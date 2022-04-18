@@ -6,9 +6,9 @@ class AlgorithmWidget(UnfoldWidget):
     def __init__(self, parent):
         super().__init__(parent)
 
-        # vertical label
-        self.label.setText("ALGORITHM")
-        self.label.setStyleSheet("background-color: rgb(177, 221, 240);")
+        # unfold button
+        self.button.setText("ALGORITHM")
+        self.button.setStyleSheet("background-color: rgb(177, 221, 240);")
 
         # algorithm frame
         self.frame.setStyleSheet("background-color: rgb(245, 252, 255);")

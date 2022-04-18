@@ -8,13 +8,10 @@ class UnfoldWidget(QtWidgets.QWidget):
         super().__init__(parent)
         self.resize(UNFOLD_WIDGET_WIDTH, WINDOW_HEIGHT)
 
-        # vertical label
-        self.label = QtWidgets.QLabel(self)
-        self.label.setGeometry(QtCore.QRect(0, 0, UNFOLD_BUTTON_WIDTH, WINDOW_HEIGHT))
-        self.label.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label.setScaledContents(False)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setWordWrap(True)
+        # unfold button
+        self.button = QtWidgets.QPushButton(self)
+        self.button.setGeometry(QtCore.QRect(0, 0, UNFOLD_BUTTON_WIDTH, WINDOW_HEIGHT))
+        self.button.setLayoutDirection(QtCore.Qt.LeftToRight)
 
         # main frame
         self.frame = QtWidgets.QFrame(self)
