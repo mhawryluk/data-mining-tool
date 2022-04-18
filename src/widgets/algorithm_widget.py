@@ -3,8 +3,8 @@ from widgets.unfold_widget import UnfoldWidget
 
 
 class AlgorithmWidget(UnfoldWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
 
         # vertical label
         self.label.setText("ALGORITHM")
@@ -26,7 +26,7 @@ class AlgorithmWidget(UnfoldWidget):
 
         # algorithm selection group
         self.algorithm_selection_group = QtWidgets.QGroupBox(self.frame)
-        self.algorithm_selection_group.setGeometry(QtCore.QRect(40, 270, 221, 111))
+        self.algorithm_selection_group.setGeometry(QtCore.QRect(30, 270, 221, 111))
         self.algorithm_selection_group.setTitle("Algorithm")
 
         self.algorithm_box = QtWidgets.QComboBox(self.algorithm_selection_group)

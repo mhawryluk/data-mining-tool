@@ -2,8 +2,8 @@ from widgets.unfold_widget import UnfoldWidget
 
 
 class VisualizationWidget(UnfoldWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
 
         # vertical label
         self.label.setText("VISUALIZATION")

@@ -1,10 +1,9 @@
-from PyQt5 import QtCore, QtWidgets
 from widgets.unfold_widget import UnfoldWidget
 
 
 class ImportWidget(UnfoldWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
 
         # vertical label
         self.label.setText("IMPORT DATA")

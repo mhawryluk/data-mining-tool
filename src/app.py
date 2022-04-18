@@ -1,12 +1,12 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 
-from widgets.main_layout import RandomGenerator
+from widgets.main_layout import MainWindow
 
 
 def main():
     app = QApplication(sys.argv)
-    window = RandomGenerator()
+    window = MainWindow()
     sys.exit(app.exec_())
 
 
