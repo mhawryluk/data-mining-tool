@@ -9,9 +9,10 @@ class AlgorithmWidget(UnfoldWidget):
         # unfold button
         self.button.setText("ALGORITHM")
         self.button.setStyleSheet("background-color: rgb(177, 221, 240);")
+        self.button.clicked.connect(lambda: self.parent().unfold(2))
 
         # algorithm frame
-        self.frame.setStyleSheet("background-color: rgb(245, 252, 255);")
+        self.frame.setStyleSheet("background-color: #EBF4F7;")
 
         # exploration technique selection
         self.technique_group = QtWidgets.QGroupBox(self.frame)
