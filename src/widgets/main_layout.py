@@ -11,7 +11,7 @@ class RandomGenerator(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Random Generator')
-        # self.setFixedSize(235 * 6, 235 * 2)
+        self.setFixedSize(815, 491)
         self.generalLayout = QHBoxLayout()
         self._centralWidget = QWidget(self)
         self.setCentralWidget(self._centralWidget)
@@ -26,7 +26,7 @@ class RandomGenerator(QMainWindow):
         self.algorithm_widget = AlgorithmWidget()
         self.generalLayout.addWidget(self.algorithm_widget)
 
-        self.showMaximized()
+        self.show()
 
     def on_click_listener(self):
         value = self.generator.get_number()
