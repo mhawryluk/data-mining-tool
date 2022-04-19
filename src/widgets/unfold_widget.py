@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QRect, Qt
-from PyQt5.QtWidgets import QPushButton, QFrame, QWidget
+from PyQt5.QtWidgets import QFrame, QWidget
+from .rotated_button import RotatedButton
 
 from widgets import WINDOW_HEIGHT, UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH
 
@@ -10,7 +11,7 @@ class UnfoldWidget(QWidget):
         self.resize(UNFOLD_WIDGET_WIDTH, WINDOW_HEIGHT)
 
         # unfold button
-        self.button = QPushButton(self)
+        self.button = RotatedButton(self)
         self.button.setGeometry(QRect(0, 0, UNFOLD_BUTTON_WIDTH, WINDOW_HEIGHT))
         self.button.setLayoutDirection(Qt.LeftToRight)
 
