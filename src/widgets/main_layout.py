@@ -15,6 +15,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
 
+        with open('../static/css/styles.css') as stylesheet:
+            self.setStyleSheet(stylesheet.read())
+
         self.generalLayout.addWidget(MainWidget())
 
         self.show()
