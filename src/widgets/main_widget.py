@@ -1,10 +1,6 @@
 from PyQt5.QtWidgets import QWidget
 
-from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH
-from widgets.algorithm_widget import AlgorithmWidget
-from widgets.import_widget import ImportWidget
-from widgets.preprocessing_widget import PreprocessingWidget
-from widgets.visualization_widget import VisualizationWidget
+from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH, AlgorithmWidget, ImportWidget, PreprocessingWidget, VisualizationWidget
 
 
 class MainWidget(QWidget):

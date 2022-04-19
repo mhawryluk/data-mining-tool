@@ -1,4 +1,7 @@
-WINDOW_WIDTH = 1200
-WINDOW_HEIGHT = 600
-UNFOLD_BUTTON_WIDTH = 100
-UNFOLD_WIDGET_WIDTH = WINDOW_WIDTH - 3*UNFOLD_BUTTON_WIDTH - 20
+from .config import WINDOW_HEIGHT, WINDOW_WIDTH, UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH
+from .unfold_widget import UnfoldWidget
+from .algorithm_widget import AlgorithmWidget
+from .import_widget import ImportWidget
+from .preprocessing_widget import PreprocessingWidget
+from .visualization_widget import VisualizationWidget
+from .main_layout import MainWindow

@@ -1,4 +1,4 @@
-from widgets.unfold_widget import UnfoldWidget
+from widgets import UnfoldWidget
 
 
 class PreprocessingWidget(UnfoldWidget):
