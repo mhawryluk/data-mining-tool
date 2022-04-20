@@ -1,4 +1,4 @@
-from .db_object_manager import DatabaseObjectManager
+from .database_manager import DatabaseObjectManager
 
 
 class Writer:
