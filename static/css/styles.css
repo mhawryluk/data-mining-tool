@@ -1,0 +1,31 @@
+#algorithm_widget > QPushButton {
+    background-color: #b1ddf0;
+}
+
+#algorithm_widget > QFrame {
+    background-color: #EBF4F7;
+}
+
+#import_widget > QPushButton {
+    background-color: #BAC8D3;
+}
+
+#import_widget > QFrame {
+    background-color: #f5f5f5;
+}
+
+#preprocessing_widget > QPushButton {
+    background-color: #B0E3E6;
+}
+
+#preprocessing_widget > QFrame {
+    background-color: #E6F4F4;
+}
+
+#visualization_widget > QPushButton {
+    background-color: #D0CEE2;
+}
+
+#visualization_widget > QFrame {
+    background-color: #F6F5F9;
+}
