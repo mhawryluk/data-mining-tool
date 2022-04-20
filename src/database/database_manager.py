@@ -18,6 +18,10 @@ class DatabaseObjectManager:
         db_list = self.db_client.list_database_names()
         return True if db_name in db_list else False
 
+    def removeDatabase(self, db_name):
+        """ Remove unwanted database """
+        self.db_client.drop_database(db_name)
+
     def getCollection(self, db_name, collection_name):
         """ Get collection by provided name from specified database or create new one if it not exists """
         return self.db_client[db_name][collection_name]
@@ -31,3 +35,7 @@ class DatabaseObjectManager:
         db = self.db_client[db_name]
         coll_list = db.list_collection_names()
         return True if coll_name in coll_list else False
+
+    def removeCollection(self, db_name, coll_name):
+        """ Remove unwanted collection """
+        self.db_client[db_name][coll_name].drop()

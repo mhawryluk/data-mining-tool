@@ -3,10 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="9099891a-ee67-427b-b13f-b871aa1ed02c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/database_reader.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/database_reader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/database_writer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/database_writer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/db_object_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/database_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/database_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/database_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
