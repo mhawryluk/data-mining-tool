@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="9099891a-ee67-427b-b13f-b871aa1ed02c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +45,7 @@
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="MONGO_PASS" value="UQ1prbNUSltzR7Rc" />
         <env name="QT_PLUGIN_PATH" value="C:\Users\Home\Desktop\studia\Inżynierka\data-mining-tool\.venv\Lib\site-packages\PyQt5\Qt5\plugins" />
       </envs>
       <option name="SDK_HOME" value="" />
@@ -90,5 +89,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>
