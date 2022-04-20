@@ -2,13 +2,13 @@ import sys
 from PyQt5.QtWidgets import QApplication
 
 from widgets.main_layout import RandomGenerator
-import database # only for checking init purposes
+from database.db_object_manager import DatabaseObjectManager
 
 
 def main():
-    app = QApplication(sys.argv)
-    window = RandomGenerator()
-    sys.exit(app.exec_())
+    manager = DatabaseObjectManager()
+    manager.getDatabase("test")
+    print(manager.getDatabasesList())
 
 
 if __name__ == '__main__':
