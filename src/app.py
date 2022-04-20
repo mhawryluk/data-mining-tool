@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 
 from widgets.main_layout import RandomGenerator
+import database # only for checking init purposes
 
 
 def main():
