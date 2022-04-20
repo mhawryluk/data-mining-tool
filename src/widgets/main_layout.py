@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QWidget
-from widgets import WINDOW_WIDTH, WINDOW_HEIGHT
-from .main_widget import MainWidget
+from widgets import WINDOW_WIDTH, WINDOW_HEIGHT, MainWidget
 
 
 class MainWindow(QMainWindow):
