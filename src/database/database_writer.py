@@ -1,4 +1,3 @@
-from .config import client
 from .db_object_manager import DatabaseObjectManager
 
 

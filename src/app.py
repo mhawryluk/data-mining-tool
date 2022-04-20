@@ -3,11 +3,14 @@ from PyQt5.QtWidgets import QApplication
 
 from widgets.main_layout import RandomGenerator
 from database.database_writer import Writer
+from database.database_reader import Reader
 
 
 def main():
-    writer = Writer("test", "collection1")
-    writer.addDataset([{"name": "jan", "age": 15}, {"name": "ania", "age": 16}])
+    reader = Reader("test", "collection1")
+    query = {"name": {"$regex": ".*a.*"}}
+    res = reader.executeQuery(query, ['name'])
+    print(res)
 
 
 if __name__ == '__main__':
