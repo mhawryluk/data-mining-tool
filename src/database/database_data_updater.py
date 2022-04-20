@@ -1,16 +1,13 @@
 from .database_manager import DatabaseObjectManager
 
 
-class DocumentRemover:
+class DocumentUpdater:
     def __init__(self, db_name, coll_name):
         self.db_manager = DatabaseObjectManager()
         self.db = self.db_manager.getDatabase(db_name)
         self.collection = self.db_manager.getCollection(db_name, coll_name)
 
-    def queryRemove(self, query):
-        """ Remove all elements that passed the query """
-        return self.collection.delete_many(query)
-
-    def removeAll(self):
-        """ Clear a collection """
-        return self.collection.delete_many({})
+    def queryUpdate(self, query, new_values):
+        """ Update all queried records with values from new_values dictionary """
+        updated = {"$set": new_values}
+        return self.collection.update_many(query, updated)
