@@ -5,8 +5,10 @@ from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH, AlgorithmWidget, I
 
 class MainWidget(QWidget):
 
-    def __init__(self):
+    def __init__(self, engine):
         super().__init__()
+
+        self.engine = engine
 
         self.import_widget = ImportWidget(self)
         self.preprocessing_widget = PreprocessingWidget(self)

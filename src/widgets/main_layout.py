@@ -4,7 +4,7 @@ from widgets import WINDOW_WIDTH, WINDOW_HEIGHT, MainWidget
 
 class MainWindow(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, engine):
         super().__init__()
         self.setWindowTitle('Data Mining Tool')
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         with open('../static/css/styles.css') as stylesheet:
             self.setStyleSheet(stylesheet.read())
 
-        self.generalLayout.addWidget(MainWidget())
+        self.generalLayout.addWidget(MainWidget(engine))
 
         self.show()
 
