@@ -9,7 +9,7 @@ class FileReader:
             self.filepath = filepath
         else:
             self.filepath = '../{}'.format(filepath)
-
+        self.filepath = filepath
 
         # check size of file
         size = os.stat(self.filepath).st_size
@@ -24,10 +24,5 @@ class FileReader:
     def get_error(self) -> str:
         return self.error
 
-
-
-
-
-
-
-
+    def is_big(self):
+        return self.need_chunks
