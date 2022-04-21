@@ -1,7 +1,8 @@
 from functools import partial
+from typing import List
 
 from PyQt5.QtCore import QRect, Qt
-from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout
 
 from widgets import UnfoldWidget
 
@@ -35,6 +36,7 @@ class ImportWidget(UnfoldWidget):
         self.database_label.setText("Choose data from database:")
         self.database_label.setGeometry(QRect(10, 80, 181, 16))
         self.database_box = QComboBox(self.load_data_group)
+        self.database_box.addItem("baza motyli")
         self.database_box.setGeometry(QRect(10, 100, 111, 23))
         self.database_button = QPushButton(self.load_data_group)
         self.database_button.setText("LOAD")
@@ -70,6 +72,8 @@ class ImportWidget(UnfoldWidget):
         self.columns_group = QGroupBox(self.frame)
         self.columns_group.setTitle("Columns:")
         self.columns_group.setGeometry(QRect(360, 30, 321, 361))
+        self.columns_grid = QGridLayout()
+        self.columns_group.setLayout(self.columns_grid)
 
     def set_options(self):
         self.save_button.setEnabled(True)
@@ -78,9 +82,28 @@ class ImportWidget(UnfoldWidget):
         else:
             self.not_save_button.setEnabled(True)
 
+    def clear_widgets(self):
+        self.error_label.clear()
+        self.warning_label.clear()
+        for i in reversed(range(self.columns_grid.count())):
+            self.columns_grid.itemAt(i).widget().deleteLater()
+
     def set_columns_grid(self):
-        columns = self.engine.get_imported_columns()
-        print(columns)
+        columns = self.engine.get_columns()
+        # rows = (len(columns) - 1) // 3 + 1
+        rows = len(columns)
+        positions = [(i, j) for i in range(rows) for j in range(1)]
+        for name, position in zip(columns, positions):
+            checkbox = QCheckBox(name)
+            checkbox.setChecked(True)
+            self.columns_grid.addWidget(checkbox, *position)
+
+    def get_checked_columns(self) -> List[str]:
+        columns = []
+        for i in range(self.columns_grid.count()):
+            if self.columns_grid.itemAt(i).widget().isChecked():
+                columns.append(self.columns_grid.itemAt(i).widget().text())
+        return columns
 
     def click_listener(self, button_type):
         if button_type == 'load_file':
@@ -90,11 +113,28 @@ class ImportWidget(UnfoldWidget):
             if result:
                 self.error_label.setText(result)
                 return
+            self.clear_widgets()
             self.set_options()
             self.set_columns_grid()
-            self.error_label.setText("")
         elif button_type == 'load_database':
-            pass
+            self.error_label.setText("Loading ...")
+            document_name = self.database_box.currentText()
+            result = self.engine.load_data_from_database(document_name)
+            if result:
+                self.error_label.setText(result)
+                return
+            self.clear_widgets()
+            self.set_options()
+            self.set_columns_grid()
+        elif button_type == 'reject_data':
+            self.clear_widgets()
+            self.engine.clear_import()
+        elif button_type == 'save_data':
+            print(self.get_checked_columns())
+            self.engine.read_data(self.get_checked_columns())
+            self.engine.save_to_database()
+        elif button_type == 'not_save_data':
+            self.engine.read_data(self.get_checked_columns())
         else:
             print("Clicked")
 
