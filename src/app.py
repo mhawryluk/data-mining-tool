@@ -1,6 +1,4 @@
-from database.database_writer import Writer
-from database.database_reader import Reader
-from database.database_data_updater import DocumentUpdater
+from database import Writer, Reader, DocumentUpdater
 
 
 def main():

@@ -1,4 +1,4 @@
-from .database_manager import DatabaseObjectManager
+from database import DatabaseObjectManager
 
 
 class DocumentUpdater:

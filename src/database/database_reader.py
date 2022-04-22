@@ -1,4 +1,4 @@
-from .database_manager import DatabaseObjectManager
+from database import DatabaseObjectManager
 
 
 class Reader:
@@ -12,5 +12,5 @@ class Reader:
         fields_selected = {}
         for name in columns:
             fields_selected[name] = 1
-        fields_selected['_id'] = useId
+        fields_selected['_id'] = use_id
         return list(self.collection.find(query, fields_selected).limit(limit)) # maybe changed to another format
