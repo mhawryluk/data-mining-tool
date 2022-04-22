@@ -7,7 +7,7 @@ class Reader:
         self.db = self.db_manager.getDatabase(db_name)
         self.collection = self.db_manager.getCollection(db_name, coll_name)
 
-    def executeQuery(self, query, columns, useId=0, limit=0):
+    def execute_query(self, query, columns, useId=0, limit=0):
         """ Make a query for specified collection and return result as a list """
         fields_selected = {}
         for name in columns:
