@@ -8,9 +8,9 @@ class Writer:
         self.collection = self.db_manager.get_collection(db_name, coll_name)
 
     def add_document(self, record):
-        """ Add one record to specified collection, returns id of inserted object """
+        """ Takes dictionary and adds it to collection, returns id of inserted object """
         return self.collection.insert_one(record)
 
-    def add_dataset(self, dataset):
-        """ As an input function takes list of objects and return list of their ids """
-        return self.collection.insert_many(dataset.to_dict('records'))
+    def add_dataset(self, dataframe):
+        """ Takes dataframe and adds it to collection, returns list of objects ids """
+        return self.collection.insert_many(dataframe.to_dict('records'))

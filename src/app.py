@@ -10,9 +10,6 @@ def main():
                              'two', 'two', 'one', 'three'],
                        'C': np.random.randn(8), 'D': np.random.randn(8)})
 
-    remover = DocumentRemover("test1", "chunks_write") # clear collection
-    remover.remove_all()
-
     writer = Writer("test1", "chunks_write")
 
     chunks_number = 2
