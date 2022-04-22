@@ -1,6 +1,6 @@
 from typing import List
 
-from data_import import CSVReader
+from data_import import CSVReader, JSONReader
 
 
 class Engine:
@@ -19,7 +19,13 @@ class Engine:
             self.from_file = True
             return ''
         elif filepath[-5:] == '.json':
-            return ".json is not supported yet"
+            self.reader_data = JSONReader(filepath)
+            if self.reader_data.error:
+                error = self.reader_data.error
+                self.reader_data = None
+                return error
+            self.from_file = False
+            return ''
         else:
             return "Supported file format: .csv, .json."
 
@@ -44,5 +50,5 @@ class Engine:
         self.imported_data = self.reader_data.read(columns)
 
     def save_to_database(self):
-        # TODO
+        # TODO save to database and prepare reading from them for next step
         print("Saving ...")
