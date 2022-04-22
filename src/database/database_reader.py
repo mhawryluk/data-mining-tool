@@ -1,4 +1,5 @@
 from database import DatabaseObjectManager
+import pandas as pd
 
 
 class Reader:
@@ -14,3 +15,12 @@ class Reader:
             fields_selected[name] = 1
         fields_selected['_id'] = use_id
         return list(self.collection.find(query, fields_selected).limit(limit)) # maybe changed to another format
+
+    def get_nth_chunk(self, query, columns, use_id=0, chunk_size=0, chunk_number=0):
+        """ Returns a n-th chunk of data from database, chunks are indexed from 0 """
+        fields_selected = {}
+        for name in columns:
+            fields_selected[name] = 1
+        fields_selected['_id'] = use_id
+        chunk = self.collection.find(query, fields_selected).skip(chunk_size*chunk_number).limit(chunk_size)
+        return pd.DataFrame(list(chunk))
