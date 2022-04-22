@@ -1,13 +1,13 @@
 from functools import partial
 from typing import List
 from PyQt5.QtCore import QRect
-from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout
+from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout, QWidget
 
 from widgets import UnfoldWidget
 
 
 class ImportWidget(UnfoldWidget):
-    def __init__(self, parent):
+    def __init__(self, parent: QWidget):
         super().__init__(parent)
         self.engine = parent.engine
         self.setObjectName("import_widget")
@@ -74,11 +74,13 @@ class ImportWidget(UnfoldWidget):
         self.columns_grid = QGridLayout()
         self.columns_group.setLayout(self.columns_grid)
 
+    # set titles to box
     def set_available_tables(self):
         names = self.engine.get_table_names_from_database()
         for name in names:
             self.database_box.addItem(name)
 
+    # enable buttons after load data
     def set_options(self):
         self.save_button.setEnabled(True)
         if self.engine.is_data_big():
@@ -86,12 +88,14 @@ class ImportWidget(UnfoldWidget):
         else:
             self.not_save_button.setEnabled(True)
 
+    # clear import widget from loaded data
     def clear_widgets(self):
         self.error_label.clear()
         self.warning_label.clear()
         for i in reversed(range(self.columns_grid.count())):
             self.columns_grid.itemAt(i).widget().deleteLater()
 
+    # draw columns and checkbox to choose them
     def set_columns_grid(self):
         columns = self.engine.get_columns()
         col = max(len(columns) // 11 + 1, 2)
@@ -103,6 +107,7 @@ class ImportWidget(UnfoldWidget):
             checkbox.setChecked(True)
             self.columns_grid.addWidget(checkbox, *position)
 
+    # get chose columns
     def get_checked_columns(self) -> List[str]:
         columns = []
         for i in range(self.columns_grid.count()):
@@ -110,7 +115,7 @@ class ImportWidget(UnfoldWidget):
                 columns.append(self.columns_grid.itemAt(i).widget().text())
         return columns
 
-    def click_listener(self, button_type):
+    def click_listener(self, button_type: str):
         if button_type == 'load_file':
             self.error_label.setText("Loading ...")
             filepath = self.filepath_line.text()

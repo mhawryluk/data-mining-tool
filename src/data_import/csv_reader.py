@@ -15,6 +15,7 @@ class CSVReader(FileReader):
             self.error = 'There is some problem with file. Please try again.'
         self.reader = None
 
+    # return DataFrame or TextFileReader (can use as generator of DataFrame)
     def read(self, columns: List[str]):
         if self.need_chunks:
             self._read_by_chunks(columns)

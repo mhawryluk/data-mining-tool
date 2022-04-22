@@ -13,6 +13,8 @@ class JSONReader(FileReader):
             self.error = 'This filepath: {} is invalid. Please write correct path.'.format(filepath)
         except Exception:
             self.error = 'There is some problem with file. Please try again.'
+
+        # if file is big we can not read by chunks because of .json format
         if self.need_chunks:
             self.error = 'File is to big for parsing in .json format'
         self.reader = None

@@ -18,6 +18,7 @@ class FileReader:
     def get_columns_name(self) -> List[str]:
         return self.columns_name
 
+    # approximate size of chunk, we want using ram as good as possible
     def get_chunksize(self) -> int:
         return AVAILABLE_RAM_MEMORY // (len(self.columns_name) * SIZE_OF_VALUE)
 
