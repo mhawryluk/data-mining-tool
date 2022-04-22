@@ -1,21 +1,24 @@
-from database import Writer, Reader, DocumentUpdater
+from database import Writer, Reader, DocumentUpdater, DocumentRemover
+import pandas as pd
+import numpy as np
 
 
 def main():
-    db = "test1"
-    collection = "newcollection"
-    query = {"value": {"$gt": 20}}
-    writer = Writer(db, collection)
-    writer.add_dataset([{"code": "qwerty", "value": 12}, {"code": "daad", "value": 13}, {"code": "asdf", "value": 41},
-                        {"code": "aaa", "value": 33}])
+    df = pd.DataFrame({'A': ['foo', 'bar', 'foo', 'bar',
+                             'foo', 'bar', 'foo', 'foo'],
+                       'B': ['one', 'one', 'two', 'three',
+                             'two', 'two', 'one', 'three'],
+                       'C': np.random.randn(8), 'D': np.random.randn(8)})
 
-    reader = Reader(db, collection)
-    print(reader.execute_query(query, ["code", "value"]))
+    remover = DocumentRemover("test1", "chunks_write") # clear collection
+    remover.remove_all()
 
-    updater = DocumentUpdater(db, collection)
-    updater.query_update(query, {"code": "updated!"})
+    writer = Writer("test1", "chunks_write")
 
-    print(reader.execute_query(query, ["code", "value"]))
+    chunks_number = 2
+    chunk_size = df.shape[0]//chunks_number # here might be a miscalculation but it's only for template presentation of wirting chunks
+    for i in range(chunks_number):
+        writer.add_dataset(df[i * chunk_size:(i + 1) * chunk_size])
 
 
 if __name__ == '__main__':

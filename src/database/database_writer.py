@@ -13,4 +13,4 @@ class Writer:
 
     def add_dataset(self, dataset):
         """ As an input function takes list of objects and return list of their ids """
-        return self.collection.insert_many(dataset)
+        return self.collection.insert_many(dataset.to_dict('records'))
