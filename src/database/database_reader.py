@@ -4,8 +4,8 @@ from database import DatabaseObjectManager
 class Reader:
     def __init__(self, db_name, coll_name):
         self.db_manager = DatabaseObjectManager()
-        self.db = self.db_manager.getDatabase(db_name)
-        self.collection = self.db_manager.getCollection(db_name, coll_name)
+        self.db = self.db_manager.get_database(db_name)
+        self.collection = self.db_manager.get_collection(db_name, coll_name)
 
     def execute_query(self, query, columns, use_id=0, limit=0):
         """ Make a query for specified collection and return result as a list """
