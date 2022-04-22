@@ -11,7 +11,7 @@ class CSVReader(FileReader):
             self.columns_name = list(pd.read_csv(self.filepath, nrows=1).columns)
         except FileNotFoundError:
             self.error = 'This filepath: {} is invalid. Please write correct path.'.format(filepath)
-        except:
+        except Exception:
             self.error = 'There is some problem with file. Please try again.'
         self.reader = None
 
@@ -28,3 +28,4 @@ class CSVReader(FileReader):
 
     def _read_all(self, columns: List[str]):
         self.reader = pd.read_csv(self.filepath, usecols=columns, engine='c')
+

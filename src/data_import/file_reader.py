@@ -24,5 +24,5 @@ class FileReader:
     def get_error(self) -> str:
         return self.error
 
-    def is_big(self):
+    def is_file_big(self):
         return self.need_chunks
