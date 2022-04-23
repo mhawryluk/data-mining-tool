@@ -5,7 +5,6 @@ import pandas as pd
 
 class CSVReader(FileReader):
     def __init__(self, filepath: str):
-        self.error = ''
         try:
             super().__init__(filepath)
             self.columns_name = list(pd.read_csv(self.filepath, nrows=1).columns)

@@ -5,10 +5,7 @@ from typing import List
 
 class FileReader:
     def __init__(self, filepath: str):
-        if filepath[0] in ['.', '~']:
-            self.filepath = filepath
-        else:
-            self.filepath = '../{}'.format(filepath)
+        self.error = ''
         self.filepath = filepath
 
         # check size of file

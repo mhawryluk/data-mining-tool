@@ -10,24 +10,21 @@ class Engine:
         self.from_file = False
 
     def load_data_from_file(self, filepath: str) -> str:
-        if filepath[-4:] == '.csv':
+        if '.' not in filepath:
+            return "Supported file format: .csv, .json."
+        extension = filepath.split('.')[-1]
+        if extension == 'csv':
             self.reader_data = CSVReader(filepath)
-            if self.reader_data.error:
-                error = self.reader_data.error
-                self.reader_data = None
-                return error
-            self.from_file = True
-            return ''
-        elif filepath[-5:] == '.json':
+        elif extension == 'json':
             self.reader_data = JSONReader(filepath)
-            if self.reader_data.error:
-                error = self.reader_data.error
-                self.reader_data = None
-                return error
-            self.from_file = False
-            return ''
         else:
             return "Supported file format: .csv, .json."
+        if self.reader_data.get_error():
+            error = self.reader_data.get_error()
+            self.reader_data = None
+            return error
+        self.from_file = True
+        return ''
 
     def load_data_from_database(self, document_name: str) -> str:
         # TODO we need some class which help with reading data from database, this class must have get_columns method

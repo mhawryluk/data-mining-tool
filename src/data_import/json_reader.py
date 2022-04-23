@@ -5,18 +5,17 @@ import pandas as pd
 
 class JSONReader(FileReader):
     def __init__(self, filepath: str):
-        self.error = ''
         try:
             super().__init__(filepath)
             self.columns_name = list(pd.read_json(self.filepath).columns)
+
+            # if file is big we can not read by chunks because of .json format
+            if self.need_chunks:
+                self.error = 'File is to big for parsing in .json format'
         except FileNotFoundError:
             self.error = 'This filepath: {} is invalid. Please write correct path.'.format(filepath)
         except Exception:
             self.error = 'There is some problem with file. Please try again.'
-
-        # if file is big we can not read by chunks because of .json format
-        if self.need_chunks:
-            self.error = 'File is to big for parsing in .json format'
         self.reader = None
 
     def read(self, columns: List[str]):

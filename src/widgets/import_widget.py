@@ -42,8 +42,8 @@ class ImportWidget(UnfoldWidget):
         self.database_button.clicked.connect(partial(self.click_listener, 'load_database'))
         self.database_button.setGeometry(QRect(190, 100, 50, 23))
 
-        self.error_label = QLabel(self.load_data_group)
-        self.error_label.setGeometry(QRect(10, 130, 240, 16))
+        self.import_state_label = QLabel(self.load_data_group)
+        self.import_state_label.setGeometry(QRect(10, 130, 240, 16))
 
         # options group
         self.options_group = QGroupBox(self.frame)
@@ -90,7 +90,7 @@ class ImportWidget(UnfoldWidget):
 
     # clear import widget from loaded data
     def clear_widgets(self):
-        self.error_label.clear()
+        self.import_state_label.clear()
         self.warning_label.clear()
         for i in reversed(range(self.columns_grid.count())):
             self.columns_grid.itemAt(i).widget().deleteLater()
@@ -100,7 +100,7 @@ class ImportWidget(UnfoldWidget):
         columns = self.engine.get_columns()
         col = max(len(columns) // 11 + 1, 2)
         rows = (len(columns) - 1) // col + 1
-        self.columns_group.setFixedHeight(min(rows*50, 450))
+        self.columns_group.setFixedHeight(min(rows*60, 450))
         positions = [(i, j) for i in range(rows) for j in range(col)]
         for name, position in zip(columns, positions):
             checkbox = QCheckBox(name)
@@ -117,21 +117,21 @@ class ImportWidget(UnfoldWidget):
 
     def click_listener(self, button_type: str):
         if button_type == 'load_file':
-            self.error_label.setText("Loading ...")
+            self.import_state_label.setText("Loading ...")
             filepath = self.filepath_line.text()
             result = self.engine.load_data_from_file(filepath)
             if result:
-                self.error_label.setText(result)
+                self.import_state_label.setText(result)
                 return
             self.clear_widgets()
             self.set_options()
             self.set_columns_grid()
         elif button_type == 'load_database':
-            self.error_label.setText("Loading ...")
+            self.import_state_label.setText("Loading ...")
             document_name = self.database_box.currentText()
             result = self.engine.load_data_from_database(document_name)
             if result:
-                self.error_label.setText(result)
+                self.import_state_label.setText(result)
                 return
             self.clear_widgets()
             self.set_options()
@@ -139,6 +139,8 @@ class ImportWidget(UnfoldWidget):
         elif button_type == 'reject_data':
             self.clear_widgets()
             self.engine.clear_import()
+            self.save_button.setEnabled(False)
+            self.not_save_button.setEnabled(False)
         elif button_type == 'save_data':
             self.engine.read_data(self.get_checked_columns())
             self.engine.save_to_database()
