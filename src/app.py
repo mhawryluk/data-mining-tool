@@ -1,9 +1,13 @@
-from database import Reader
+import sys
+from PyQt5.QtWidgets import QApplication
+
+from widgets import MainWindow
 
 
 def main():
-    reader = Reader("test1", "chunks_write")
-    print(reader.get_nth_chunk({}, ["A", "B", "C"], chunk_size=3, chunk_number=4))
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
