@@ -19,8 +19,7 @@ class Engine:
             self.reader_data = JSONReader(filepath)
         else:
             return "Supported file format: .csv, .json."
-        if self.reader_data.get_error():
-            error = self.reader_data.get_error()
+        if error := self.reader_data.get_error():
             self.reader_data = None
             return error
         self.from_file = True

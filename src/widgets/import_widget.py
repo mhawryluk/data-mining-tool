@@ -90,6 +90,8 @@ class ImportWidget(UnfoldWidget):
 
     # clear import widget from loaded data
     def clear_widgets(self):
+        self.save_button.setEnabled(False)
+        self.not_save_button.setEnabled(False)
         self.import_state_label.clear()
         self.warning_label.clear()
         for i in reversed(range(self.columns_grid.count())):
@@ -116,33 +118,32 @@ class ImportWidget(UnfoldWidget):
         return columns
 
     def click_listener(self, button_type: str):
-        if button_type == 'load_file':
-            self.import_state_label.setText("Loading ...")
-            filepath = self.filepath_line.text()
-            result = self.engine.load_data_from_file(filepath)
-            if result:
-                self.import_state_label.setText(result)
-                return
-            self.clear_widgets()
-            self.set_options()
-            self.set_columns_grid()
-        elif button_type == 'load_database':
-            self.import_state_label.setText("Loading ...")
-            document_name = self.database_box.currentText()
-            result = self.engine.load_data_from_database(document_name)
-            if result:
-                self.import_state_label.setText(result)
-                return
-            self.clear_widgets()
-            self.set_options()
-            self.set_columns_grid()
-        elif button_type == 'reject_data':
-            self.clear_widgets()
-            self.engine.clear_import()
-            self.save_button.setEnabled(False)
-            self.not_save_button.setEnabled(False)
-        elif button_type == 'save_data':
-            self.engine.read_data(self.get_checked_columns())
-            self.engine.save_to_database()
-        elif button_type == 'not_save_data':
-            self.engine.read_data(self.get_checked_columns())
+        match button_type:
+            case 'load_file':
+                self.import_state_label.setText("Loading ...")
+                filepath = self.filepath_line.text()
+                result = self.engine.load_data_from_file(filepath)
+                if result:
+                    self.import_state_label.setText(result)
+                    return
+                self.clear_widgets()
+                self.set_options()
+                self.set_columns_grid()
+            case 'load_database':
+                self.import_state_label.setText("Loading ...")
+                document_name = self.database_box.currentText()
+                result = self.engine.load_data_from_database(document_name)
+                if result:
+                    self.import_state_label.setText(result)
+                    return
+                self.clear_widgets()
+                self.set_options()
+                self.set_columns_grid()
+            case 'reject_data':
+                self.clear_widgets()
+                self.engine.clear_import()
+            case 'save_data':
+                self.engine.read_data(self.get_checked_columns())
+                self.engine.save_to_database()
+            case 'not_save_data':
+                self.engine.read_data(self.get_checked_columns())
