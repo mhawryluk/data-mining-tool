@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from data_import import FileReader
 import pandas as pd
 
@@ -18,9 +18,11 @@ class JSONReader(FileReader):
             self.error = 'There is some problem with file. Please try again.'
         self.reader = None
 
-    def read(self, columns: List[str]):
+    def read(self, columns: Optional[List[str]]):
         self._read_all(columns)
         return self.reader
 
-    def _read_all(self, columns: List[str]):
+    def _read_all(self, columns: Optional[List[str]]):
+        if columns is None:
+            self.reader = pd.read_json(self.filepath, typ='frame')
         self.reader = pd.read_json(self.filepath, typ='frame').filter(items=columns, axis='columns')

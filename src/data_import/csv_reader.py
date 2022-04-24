@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from data_import import FileReader
 import pandas as pd
 
@@ -15,14 +15,14 @@ class CSVReader(FileReader):
         self.reader = None
 
     # return DataFrame or TextFileReader (can use as generator of DataFrame)
-    def read(self, columns: List[str]):
+    def read(self, columns: Optional[List[str]]):
         if self.need_chunks:
             self._read_by_chunks(columns)
         else:
             self._read_all(columns)
         return self.reader
 
-    def _read_by_chunks(self, columns: List[str]):
+    def _read_by_chunks(self, columns: Optional[List[str]]):
         chunksize = self.get_chunksize()
         self.reader = pd.read_csv(self.filepath, usecols=columns, engine='c', low_memory=True, chunksize=chunksize)
 

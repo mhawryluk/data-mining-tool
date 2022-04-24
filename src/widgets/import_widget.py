@@ -144,6 +144,7 @@ class ImportWidget(UnfoldWidget):
                 self.engine.clear_import()
             case 'save_data':
                 self.engine.read_data(self.get_checked_columns())
-                self.engine.save_to_database()
+                # todo popup to enter title
+                self.engine.save_to_database("TITLE")
             case 'not_save_data':
                 self.engine.read_data(self.get_checked_columns())
