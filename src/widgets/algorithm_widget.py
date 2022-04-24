@@ -5,8 +5,9 @@ from widgets import UnfoldWidget
 
 
 class AlgorithmWidget(UnfoldWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, engine):
         super().__init__(parent)
+        self.engine = engine
         self.setObjectName('algorithm_widget')
 
         # unfold button

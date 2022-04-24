@@ -2,8 +2,9 @@ from widgets import UnfoldWidget
 
 
 class VisualizationWidget(UnfoldWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, engine):
         super().__init__(parent)
+        self.engine = engine
 
         self.setObjectName("visualization_widget")
 

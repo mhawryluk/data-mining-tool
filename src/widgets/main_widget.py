@@ -5,15 +5,13 @@ from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH, AlgorithmWidget, I
 
 class MainWidget(QWidget):
 
-    def __init__(self, engine):
+    def __init__(self, engines):
         super().__init__()
 
-        self.engine = engine
-
-        self.import_widget = ImportWidget(self)
-        self.preprocessing_widget = PreprocessingWidget(self)
-        self.algorithm_widget = AlgorithmWidget(self)
-        self.visualization_widget = VisualizationWidget(self)
+        self.import_widget = ImportWidget(self, engines['import_data'])
+        self.preprocessing_widget = PreprocessingWidget(self, engines['preprocess'])
+        self.algorithm_widget = AlgorithmWidget(self, engines['algorithms'])
+        self.visualization_widget = VisualizationWidget(self, engines['visualization'])
 
         self.widgets = [self.import_widget, self.preprocessing_widget, self.algorithm_widget, self.visualization_widget]
         self.unfold(0)

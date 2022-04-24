@@ -1,14 +1,21 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from engine import Engine
+from engines import ImportDataEngine
+from state import State
 
 from widgets import MainWindow
 
 
 def main():
-    engine = Engine()
+    state = State()
+    engines = {
+        'import_data': ImportDataEngine(state),
+        'preprocess': None,
+        'algorithms': None,
+        'visualization': None
+    }
     app = QApplication(sys.argv)
-    window = MainWindow(engine)
+    window = MainWindow(engines)
     sys.exit(app.exec_())
 
 

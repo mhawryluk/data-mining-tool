@@ -3,12 +3,14 @@ import pandas as pd
 
 from data_import import CSVReader, JSONReader, DatabaseReader
 from database import DatabaseObjectManager, Writer
+from state import State
 
 DB_NAME = 'test1'
 
 
-class Engine:
-    def __init__(self):
+class ImportDataEngine:
+    def __init__(self, state: State):
+        self.state = state
         self.reader_data = None
         self.imported_data = None
         self.from_file = False
@@ -31,7 +33,7 @@ class Engine:
         return ''
 
     def load_data_from_database(self, document_name: str) -> str:
-        self.reader_data = DatabaseReader(document_name)
+        self.reader_data = DatabaseReader(DB_NAME, document_name)
         if error := self.reader_data.get_error():
             self.reader_data = None
             return error
@@ -52,6 +54,7 @@ class Engine:
 
     def read_data(self, columns: Optional[List[str]] = None):
         self.imported_data = self.reader_data.read(columns)
+        self.state.imported_data = self.imported_data
 
     def save_to_database(self, title: str):
         writer = Writer(DB_NAME, title)

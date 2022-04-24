@@ -7,9 +7,9 @@ from widgets import UnfoldWidget
 
 
 class ImportWidget(UnfoldWidget):
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, engine):
         super().__init__(parent)
-        self.engine = parent.engine
+        self.engine = engine
         self.setObjectName("import_widget")
 
         # unfold button
