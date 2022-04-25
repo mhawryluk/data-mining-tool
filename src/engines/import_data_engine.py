@@ -63,7 +63,8 @@ class ImportDataEngine:
             else:
                 for chunk in self.imported_data:
                     writer.add_dataset(chunk)
-        except Exception:
+        except Exception as e:
+            print(e)
             return 'There is some problem with database.'
         state = self.load_data_from_database(title)
         if state:

@@ -17,7 +17,8 @@ class DatabaseReader:
             # TODO get columns name of collection
             self.columns_name = list(self.database.get_nth_chunk('', []).columns)
             self.need_chunks = size > self.get_chunksize()
-        except Exception:
+        except Exception as e:
+            print(e)
             self.error = 'There is some problem with database. Please try again.'
         self.reader = None
 
