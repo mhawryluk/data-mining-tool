@@ -1,7 +1,8 @@
 from functools import partial
 from typing import List
 from PyQt5.QtCore import QRect
-from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout, QWidget
+from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout, QWidget, \
+    QInputDialog
 
 from widgets import UnfoldWidget
 
@@ -144,7 +145,15 @@ class ImportWidget(UnfoldWidget):
                 self.engine.clear_import()
             case 'save_data':
                 self.engine.read_data(self.get_checked_columns())
-                # todo popup to enter title
-                self.engine.save_to_database("TITLE")
+                text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
+                if is_ok:
+                    if text:
+                        label = self.engine.save_to_database(str(text))
+                        if label:
+                            self.import_state_label.setText(label)
+                        else:
+                            self.import_state_label.setText("Data was stored in database.")
+                    else:
+                        self.import_state_label.setText("The name of collection is not valid.")
             case 'not_save_data':
                 self.engine.read_data(self.get_checked_columns())

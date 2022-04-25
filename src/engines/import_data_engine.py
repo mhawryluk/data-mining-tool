@@ -58,10 +58,16 @@ class ImportDataEngine:
 
     def save_to_database(self, title: str):
         writer = Writer(DB_NAME, title)
-        if type(self.imported_data) == pd.DataFrame:
-            writer.add_dataset(self.imported_data)
-        else:
-            for chunk in self.imported_data:
-                writer.add_dataset(chunk)
-        self.load_data_from_database(title)
+        try:
+            if type(self.imported_data) == pd.DataFrame:
+                writer.add_dataset(self.imported_data)
+            else:
+                for chunk in self.imported_data:
+                    writer.add_dataset(chunk)
+        except Exception:
+            return 'There is some problem with database.'
+        state = self.load_data_from_database(title)
+        if state:
+            return state
         self.read_data()
+        return ''
