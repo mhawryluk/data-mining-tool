@@ -4,8 +4,7 @@ import pandas as pd
 from data_import import CSVReader, JSONReader, DatabaseReader
 from database import DatabaseObjectManager, Writer
 from state import State
-
-DB_NAME = 'test1'
+from engines import DB_NAME
 
 
 class ImportDataEngine:
@@ -56,7 +55,7 @@ class ImportDataEngine:
         self.imported_data = self.reader_data.read(columns)
         self.state.imported_data = self.imported_data
 
-    def save_to_database(self, title: str):
+    def save_to_database(self, title: str) -> str:
         writer = Writer(DB_NAME, title)
         try:
             if type(self.imported_data) == pd.DataFrame:
