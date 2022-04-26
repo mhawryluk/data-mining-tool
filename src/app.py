@@ -27,11 +27,8 @@ def main():
     # db_reader._read_all(["key", "another_key"])
     # print(db_reader.reader)
 
-    db_reader = DatabaseReader("db", "collection")
-    chunks_reader = db_reader._read_by_chunks(["key", "another_key"])
-    for chunk in chunks_reader:
-        print("CHUNK")
-        print(chunk)
+    db_reader = Reader("db", "collection")
+    print(db_reader.get_nth_chunk(use_id=1))
 
 
     state = State()

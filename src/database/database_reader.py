@@ -11,7 +11,7 @@ class Reader:
     def execute_query(self, query=None, columns=None, use_id=0, limit=0):
         """ Make a query for specified collection and return result as a list """
         if columns is None:
-            columns = []
+            columns = self.get_columns_names()
         if query is None:
             query = {}
         fields_selected = {}
@@ -23,7 +23,7 @@ class Reader:
     def get_nth_chunk(self, query=None, columns=None, use_id=0, chunk_size=0, chunk_number=0):
         """ Returns a n-th chunk of data from database, chunks are indexed from 0 """
         if columns is None:
-            columns = []
+            columns = self.get_columns_names()
         if query is None:
             query = {}
         fields_selected = {}

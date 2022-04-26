@@ -30,8 +30,7 @@ class DatabaseReader:
 
     # approximate size of chunk, we want using ram as good as possible
     def get_chunksize(self) -> int:
-        return 10   # for showing purposes
-        # return AVAILABLE_RAM_MEMORY // (len(self.columns_name) * SIZE_OF_VALUE)
+        return AVAILABLE_RAM_MEMORY // (len(self.columns_name) * SIZE_OF_VALUE)
 
     def is_file_big(self):
         return self.need_chunks
@@ -45,7 +44,6 @@ class DatabaseReader:
             self._read_all(columns)
         return self.reader
 
-    # TODO return some object which help with reading chunks
     # I think about some class which behave same as DataFrame class
     def _read_by_chunks(self, columns: [List[str]]):
         chunksize = self.get_chunksize()
@@ -55,6 +53,5 @@ class DatabaseReader:
             yield self.database.get_nth_chunk(columns=columns, chunk_size=chunksize, chunk_number=chunk_num)
             chunk_num += 1
 
-    # TODO How read all records without `query`? Done
     def _read_all(self, columns: List[str]):
         self.reader = pd.DataFrame(self.database.execute_query(columns=columns))
