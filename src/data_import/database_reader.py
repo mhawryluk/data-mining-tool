@@ -44,12 +44,14 @@ class DatabaseReader:
             self._read_all(columns)
         return self.reader
 
-    # TODO return some object which help with reading chunks
     # I think about some class which behave same as DataFrame class
     def _read_by_chunks(self, columns: [List[str]]):
         chunksize = self.get_chunksize()
-        pass
+        chunk_num = 0
+        chunks = self.database.get_rows_number()//chunksize # to check
+        while chunk_num <= chunks:
+            yield self.database.get_nth_chunk(columns=columns, chunk_size=chunksize, chunk_number=chunk_num)
+            chunk_num += 1
 
-    # TODO How read all records without `query`?
     def _read_all(self, columns: List[str]):
-        self.reader = pd.DataFrame(self.database.execute_query(None, columns))
+        self.reader = pd.DataFrame(self.database.execute_query(columns=columns))
