@@ -2,9 +2,9 @@ from functools import partial
 from typing import List
 from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout, QWidget, \
-    QInputDialog
+    QInputDialog, QTableView
 
-from widgets import UnfoldWidget
+from widgets import UnfoldWidget, QtTable
 
 
 class ImportWidget(UnfoldWidget):
@@ -30,7 +30,7 @@ class ImportWidget(UnfoldWidget):
         self.file_button = QPushButton(self.load_data_group)
         self.file_button.setText("LOAD")
         self.file_button.clicked.connect(partial(self.click_listener, 'load_file'))
-        self.file_button.setGeometry(QRect(190, 50, 50, 23))
+        self.file_button.setGeometry(QRect(170, 50, 80, 23))
 
         self.database_label = QLabel(self.load_data_group)
         self.database_label.setText("Choose data from database:")
@@ -41,7 +41,7 @@ class ImportWidget(UnfoldWidget):
         self.database_button = QPushButton(self.load_data_group)
         self.database_button.setText("LOAD")
         self.database_button.clicked.connect(partial(self.click_listener, 'load_database'))
-        self.database_button.setGeometry(QRect(190, 100, 50, 23))
+        self.database_button.setGeometry(QRect(170, 100, 80, 23))
 
         self.import_state_label = QLabel(self.load_data_group)
         self.import_state_label.setGeometry(QRect(10, 130, 240, 16))
@@ -74,6 +74,10 @@ class ImportWidget(UnfoldWidget):
         self.columns_group.setGeometry(QRect(360, 30, 400, 100))
         self.columns_grid = QGridLayout()
         self.columns_group.setLayout(self.columns_grid)
+
+        # data table
+        self.data_table = QTableView(self.frame)
+        self.data_table.setGeometry(QRect(360, 200, 400, 300))
 
     # set titles to box
     def set_available_tables(self):
@@ -110,6 +114,14 @@ class ImportWidget(UnfoldWidget):
             checkbox.setChecked(True)
             self.columns_grid.addWidget(checkbox, *position)
 
+    def display_data(self):
+        self.engine.read_data()
+        if (data := self.engine.imported_data) is not None:
+            self.data_table.setModel(QtTable(data))
+
+    def reset_data_table(self):
+        self.data_table.setModel(None)
+
     # get chose columns
     def get_checked_columns(self) -> List[str]:
         columns = []
@@ -130,6 +142,7 @@ class ImportWidget(UnfoldWidget):
                 self.clear_widgets()
                 self.set_options()
                 self.set_columns_grid()
+                self.display_data()
             case 'load_database':
                 self.import_state_label.setText("Loading ...")
                 document_name = self.database_box.currentText()
@@ -140,9 +153,11 @@ class ImportWidget(UnfoldWidget):
                 self.clear_widgets()
                 self.set_options()
                 self.set_columns_grid()
+                self.display_data()
             case 'reject_data':
                 self.clear_widgets()
                 self.engine.clear_import()
+                self.reset_data_table()
             case 'save_data':
                 self.engine.read_data(self.get_checked_columns())
                 text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
