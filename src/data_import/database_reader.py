@@ -8,7 +8,7 @@ class DatabaseReader:
     def __init__(self, db_name: str, coll_name: str):
         """
             Class to read data from database.
-            self.reader is DataFrame or Geneartor of DataFrame.
+            self.reader is DataFrame or Generator of DataFrame.
             We may implement some special class to have data and behave as DataFrame.
         """
         self.error = ''
