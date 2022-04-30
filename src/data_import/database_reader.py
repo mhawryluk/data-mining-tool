@@ -1,5 +1,3 @@
-# TODO we need some class which help with reading data from database
-
 from database import Reader
 from typing import List, Optional
 from data_import import AVAILABLE_RAM_MEMORY, SIZE_OF_VALUE
@@ -10,12 +8,10 @@ class DatabaseReader:
     def __init__(self, db_name: str, coll_name: str):
         self.error = ''
         self.need_chunks = False
-        # TODO check size od collection, get number of records
-        size = 10
         try:
             self.database = Reader(db_name, coll_name)
-            # TODO get columns name of collection
-            self.columns_name = list(self.database.get_nth_chunk('', []).columns)
+            self.columns_name = self.database.get_columns_names()
+            size = self.database.get_rows_number()
             self.need_chunks = size > self.get_chunksize()
         except Exception as e:
             print(e)
