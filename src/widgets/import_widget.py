@@ -77,7 +77,7 @@ class ImportWidget(UnfoldWidget):
 
         # data table
         self.data_table = QTableView(self.frame)
-        self.data_table.setGeometry(QRect(360, 200, 400, 300))
+        self.data_table.setGeometry(QRect(360, 230, 400, 300))
 
     # set titles to box
     def set_available_tables(self):
