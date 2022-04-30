@@ -66,8 +66,8 @@ class ImportDataEngine:
         except Exception as e:
             print(e)
             return 'There is some problem with database.'
-        state = self.load_data_from_database(title)
-        if state:
-            return state
+        result = self.load_data_from_database(title)
+        if result:
+            return result
         self.read_data()
         return ''
