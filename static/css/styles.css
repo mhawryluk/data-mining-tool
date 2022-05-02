@@ -10,31 +10,31 @@ UnfoldWidget QGroupBox:title {
 }
 
 #import_widget > QPushButton, #import_widget QGroupBox:title{
-    background-color: #0a1128;
+    background-color: #054a91;
     color: white;
     border: none;
 }
 
 #preprocessing_widget > QPushButton, #preprocessing_widget QGroupBox:title {
-    background-color: #001f54;
+    background-color: #3e7cb1;
     color: white;
     border: none;
 }
 
 #algorithm_setup_widget > QPushButton, #algorithm_setup_widget QGroupBox:title{
-    background-color: #034078;
+    background-color: #81a4cd;
     color: white;
     border: none;
 }
 
 #algorithm_run_widget > QPushButton, #algorithm_run_widget QGroupBox:title{
-    background-color: #1282a2;
+    background-color: #dbe4ee;
     color: black;
     border: none;
 }
 
 #results_widget > QPushButton, #results_widget QGroupBox:title{
-    background-color: #5897ac;
-    color: black;
+    background-color: #f17300;
+    color: white;
     border: none;
 }
