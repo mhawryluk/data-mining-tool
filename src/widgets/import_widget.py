@@ -19,7 +19,7 @@ class ImportWidget(UnfoldWidget):
 
         # load data group
         self.load_data_group = QGroupBox(self.frame)
-        self.load_data_group.setTitle("Load data:")
+        self.load_data_group.setTitle("Load data")
         self.load_data_group.setGeometry(QRect(30, 30, 250, 161))
 
         self.filepath_label = QLabel(self.load_data_group)
@@ -48,7 +48,7 @@ class ImportWidget(UnfoldWidget):
 
         # options group
         self.options_group = QGroupBox(self.frame)
-        self.options_group.setTitle("Options:")
+        self.options_group.setTitle("Options")
         self.options_group.setGeometry(QRect(30, 220, 250, 171))
 
         self.reject_button = QPushButton(self.options_group)
@@ -70,7 +70,7 @@ class ImportWidget(UnfoldWidget):
 
         # columns group
         self.columns_group = QGroupBox(self.frame)
-        self.columns_group.setTitle("Columns:")
+        self.columns_group.setTitle("Columns")
         self.columns_group.setGeometry(QRect(360, 30, 400, 100))
         self.columns_grid = QGridLayout()
         self.columns_group.setLayout(self.columns_grid)
