@@ -31,3 +31,5 @@ class MainWidget(QWidget):
             widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
             widget.move((widget_index+i)*UNFOLD_BUTTON_WIDTH+UNFOLD_WIDGET_WIDTH, 0)
 
+        if focused := self.focusWidget():
+            focused.clearFocus()
