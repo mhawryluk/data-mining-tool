@@ -1,8 +1,8 @@
-#algorithm_widget > QPushButton {
+#algorithm_setup_widget > QPushButton {
     background-color: #b1ddf0;
 }
 
-#algorithm_widget > QFrame {
+#algorithm_setup_widget > QFrame {
     background-color: #EBF4F7;
 }
 

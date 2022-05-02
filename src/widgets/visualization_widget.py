@@ -10,4 +10,4 @@ class VisualizationWidget(UnfoldWidget):
 
         # unfold button
         self.button.setText("VISUALIZATION")
-        self.button.clicked.connect(lambda: self.parent().unfold(3))
+        self.button.clicked.connect(lambda: self.parent().unfold(4))
