@@ -1,41 +1,40 @@
-UnfoldWidget {
-    border: none;
-}
-
 UnfoldWidget > QFrame {
     background-color: white;
 }
 
 UnfoldWidget QGroupBox:title {
-    padding: 5px 5px 2px;
+    padding: 5px;
     border-radius: 5px;
+    margin-bottom: 5px;
+    margin-right: 5px;
 }
 
 #import_widget > QPushButton, #import_widget QGroupBox:title{
-    background-color: #0A0908;
+    background-color: #0a1128;
     color: white;
+    border: none;
 }
 
 #preprocessing_widget > QPushButton, #preprocessing_widget QGroupBox:title {
-    background-color: #22333B;
+    background-color: #001f54;
     color: white;
     border: none;
 }
 
 #algorithm_setup_widget > QPushButton, #algorithm_setup_widget QGroupBox:title{
-    background-color: #5E503F;
+    background-color: #034078;
     color: white;
     border: none;
 }
 
 #algorithm_run_widget > QPushButton, #algorithm_run_widget QGroupBox:title{
-    background-color: #A9927D;
-    color: white;
+    background-color: #1282a2;
+    color: black;
     border: none;
 }
 
 #results_widget > QPushButton, #results_widget QGroupBox:title{
-    background-color: #F2F4F3;
+    background-color: #5897ac;
     color: black;
     border: none;
 }
