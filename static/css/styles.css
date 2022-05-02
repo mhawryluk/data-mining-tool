@@ -22,10 +22,10 @@
     background-color: #E6F4F4;
 }
 
-#visualization_widget > QPushButton {
+#results_widget > QPushButton {
     background-color: #D0CEE2;
 }
 
-#visualization_widget > QFrame {
+#results_widget > QFrame {
     background-color: #F6F5F9;
 }

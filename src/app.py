@@ -36,7 +36,7 @@ def main():
         'preprocess': None,
         'algorithm_setup': None,
         'algorithm_run': None,
-        'visualization': None
+        'results': None
     }
     app = QApplication(sys.argv)
     window = MainWindow(engines)

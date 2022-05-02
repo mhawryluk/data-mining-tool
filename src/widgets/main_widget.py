@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget
 
 from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH, AlgorithmSetupWidget, ImportWidget, PreprocessingWidget, \
-    VisualizationWidget, AlgorithmRunWidget
+    ResultsWidget, AlgorithmRunWidget
 
 
 class MainWidget(QWidget):
@@ -13,10 +13,10 @@ class MainWidget(QWidget):
         self.preprocessing_widget = PreprocessingWidget(self, engines['preprocess'])
         self.algorithm_setup_widget = AlgorithmSetupWidget(self, engines['algorithm_setup'])
         self.algorithm_run_widget = AlgorithmRunWidget(self, engines['algorithm_run'])
-        self.visualization_widget = VisualizationWidget(self, engines['visualization'])
+        self.results_widget = ResultsWidget(self, engines['results'])
 
         self.widgets = [self.import_widget, self.preprocessing_widget, self.algorithm_setup_widget,
-                        self.algorithm_run_widget, self.visualization_widget]
+                        self.algorithm_run_widget, self.results_widget]
         self.unfold(0)
 
     def unfold(self, widget_index):
