@@ -2,11 +2,13 @@ import pandas as pd
 import numpy as np
 from typing import List, Tuple, Generator
 
+num_types = [int, float, np.float, np.int]
+
 
 class KMeans:
     def __init__(self, data: pd.DataFrame, k: int, metrics: int = 1, stop: int = 5, max_step: int = None):
         self.k = k
-        self.distance = lambda x, y: ((np.abs(x-y))**metrics)**(1/metrics)
+        self.metrics = metrics
         self.stop = stop
         self.max_step = max_step
         self.step_counter = 0
@@ -14,6 +16,17 @@ class KMeans:
         self.centroids = list(self.data.sample(k, replace=False).itertuples(index=False))
         self.labels = np.zeros(self.data.size)
         self.mark_labels()
+
+    def distance(self, X: List, Y: List) -> float:
+        diff = np.zeros_like(X, dtype=float)
+        for i, (x, y) in enumerate(zip(X, Y)):
+            if type(x) in num_types:
+                diff[i] = np.abs(x - y)
+            elif x != y:
+                diff[i] = 1
+            else:
+                diff[i] = 0
+        return (np.sum(diff**self.metrics))**(1/self.metrics)
 
     def mark_labels(self) -> int:
         min_dis = np.inf
