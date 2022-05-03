@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget
 
-from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH, AlgorithmWidget, ImportWidget, PreprocessingWidget, VisualizationWidget
+from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH, AlgorithmSetupWidget, ImportWidget, PreprocessingWidget, \
+    ResultsWidget, AlgorithmRunWidget
 
 
 class MainWidget(QWidget):
@@ -10,10 +11,12 @@ class MainWidget(QWidget):
 
         self.import_widget = ImportWidget(self, engines['import_data'])
         self.preprocessing_widget = PreprocessingWidget(self, engines['preprocess'])
-        self.algorithm_widget = AlgorithmWidget(self, engines['algorithms'])
-        self.visualization_widget = VisualizationWidget(self, engines['visualization'])
+        self.algorithm_setup_widget = AlgorithmSetupWidget(self, engines['algorithm_setup'])
+        self.algorithm_run_widget = AlgorithmRunWidget(self, engines['algorithm_run'])
+        self.results_widget = ResultsWidget(self, engines['results'])
 
-        self.widgets = [self.import_widget, self.preprocessing_widget, self.algorithm_widget, self.visualization_widget]
+        self.widgets = [self.import_widget, self.preprocessing_widget, self.algorithm_setup_widget,
+                        self.algorithm_run_widget, self.results_widget]
         self.unfold(0)
 
     def unfold(self, widget_index):
@@ -28,3 +31,5 @@ class MainWidget(QWidget):
             widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
             widget.move((widget_index+i)*UNFOLD_BUTTON_WIDTH+UNFOLD_WIDGET_WIDTH, 0)
 
+        if focused := self.focusWidget():
+            focused.clearFocus()
