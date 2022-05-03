@@ -4,14 +4,14 @@ from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QSpinBox, QComboBox
 from widgets import UnfoldWidget
 
 
-class AlgorithmWidget(UnfoldWidget):
+class AlgorithmSetupWidget(UnfoldWidget):
     def __init__(self, parent, engine):
         super().__init__(parent)
         self.engine = engine
-        self.setObjectName('algorithm_widget')
+        self.setObjectName('algorithm_setup_widget')
 
         # unfold button
-        self.button.setText("ALGORITHM")
+        self.button.setText("ALGORITHM SETUP")
         self.button.clicked.connect(lambda: self.parent().unfold(2))
 
         # exploration technique selection

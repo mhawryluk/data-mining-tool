@@ -27,16 +27,16 @@ def main():
     # db_reader._read_all(["key", "another_key"])
     # print(db_reader.reader)
 
-    db_reader = DatabaseReader("db", "collection")
-    print(db_reader._read_by_chunks(['another_key']))
-
+    # db_reader = DatabaseReader("db", "collection")
+    # print(db_reader._read_by_chunks(['another_key']))
 
     state = State()
     engines = {
         'import_data': ImportDataEngine(state),
         'preprocess': None,
-        'algorithms': AlgorithmsEngine(state),
-        'visualization': None
+        'algorithm_setup': AlgorithmsEngine(state),
+        'algorithm_run': None,
+        'results': None
     }
     app = QApplication(sys.argv)
     window = MainWindow(engines)
