@@ -1,5 +1,5 @@
 from state import State
-from widgets.plots import HistogramPlot, PiePlot
+from widgets.plots import HistogramPlot, PiePlot, FallbackPlot
 
 
 class PreprocessingEngine:
@@ -12,8 +12,11 @@ class PreprocessingEngine:
         return self.state.imported_data.columns
 
     def create_plot(self, column_name, plot_type):
-        column = self.state.imported_data.loc[:, column_name]
         plotter = None
+        if column_name == '':
+            plotter = FallbackPlot([])
+            return plotter.plot()
+        column = self.state.imported_data.loc[:, column_name]
         match plot_type:
             case 'Histogram':
                 plotter = HistogramPlot(column)
