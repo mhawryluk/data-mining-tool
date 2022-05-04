@@ -1,5 +1,5 @@
 from widgets import UnfoldWidget
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton, QCheckBox
 from PyQt5.QtCore import QRect
 
 
@@ -70,12 +70,14 @@ class PreprocessingWidget(UnfoldWidget):
         self.columns_group.setGeometry(QRect(480, 200, 420, 350))
         self.columns_grid = QGridLayout()
         self.columns_group.setLayout(self.columns_grid)
+        self.set_columns_grid()
 
     def get_data(self):
         """ check column names every time coming to that frame (potential changes) """
         self.parent().unfold(1)
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
+        self.set_columns_grid()
 
     def plot_data(self, column_name, plot_type):
         self._clear_plot()
@@ -85,3 +87,14 @@ class PreprocessingWidget(UnfoldWidget):
     def _clear_plot(self):
         for i in reversed(range(self.plot_layout.count())):
             self.plot_layout.itemAt(i).widget().setParent(None)
+
+    def set_columns_grid(self):
+        columns = self.engine.get_columns()
+        col = max(len(columns) // 11 + 1, 2)
+        rows = (len(columns) - 1) // col + 1
+        self.columns_group.setFixedHeight(min(rows * 60, 350))
+        positions = [(i, j) for i in range(rows) for j in range(col)]
+        for name, position in zip(columns, positions):
+            checkbox = QCheckBox(name)
+            checkbox.setChecked(True)
+            self.columns_grid.addWidget(checkbox, *position)
