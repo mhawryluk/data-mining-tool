@@ -31,11 +31,12 @@ def main():
     # print(db_reader._read_by_chunks(['another_key']))
 
     state = State()
+    tmp = AlgorithmsEngine(state)
     engines = {
         'import_data': ImportDataEngine(state),
         'preprocess': None,
-        'algorithm_setup': AlgorithmsEngine(state),
-        'algorithm_run': None,
+        'algorithm_setup': tmp,
+        'algorithm_run': tmp,
         'results': None
     }
     app = QApplication(sys.argv)
