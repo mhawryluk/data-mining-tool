@@ -89,6 +89,7 @@ class PreprocessingWidget(UnfoldWidget):
             self.plot_layout.itemAt(i).widget().setParent(None)
 
     def set_columns_grid(self):
+        self.clear_grid()
         columns = self.engine.get_columns()
         col = max(len(columns) // 11 + 1, 2)
         rows = (len(columns) - 1) // col + 1
@@ -98,3 +99,7 @@ class PreprocessingWidget(UnfoldWidget):
             checkbox = QCheckBox(name)
             checkbox.setChecked(True)
             self.columns_grid.addWidget(checkbox, *position)
+
+    def clear_grid(self):
+        for i in reversed(range(self.columns_grid.count())):
+            self.columns_grid.itemAt(i).widget().setParent(None)
