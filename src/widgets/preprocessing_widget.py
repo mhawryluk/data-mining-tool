@@ -93,13 +93,27 @@ class PreprocessingWidget(UnfoldWidget):
         columns = self.engine.get_columns()
         col = max(len(columns) // 11 + 1, 2)
         rows = (len(columns) - 1) // col + 1
-        self.columns_group.setFixedHeight(min(rows * 60, 350))
+        self.columns_group.setFixedHeight(min(rows * 60, 280) + 70)
         positions = [(i, j) for i in range(rows) for j in range(col)]
         for name, position in zip(columns, positions):
             checkbox = QCheckBox(name)
             checkbox.setChecked(True)
             self.columns_grid.addWidget(checkbox, *position)
+        submit_checkboxes_button = QPushButton()
+        submit_checkboxes_button.setFixedWidth(50)
+        submit_checkboxes_button.setFixedHeight(23)
+        submit_checkboxes_button.setText("Select")
+        submit_checkboxes_button.clicked.connect(lambda: self.submit_columns())
+        self.columns_grid.addWidget(submit_checkboxes_button, rows, 0)
 
     def clear_grid(self):
         for i in reversed(range(self.columns_grid.count())):
             self.columns_grid.itemAt(i).widget().setParent(None)
+
+    def submit_columns(self):
+        columns = []
+        for i in range(self.columns_grid.count()):
+            if self.columns_grid.itemAt(i).widget().isChecked():
+                columns.append(self.columns_grid.itemAt(i).widget().text())
+        self.engine.set_state(columns)
+        self.get_data()

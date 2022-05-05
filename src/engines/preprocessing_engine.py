@@ -11,6 +11,9 @@ class PreprocessingEngine:
             return []
         return self.state.imported_data.columns
 
+    def set_state(self, columns):
+        self.state.imported_data = self.state.imported_data[columns]
+
     def create_plot(self, column_name, plot_type):
         plotter = None
         if column_name == '':
