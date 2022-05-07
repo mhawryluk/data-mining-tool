@@ -1,6 +1,7 @@
 from widgets import UnfoldWidget
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton, QCheckBox, QMessageBox
-from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton, QCheckBox, \
+    QMessageBox, QSplashScreen, QApplication, QDesktopWidget
+from PyQt5.QtCore import QRect, Qt
 
 
 class PreprocessingWidget(UnfoldWidget):
@@ -81,11 +82,20 @@ class PreprocessingWidget(UnfoldWidget):
             error.setWindowTitle("Error")
             error.exec_()
             return
+
+        loading_screen = QSplashScreen()
+        size = QDesktopWidget().screenGeometry(-1)
+        loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
+        loading_screen.setGeometry(QRect(size.width()//2-125, size.height()//2-50, 250, 100)) # hardcoded alignment
+        loading_screen.show()
+        QApplication.processEvents()
+
         self.parent().unfold(1)
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.set_columns_grid()
         self.engine.clean_data()
+        loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
         self._clear_plot()
