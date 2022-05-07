@@ -28,5 +28,8 @@ class PreprocessingEngine:
                 plotter = PiePlot(column)
         return plotter.plot()
 
-    def clean_data(self):
+    def _cast_nulls(self):
         self.state.imported_data = self.state.imported_data.fillna("null")
+
+    def clean_data(self):
+        self._cast_nulls()
