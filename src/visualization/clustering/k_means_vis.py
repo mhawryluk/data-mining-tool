@@ -1,7 +1,8 @@
 from functools import partial
 
 import numpy as np
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, QSpinBox, QPushButton, QComboBox, QLabel
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
+    QSpinBox, QPushButton, QComboBox, QLabel
 import pandas as pd
 from typing import List, Tuple
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -23,12 +24,41 @@ class KMeansCanvas(FigureCanvasQTAgg):
         self.axes.set_ylim(min_y, max_y)
         self.draw()
 
-    def make_plot(self, vector_x, vector_y, vector_x_centroids, vector_y_centroids, labels, name_x, name_y, min_x, max_x, min_y, max_y):
+    def all_plot(self, vector_x, vector_y, vector_x_centroids, vector_y_centroids,
+                 labels, name_x, name_y, min_x, max_x, min_y, max_y):
         self.axes.cla()
         label = [labels[i] for i in range(len(vector_x))]
         max_label = len(vector_x_centroids)
         self.axes.scatter(vector_x, vector_y, c=label, cmap='gist_ncar', vmin=0, vmax=max_label)
-        self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label), marker='s', cmap='gist_ncar', vmin=0, vmax=max_label)
+        self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label),
+                          marker='s', cmap='gist_ncar', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
+        self.axes.set_xlabel(name_x)
+        self.axes.set_ylabel(name_y)
+        self.axes.set_xlim(min_x, max_x)
+        self.axes.set_ylim(min_y, max_y)
+        self.draw()
+
+    def new_centroids_plot(self, old_vector_x_centroids, old_vector_y_centroids, vector_x_centroids, vector_y_centroids,
+                           name_x, name_y, min_x, max_x, min_y, max_y):
+        self.axes.cla()
+        max_label = len(vector_x_centroids)
+        if not old_vector_x_centroids is None:
+            self.axes.scatter(old_vector_x_centroids, old_vector_y_centroids, c=np.arange(max_label),
+                              marker='s', cmap='gist_ncar', vmin=0, vmax=max_label, alpha=0.3)
+        self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label),
+                          marker='s', cmap='gist_ncar', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
+        self.axes.set_xlabel(name_x)
+        self.axes.set_ylabel(name_y)
+        self.axes.set_xlim(min_x, max_x)
+        self.axes.set_ylim(min_y, max_y)
+        self.draw()
+
+    def choose_centroid_plot(self, vector_x, vector_y, old_x_centroid, old_y_centroid, x_centroid, y_centroid,
+                             label, max_label, name_x, name_y, min_x, max_x, min_y, max_y):
+        self.axes.cla()
+        self.axes.scatter(vector_x, vector_y, c=[label] * len(vector_x), cmap='gist_ncar', vmin=0, vmax=max_label)
+        self.axes.scatter([old_x_centroid], [old_y_centroid], c='black', marker='s', alpha=0.3)
+        self.axes.scatter([x_centroid], [y_centroid], c='black', marker='s')
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
@@ -43,10 +73,11 @@ class KMeansStepsVisualization(QWidget):
         self.layout = QHBoxLayout(self)
 
         self.algorithms_steps = algorithms_steps
+        self.num_cluster = algorithms_steps[0][1].shape[0]
         self.data = data
-        self.max_step = len(algorithms_steps)
+        self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
         self.current_step = 0
-        self.num_samples = min(20, self.data.shape[0])
+        self.num_samples = min(35, self.data.shape[0] // 2)
         self.samples = self.get_samples()
         self.ox = self.oy = self.data.columns[0]
 
@@ -175,9 +206,43 @@ class KMeansStepsVisualization(QWidget):
             self.canvas.data_plot(x, y, self.ox, self.oy, min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
             return
 
-        step_labels, step_centroids = self.algorithms_steps[self.current_step - 1]
+        step_labels, step_centroids = self.algorithms_steps[0]
         labels = [step_labels[sample] for sample in self.samples]
         x_centroids = step_centroids[self.ox]
         y_centroids = step_centroids[self.oy]
 
-        self.canvas.make_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy, min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+        if self.current_step == 1:
+            self.canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
+                                           min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+            return
+
+        if self.current_step == 2:
+            self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
+                                 min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+            return
+
+        index = (self.current_step - 3) // (self.num_cluster + 2) + 1
+        mode = (self.current_step - 3) % (self.num_cluster + 2)
+
+        step_labels, step_centroids = self.algorithms_steps[index]
+        labels = [step_labels[sample] for sample in self.samples]
+        x_centroids = step_centroids[self.ox]
+        y_centroids = step_centroids[self.oy]
+
+        old_step_labels, old_step_centroids = self.algorithms_steps[index - 1]
+        old_x_centroids = old_step_centroids[self.ox]
+        old_y_centroids = old_step_centroids[self.oy]
+
+        if mode < self.num_cluster:
+            vector_x = self.data.loc[old_step_labels == mode][self.ox]
+            vector_y = self.data.loc[old_step_labels == mode][self.oy]
+            self.canvas.choose_centroid_plot(vector_x, vector_y, old_x_centroids.iloc[mode],
+                                             old_y_centroids.iloc[mode], x_centroids.iloc[mode], y_centroids.iloc[mode],
+                                             mode, len(x_centroids), self.ox, self.oy,
+                                             min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+        elif mode == self.num_cluster:
+            self.canvas.new_centroids_plot(old_x_centroids, old_y_centroids, x_centroids, y_centroids, self.ox, self.oy,
+                                           min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+        else:
+            self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
+                                 min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
