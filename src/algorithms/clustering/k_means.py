@@ -47,7 +47,7 @@ class KMeans:
 
     def is_numeric(self, element: any) -> bool:
         try:
-            float(element)
+            pd.to_numeric(element)
             return True
         except ValueError:
             return False
@@ -55,7 +55,7 @@ class KMeans:
     def mean(self, group: pd.DataFrame) -> Tuple:
         result = []
         for i, (_, row) in enumerate(group.items()):
-            if self.is_numeric(list(row)[0]):
+            if self.is_numeric(row):
                 result.append(row.mean())
             else:
                 counter = {}

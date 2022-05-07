@@ -13,3 +13,8 @@ class AlgorithmsEngine:
         alg = KMeans(self.state.imported_data, **kwargs)
         steps = alg.get_steps()
         self.steps_vis = KMeansStepsVisualization(self.state.imported_data, steps)
+
+    def get_maximum_clusters(self) -> int:
+        if self.state.imported_data is None:
+            return 100
+        return self.state.imported_data.shape[0]

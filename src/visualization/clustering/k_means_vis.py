@@ -29,9 +29,9 @@ class KMeansCanvas(FigureCanvasQTAgg):
         self.axes.cla()
         label = [labels[i] for i in range(len(vector_x))]
         max_label = len(vector_x_centroids)
-        self.axes.scatter(vector_x, vector_y, c=label, cmap='gist_ncar', vmin=0, vmax=max_label)
+        self.axes.scatter(vector_x, vector_y, c=label, cmap='gist_rainbow', vmin=0, vmax=max_label)
         self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label),
-                          marker='s', cmap='gist_ncar', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
+                          marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
@@ -44,9 +44,9 @@ class KMeansCanvas(FigureCanvasQTAgg):
         max_label = len(vector_x_centroids)
         if not old_vector_x_centroids is None:
             self.axes.scatter(old_vector_x_centroids, old_vector_y_centroids, c=np.arange(max_label),
-                              marker='s', cmap='gist_ncar', vmin=0, vmax=max_label, alpha=0.3)
+                              marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, alpha=0.3)
         self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label),
-                          marker='s', cmap='gist_ncar', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
+                          marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
@@ -56,7 +56,8 @@ class KMeansCanvas(FigureCanvasQTAgg):
     def choose_centroid_plot(self, vector_x, vector_y, old_x_centroid, old_y_centroid, x_centroid, y_centroid,
                              label, max_label, name_x, name_y, min_x, max_x, min_y, max_y):
         self.axes.cla()
-        self.axes.scatter(vector_x, vector_y, c=[label] * len(vector_x), cmap='gist_ncar', vmin=0, vmax=max_label)
+        self.axes.scatter(vector_x, vector_y, c=[label] * len(vector_x), cmap='gist_rainbow',
+                          vmin=0, vmax=max_label, alpha=0.6)
         self.axes.scatter([old_x_centroid], [old_y_centroid], c='black', marker='s', alpha=0.3)
         self.axes.scatter([x_centroid], [y_centroid], c='black', marker='s')
         self.axes.set_xlabel(name_x)
@@ -75,11 +76,14 @@ class KMeansStepsVisualization(QWidget):
         self.algorithms_steps = algorithms_steps
         self.num_cluster = algorithms_steps[0][1].shape[0]
         self.data = data
+        columns = [col for col in self.data.columns if self.is_numeric(self.data[col])]
+        for column in columns:
+            self.data[column] = pd.to_numeric(self.data[column])
         self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
         self.current_step = 0
         self.num_samples = min(35, self.data.shape[0] // 2)
         self.samples = self.get_samples()
-        self.ox = self.oy = self.data.columns[0]
+        self.ox = self.oy = columns[0]
 
         self.setObjectName("k_means_steps_visualization")
 
@@ -102,8 +106,6 @@ class KMeansStepsVisualization(QWidget):
 
         # axis
         self.settings_box_layout.addRow(QLabel("Set axis:"))
-
-        columns = [col for col in self.data.columns if self.is_numeric(self.data[col][0])]
 
         self.ox_box = QComboBox()
         self.ox_box.addItems(columns)
@@ -155,7 +157,7 @@ class KMeansStepsVisualization(QWidget):
 
     def is_numeric(self, element: any) -> bool:
         try:
-            float(element)
+            pd.to_numeric(element)
             return True
         except ValueError:
             return False
