@@ -7,5 +7,5 @@ from .import_widget import ImportWidget
 from .preprocessing_widget import PreprocessingWidget
 from .results_widget import ResultsWidget
 from .main_widget import MainWidget
-from .main_layout import MainWindow
+from .main_window import MainWindow
 from .plots import HistogramPlot, PiePlot, FallbackPlot
