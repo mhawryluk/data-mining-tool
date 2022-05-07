@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QWIDGETSIZE_MAX
 
-from widgets import UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH, AlgorithmSetupWidget, ImportWidget, PreprocessingWidget, \
+from widgets import UNFOLD_BUTTON_WIDTH, AlgorithmSetupWidget, ImportWidget, PreprocessingWidget, \
     ResultsWidget, AlgorithmRunWidget
 
 
@@ -17,19 +17,24 @@ class MainWidget(QWidget):
 
         self.widgets = [self.import_widget, self.preprocessing_widget, self.algorithm_setup_widget,
                         self.algorithm_run_widget, self.results_widget]
+
+        layout = QHBoxLayout()
+        for widget in self.widgets:
+            layout.addWidget(widget)
+
+        layout.setSpacing(0)
+        self.setLayout(layout)
+
         self.unfold(0)
 
     def unfold(self, widget_index):
-        for i, widget in enumerate(self.widgets[:widget_index]):
-            widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
-            widget.move(i*UNFOLD_BUTTON_WIDTH, 0)
-
-        self.widgets[widget_index].setFixedWidth(UNFOLD_WIDGET_WIDTH)
-        self.widgets[widget_index].move(widget_index*UNFOLD_BUTTON_WIDTH, 0)
-
-        for i, widget in enumerate(self.widgets[widget_index+1:]):
-            widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
-            widget.move((widget_index+i)*UNFOLD_BUTTON_WIDTH+UNFOLD_WIDGET_WIDTH, 0)
+        for i, widget in enumerate(self.widgets):
+            if i == widget_index:
+                widget.setFixedWidth(QWIDGETSIZE_MAX)
+                widget.frame.setFixedWidth(QWIDGETSIZE_MAX)
+            else:
+                widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
+                widget.frame.setFixedWidth(0)
 
         if focused := self.focusWidget():
             focused.clearFocus()
