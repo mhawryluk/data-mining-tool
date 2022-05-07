@@ -9,7 +9,7 @@ UnfoldWidget QGroupBox:title {
     margin-right: 5px;
 }
 
-#import_widget > QPushButton, #import_widget QGroupBox:title{
+#import_widget > QPushButton, #import_widget QGroupBox:title {
     background-color: #054a91;
     color: white;
     border: none;
