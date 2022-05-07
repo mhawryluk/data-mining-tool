@@ -1,21 +1,15 @@
 from functools import partial
 
-from PyQt5.QtCore import QRect, Qt
-from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QSpinBox, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGroupBox, QLabel, QSpinBox, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFormLayout, QDialog
 
-from widgets import UnfoldWidget, UNFOLD_WIDGET_WIDTH, WINDOW_HEIGHT
+from widgets import UnfoldWidget
 
 
 class AlgorithmSetupWidget(UnfoldWidget):
     def __init__(self, parent, engine):
-        super().__init__(parent)
-        self.engine = engine
-        self.setObjectName('algorithm_setup_widget')
-
-        # unfold button
-        self.button.setText("ALGORITHM SETUP")
-        self.button.clicked.connect(lambda: self.parent().unfold(2))
+        super().__init__(parent, engine, 'algorithm_setup_widget', "ALGORITHM SETUP")
 
         # layout
         self.layout = QVBoxLayout(self.frame)

@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QDesktopWidget
-from widgets import WINDOW_WIDTH, WINDOW_HEIGHT, MainWidget
+from widgets import MainWidget
 
 
 class MainWindow(QMainWindow):
@@ -7,7 +7,7 @@ class MainWindow(QMainWindow):
     def __init__(self, engines):
         super().__init__()
         self.setWindowTitle('Data Mining Tool')
-        self.setGeometry(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.setGeometry(0, 0, 1200, 600)
 
         # position the window in the middle of the screen
         rect = self.frameGeometry()

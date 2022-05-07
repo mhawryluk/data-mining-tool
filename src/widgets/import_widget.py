@@ -9,13 +9,7 @@ from widgets import UnfoldWidget, QtTable
 
 class ImportWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
-        super().__init__(parent)
-        self.engine = engine
-        self.setObjectName("import_widget")
-
-        # unfold button
-        self.button.setText("IMPORT DATA")
-        self.button.clicked.connect(lambda: self.parent().unfold(0))
+        super().__init__(parent, engine, 'import_widget', 'IMPORT DATA')
 
         # load data group
         self.load_data_group = QGroupBox(self.frame)

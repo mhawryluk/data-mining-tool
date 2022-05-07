@@ -25,11 +25,11 @@ class MainWidget(QWidget):
         layout.setSpacing(0)
         self.setLayout(layout)
 
-        self.unfold(0)
+        self.unfold(self.import_widget)
 
-    def unfold(self, widget_index):
-        for i, widget in enumerate(self.widgets):
-            if i == widget_index:
+    def unfold(self, requested_widget):
+        for widget in self.widgets:
+            if requested_widget is widget:
                 widget.setFixedWidth(QWIDGETSIZE_MAX)
                 widget.frame.setFixedWidth(QWIDGETSIZE_MAX)
             else:

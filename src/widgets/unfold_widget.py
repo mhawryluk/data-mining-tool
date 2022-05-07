@@ -1,19 +1,21 @@
-from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtWidgets import QFrame, QWidget, QSizePolicy, QHBoxLayout
+from widgets import UNFOLD_BUTTON_WIDTH
 from .rotated_button import RotatedButton
-
-from widgets import WINDOW_HEIGHT, UNFOLD_BUTTON_WIDTH, UNFOLD_WIDGET_WIDTH
 
 
 class UnfoldWidget(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent: QWidget, engine, object_id: str, button_text: str):
         super().__init__(parent)
+
+        self.engine = engine
+        self.setObjectName(object_id)
 
         # unfold button
         self.button = RotatedButton(self)
-        self.button.setLayoutDirection(Qt.LeftToRight)
         self.button.setFixedWidth(UNFOLD_BUTTON_WIDTH)
         self.button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.button.clicked.connect(lambda: self.parent().unfold(self))
+        self.button.setText(button_text)
 
         # main frame
         self.frame = QFrame(self)
@@ -27,4 +29,3 @@ class UnfoldWidget(QWidget):
 
         self.setLayout(layout)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-

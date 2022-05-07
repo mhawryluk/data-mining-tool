@@ -6,14 +6,12 @@ from PyQt5.QtCore import QRect, Qt
 
 class PreprocessingWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
-        super().__init__(parent)
-        self.engine = engine
-        self.plot_types = ['Histogram', 'Pie']
-        self.setObjectName('preprocessing_widget')
+        super().__init__(parent, engine, 'preprocessing_widget', 'PREPROCESSING')
 
-        # unfold button
-        self.button.setText("PREPROCESSING")
+        self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
+
+        self.plot_types = ['Histogram', 'Pie']
 
         # plot picker group
         self.plot_picker_group = QGroupBox(self.frame)
@@ -90,7 +88,7 @@ class PreprocessingWidget(UnfoldWidget):
         loading_screen.show()
         QApplication.processEvents()
 
-        self.parent().unfold(1)
+        self.parent().unfold(self)
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.set_columns_grid()
