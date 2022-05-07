@@ -11,6 +11,7 @@ class AlgorithmsEngine:
     def run(self, technique, algorithm, **kwargs):
         print(technique, algorithm)
         alg = KMeans(self.state.imported_data, **kwargs)
+        alg.run()
         steps = alg.get_steps()
         self.steps_vis = KMeansStepsVisualization(self.state.imported_data, steps)
 
