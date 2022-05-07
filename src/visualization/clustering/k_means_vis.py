@@ -53,7 +53,7 @@ class KMeansCanvas(FigureCanvasQTAgg):
         self.axes.set_ylim(min_y, max_y)
         self.draw()
 
-    def choose_centroid_plot(self, vector_x, vector_y, old_x_centroid, old_y_centroid, x_centroid, y_centroid,
+    def chosen_centroid_plot(self, vector_x, vector_y, old_x_centroid, old_y_centroid, x_centroid, y_centroid,
                              label, max_label, name_x, name_y, min_x, max_x, min_y, max_y):
         self.axes.cla()
         self.axes.scatter(vector_x, vector_y, c=[label] * len(vector_x), cmap='gist_rainbow',
@@ -76,7 +76,7 @@ class KMeansStepsVisualization(QWidget):
         self.algorithms_steps = algorithms_steps
         self.num_cluster = algorithms_steps[0][1].shape[0]
         self.data = data
-        columns = [col for col in self.data.columns if self.is_numeric(self.data[col])]
+        columns = [col for col in self.data.columns if self.check_numeric(self.data[col])]
         for column in columns:
             self.data[column] = pd.to_numeric(self.data[column])
         self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
@@ -155,7 +155,7 @@ class KMeansStepsVisualization(QWidget):
         self.layout.addWidget(self.settings_box)
         self.layout.addWidget(self.visualization_box)
 
-    def is_numeric(self, element: any) -> bool:
+    def check_numeric(self, element: any) -> bool:
         try:
             pd.to_numeric(element)
             return True
@@ -238,7 +238,7 @@ class KMeansStepsVisualization(QWidget):
         if mode < self.num_cluster:
             vector_x = self.data.loc[old_step_labels == mode][self.ox]
             vector_y = self.data.loc[old_step_labels == mode][self.oy]
-            self.canvas.choose_centroid_plot(vector_x, vector_y, old_x_centroids.iloc[mode],
+            self.canvas.chosen_centroid_plot(vector_x, vector_y, old_x_centroids.iloc[mode],
                                              old_y_centroids.iloc[mode], x_centroids.iloc[mode], y_centroids.iloc[mode],
                                              mode, len(x_centroids), self.ox, self.oy,
                                              min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)

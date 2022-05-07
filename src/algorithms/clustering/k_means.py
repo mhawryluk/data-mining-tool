@@ -13,21 +13,22 @@ class KMeans:
         self.max_step = max_step
         self.step_counter = 0
         self.data = data
+        self.is_numeric = [self.check_numeric(column) for _, column in self.data.items()]
         self.centroids = list(self.data.sample(self.num_clusters, replace=False).itertuples(index=False))
         self.labels = np.zeros(self.data.shape[0])
         self.mark_labels()
+        self.steps = []
 
     def distance(self, vector_x: Union[Tuple, List], vector_y: Union[Tuple, List]) -> float:
         diff = np.zeros_like(vector_x, dtype=float)
         for i, (x, y) in enumerate(zip(vector_x, vector_y)):
-            if self.is_numeric(x):
+            if self.is_numeric[i]:
                 diff[i] = np.abs(float(x) - float(y))
             else:
                 if x == y:
                     diff[i] = 0
                 else:
                     diff[i] = 1
-        diff.astype(float)
         return (np.sum(diff**self.metrics))**(1/self.metrics)
 
     def mark_labels(self) -> int:
@@ -45,7 +46,7 @@ class KMeans:
             self.labels[i] = m
         return count
 
-    def is_numeric(self, element: any) -> bool:
+    def check_numeric(self, element: any) -> bool:
         try:
             pd.to_numeric(element)
             return True
@@ -54,14 +55,14 @@ class KMeans:
 
     def mean(self, group: pd.DataFrame) -> Tuple:
         result = []
-        for i, (_, row) in enumerate(group.items()):
-            if self.is_numeric(row):
-                result.append(row.mean())
+        for i, (_, column) in enumerate(group.items()):
+            if self.is_numeric[i]:
+                result.append(column.mean())
             else:
                 counter = {}
                 most_frequent = None
                 count = 0
-                for element in row:
+                for element in column:
                     counter[element] = counter.get(element, 0) + 1
                     if counter[element] > count:
                         count = counter[element]
@@ -83,22 +84,25 @@ class KMeans:
 
     def run(self) -> Tuple[np.ndarray, pd.DataFrame]:
         steps = 0
+        self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
         while self.step():
             steps += 1
+            self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
             if self.max_step and steps > self.max_step:
                 break
         self.step_counter = steps
+        self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
         return self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
 
-    def run_by_steps(self) -> Generator[Tuple[np.ndarray, pd.DataFrame], None, None]:
-        steps = 0
-        yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
-        while self.step():
-            steps += 1
-            yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
-            if self.max_step and steps > self.max_step:
-                break
-        yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
+    # def run_by_steps(self) -> Generator[Tuple[np.ndarray, pd.DataFrame], None, None]:
+    #     steps = 0
+    #     yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
+    #     while self.step():
+    #         steps += 1
+    #         yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
+    #         if self.max_step and steps > self.max_step:
+    #             break
+    #     yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
 
     def get_steps(self) -> List[Tuple[np.ndarray, pd.DataFrame]]:
-        return list(self.run_by_steps())
+        return self.steps
