@@ -9,6 +9,7 @@ class UnfoldWidget(QWidget):
 
         self.engine = engine
         self.setObjectName(object_id)
+        self.setFixedWidth(UNFOLD_BUTTON_WIDTH)
 
         # unfold button
         self.button = RotatedButton(self)
@@ -19,6 +20,7 @@ class UnfoldWidget(QWidget):
 
         # main frame
         self.frame = QFrame(self)
+        self.frame.setFixedWidth(0)
 
         # layout
         layout = QHBoxLayout()

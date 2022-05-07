@@ -25,16 +25,17 @@ class MainWidget(QWidget):
         layout.setSpacing(0)
         self.setLayout(layout)
 
+        self.unfolded_widget = self.import_widget
         self.unfold(self.import_widget)
 
-    def unfold(self, requested_widget):
-        for widget in self.widgets:
-            if requested_widget is widget:
-                widget.setFixedWidth(QWIDGETSIZE_MAX)
-                widget.frame.setFixedWidth(QWIDGETSIZE_MAX)
-            else:
-                widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
-                widget.frame.setFixedWidth(0)
+    def unfold(self, widget):
+        self.unfolded_widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
+        self.unfolded_widget.frame.setFixedWidth(0)
+
+        widget.setFixedWidth(QWIDGETSIZE_MAX)
+        widget.frame.setFixedWidth(QWIDGETSIZE_MAX)
+
+        self.unfolded_widget = widget
 
         if focused := self.focusWidget():
             focused.clearFocus()
