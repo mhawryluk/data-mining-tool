@@ -1,5 +1,5 @@
 from widgets import UnfoldWidget
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton, QCheckBox
+from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton, QCheckBox, QMessageBox
 from PyQt5.QtCore import QRect
 
 
@@ -74,10 +74,18 @@ class PreprocessingWidget(UnfoldWidget):
 
     def get_data(self):
         """ check column names every time coming to that frame (potential changes) """
+        if self.engine.state.imported_data is None:
+            error = QMessageBox()
+            error.setIcon(QMessageBox.Critical)
+            error.setText('No dataset was selected')
+            error.setWindowTitle("Error")
+            error.exec_()
+            return
         self.parent().unfold(1)
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.set_columns_grid()
+        self.engine.clean_data()
 
     def plot_data(self, column_name, plot_type):
         self._clear_plot()

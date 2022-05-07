@@ -1,5 +1,6 @@
 from state import State
 from widgets.plots import HistogramPlot, PiePlot, FallbackPlot
+from time import sleep
 
 
 class PreprocessingEngine:
@@ -26,3 +27,6 @@ class PreprocessingEngine:
             case 'Pie':
                 plotter = PiePlot(column)
         return plotter.plot()
+
+    def clean_data(self):
+        self.state.imported_data = self.state.imported_data.fillna("null")
