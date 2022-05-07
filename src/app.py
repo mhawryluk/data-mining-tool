@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from engines import ImportDataEngine, PreprocessingEngine
+from engines import ImportDataEngine, AlgorithmsEngine
 from state import State
 from database import Reader, Writer, DocumentRemover
 from data_import import DatabaseReader
@@ -18,11 +19,12 @@ def main():
     # print(db_reader._read_by_chunks(['another_key']))
 
     state = State()
+    tmp = AlgorithmsEngine(state)
     engines = {
         'import_data': ImportDataEngine(state),
         'preprocess': PreprocessingEngine(state),
-        'algorithm_setup': None,
-        'algorithm_run': None,
+        'algorithm_setup': tmp,
+        'algorithm_run': tmp,
         'results': None
     }
     app = QApplication(sys.argv)
