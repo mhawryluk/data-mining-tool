@@ -60,6 +60,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
 
         self.num_clusters_spinbox = QSpinBox()
         self.num_clusters_spinbox.setMinimum(2)
+        self.num_clusters_spinbox.setMaximum(engine.get_maximum_clusters())
         self.num_clusters_spinbox.setValue(5)
         self.options_group_layout.addRow(QLabel("Number of clusters:"), self.num_clusters_spinbox)
 

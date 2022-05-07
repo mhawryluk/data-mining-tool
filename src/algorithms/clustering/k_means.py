@@ -21,7 +21,7 @@ class KMeans:
         diff = np.zeros_like(vector_x, dtype=float)
         for i, (x, y) in enumerate(zip(vector_x, vector_y)):
             if self.is_numeric(x):
-                diff[i] = np.abs(x - y)
+                diff[i] = np.abs(float(x) - float(y))
             else:
                 if x == y:
                     diff[i] = 0
@@ -47,7 +47,7 @@ class KMeans:
 
     def is_numeric(self, element: any) -> bool:
         try:
-            float(element)
+            pd.to_numeric(element)
             return True
         except ValueError:
             return False
@@ -55,7 +55,7 @@ class KMeans:
     def mean(self, group: pd.DataFrame) -> Tuple:
         result = []
         for i, (_, row) in enumerate(group.items()):
-            if self.is_numeric(list(row)[0]):
+            if self.is_numeric(row):
                 result.append(row.mean())
             else:
                 counter = {}
@@ -81,24 +81,24 @@ class KMeans:
             return False
         return True
 
-    def run(self) -> Tuple[np.ndarray, List[Tuple]]:
+    def run(self) -> Tuple[np.ndarray, pd.DataFrame]:
         steps = 0
         while self.step():
             steps += 1
             if self.max_step and steps > self.max_step:
                 break
         self.step_counter = steps
-        return self.labels, self.centroids
+        return self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
 
-    def run_by_steps(self) -> Generator[Tuple[np.ndarray, List[Tuple]], None, None]:
+    def run_by_steps(self) -> Generator[Tuple[np.ndarray, pd.DataFrame], None, None]:
         steps = 0
-        yield self.labels, self.centroids
+        yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
         while self.step():
             steps += 1
-            yield self.labels, self.centroids
+            yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
             if self.max_step and steps > self.max_step:
                 break
-        yield self.labels, self.centroids
+        yield self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
 
-    def get_steps(self) -> List[Tuple[np.ndarray, List[Tuple]]]:
+    def get_steps(self) -> List[Tuple[np.ndarray, pd.DataFrame]]:
         return list(self.run_by_steps())
