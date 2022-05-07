@@ -1,6 +1,6 @@
 from widgets import UnfoldWidget
 from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton, QCheckBox, \
-    QMessageBox, QSplashScreen, QApplication, QDesktopWidget
+    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy
 from PyQt5.QtCore import QRect, Qt
 
 
@@ -15,50 +15,59 @@ class PreprocessingWidget(UnfoldWidget):
 
         # plot picker group
         self.plot_picker_group = QGroupBox(self.frame)
+        self.plot_picker_group_layout = QFormLayout(self.plot_picker_group)
+
         self.plot_picker_group.setTitle("Choose data to plot")
-        self.plot_picker_group.setGeometry(QRect(30, 30, 270, 160))
 
         self.column_picker_label = QLabel(self.plot_picker_group)
         self.column_picker_label.setText("Select column:")
-        self.column_picker_label.setGeometry(QRect(10, 40, 100, 23))
+        self.column_picker_label.setMinimumHeight(23)
         self.column_select_box = QComboBox(self.plot_picker_group)
-        self.column_select_box.setGeometry(QRect(110, 40, 130, 23))
+        self.column_select_box.setMinimumHeight(23)
+
+        self.plot_picker_group_layout.addRow(self.column_picker_label, self.column_select_box)
+        self.plot_picker_group.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.plot_picker_label = QLabel(self.plot_picker_group)
         self.plot_picker_label.setText("Select plot type:")
-        self.plot_picker_label.setGeometry(10, 80, 100, 23)
+        self.plot_picker_label.setMinimumHeight(23)
         self.plot_select_box = QComboBox(self.plot_picker_group)
-        self.plot_select_box.setGeometry(QRect(110, 80, 130, 23))
+        self.plot_select_box.setMinimumHeight(23)
         self.plot_select_box.addItems(self.plot_types)
+
+        self.plot_picker_group_layout.addRow(self.plot_picker_label, self.plot_select_box)
 
         self.plot_picker_submit = QPushButton(self.plot_picker_group)
         self.plot_picker_submit.setText("Plot")
-        self.plot_picker_submit.setGeometry(QRect(10, 120, 50, 23))
+        self.plot_picker_submit.setMinimumHeight(23)
         self.plot_picker_submit.clicked.connect(lambda: self.plot_data(self.column_select_box.currentText(),
                                                                        self.plot_select_box.currentText()))
+
+        self.plot_picker_group_layout.addRow(self.plot_picker_submit)
 
         # estimation group
         self.estimate_group = QGroupBox(self.frame)
         self.estimate_group.setTitle("Estimate missing values")
-        self.estimate_group.setGeometry(QRect(330, 30, 270, 120))
+        self.estimate_group_layout = QFormLayout(self.estimate_group)
 
         self.estimate_group_todo = QLabel(self.estimate_group)
         self.estimate_group_todo.setText("Future")
-        self.estimate_group_todo.setGeometry(QRect(10, 40, 100, 23))
+        self.estimate_group_todo.setMinimumHeight(23)
+        self.estimate_group_layout.addRow(self.estimate_group_todo)
 
         # automatic reduction group
         self.auto_reduction_group = QGroupBox(self.frame)
         self.auto_reduction_group.setTitle("Reduce dimensions automatically")
-        self.auto_reduction_group.setGeometry(QRect(630, 30, 270, 120))
+        self.auto_reduction_group_layout = QFormLayout(self.auto_reduction_group)
 
         self.auto_reduction_todo = QLabel(self.auto_reduction_group)
         self.auto_reduction_todo.setText("Future")
-        self.auto_reduction_todo.setGeometry(QRect(10, 40, 100, 23))
+        self.auto_reduction_todo.setMinimumHeight(23)
+        self.auto_reduction_group_layout.addRow(self.auto_reduction_todo)
 
         # plot stats window
         self.plot_widget = QGroupBox(self.frame)
         self.plot_widget.setTitle("Result")
-        self.plot_widget.setGeometry(QRect(30, 200, 420, 350))
 
         self.plot_layout = QVBoxLayout()
         self.plot_widget.setLayout(self.plot_layout)
@@ -66,10 +75,27 @@ class PreprocessingWidget(UnfoldWidget):
         # column rejection group
         self.columns_group = QGroupBox(self.frame)
         self.columns_group.setTitle("Columns")
-        self.columns_group.setGeometry(QRect(480, 200, 420, 350))
         self.columns_grid = QGridLayout()
         self.columns_group.setLayout(self.columns_grid)
         self.set_columns_grid()
+
+        # layouts for sections
+        layout = QVBoxLayout(self.frame)
+
+        self.first_row = QHBoxLayout()
+        self.first_row.addStretch(1)
+        self.first_row.addWidget(self.plot_picker_group, 0)
+        self.first_row.addStretch(1)
+        self.first_row.addWidget(self.plot_widget, 10)
+        self.first_row.addStretch(1)
+
+        self.second_row = QHBoxLayout()
+        self.second_row.addWidget(self.estimate_group, 0)
+        self.second_row.addWidget(self.auto_reduction_group, 0)
+        self.second_row.addWidget(self.columns_group, 1)
+
+        layout.addLayout(self.first_row, 1)
+        layout.addLayout(self.second_row, 0)
 
     def get_data(self):
         """ check column names every time coming to that frame (potential changes) """
@@ -116,7 +142,6 @@ class PreprocessingWidget(UnfoldWidget):
             checkbox.setChecked(True)
             self.columns_grid.addWidget(checkbox, *position)
         submit_checkboxes_button = QPushButton()
-        submit_checkboxes_button.setFixedWidth(50)
         submit_checkboxes_button.setFixedHeight(23)
         submit_checkboxes_button.setText("Select")
         submit_checkboxes_button.clicked.connect(lambda: self.submit_columns())

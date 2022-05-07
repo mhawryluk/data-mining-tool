@@ -14,7 +14,6 @@ class ImportWidget(UnfoldWidget):
         self.load_data_group = QGroupBox(self.frame)
         self.load_data_group_layout = QFormLayout(self.load_data_group)
         self.load_data_group.setTitle("Load data")
-        self.load_data_group.setMinimumHeight(161)
 
         self.filepath_label = QLabel(self.load_data_group)
         self.filepath_label.setText("Set path to file:")
@@ -47,7 +46,7 @@ class ImportWidget(UnfoldWidget):
 
         self.import_state_label = QLabel(self.load_data_group)
         self.import_state_label.setMinimumHeight(16)
-        self.load_data_group_layout.addWidget(self.import_state_label)
+        self.load_data_group_layout.addRow(self.import_state_label)
 
         self.load_data_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -55,7 +54,6 @@ class ImportWidget(UnfoldWidget):
         self.options_group = QGroupBox(self.frame)
         self.options_layout = QVBoxLayout(self.options_group)
         self.options_group.setTitle("Options")
-        self.options_group.setMinimumHeight(171)
 
         self.reject_button = QPushButton(self.options_group)
         self.reject_button.setText("Reject this data")
@@ -85,7 +83,6 @@ class ImportWidget(UnfoldWidget):
         # columns group
         self.columns_group = QGroupBox(self.frame)
         self.columns_group.setTitle("Columns")
-        self.columns_group.setMinimumHeight(100)
         self.columns_grid = QGridLayout()
         self.columns_group.setLayout(self.columns_grid)
 
@@ -98,11 +95,9 @@ class ImportWidget(UnfoldWidget):
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # layouts for sections
-        self.vertical_layout = QHBoxLayout(self.frame)
+        layout = QHBoxLayout(self.frame)
 
         self.first_column = QVBoxLayout()
-        self.vertical_layout.addLayout(self.first_column, 0)
-
         self.first_column.addStretch(1)
         self.first_column.addWidget(self.load_data_group)
         self.first_column.addStretch(1)
@@ -110,10 +105,11 @@ class ImportWidget(UnfoldWidget):
         self.first_column.addStretch(1)
 
         self.second_column = QVBoxLayout()
-        self.vertical_layout.addLayout(self.second_column, 1)
-
         self.second_column.addWidget(self.columns_group)
         self.second_column.addWidget(self.data_table)
+
+        layout.addLayout(self.first_column, 0)
+        layout.addLayout(self.second_column, 1)
 
     # set titles to box
     def set_available_tables(self):
