@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QWidget
+from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QWidget, QDesktopWidget
 from widgets import WINDOW_WIDTH, WINDOW_HEIGHT, MainWidget
 
 
@@ -7,7 +7,12 @@ class MainWindow(QMainWindow):
     def __init__(self, engines):
         super().__init__()
         self.setWindowTitle('Data Mining Tool')
-        self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.setGeometry(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+
+        # position the window in the middle of the screen
+        rect = self.frameGeometry()
+        rect.moveCenter(QDesktopWidget().availableGeometry().center())
+        self.move(rect.topLeft())
 
         self.generalLayout = QHBoxLayout()
         self._centralWidget = QWidget(self)
