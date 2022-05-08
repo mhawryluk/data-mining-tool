@@ -127,7 +127,7 @@ class KMeansStepsVisualization(QWidget):
         self.canvas = KMeansCanvas()
         self.update_plot()
 
-        self.visualization_box_layout.addWidget(self.canvas)
+        self.visualization_box_layout.addWidget(self.canvas, 1)
 
         self.visualization_box_layout.addStretch()
 
@@ -150,7 +150,7 @@ class KMeansStepsVisualization(QWidget):
         self.control_buttons_layout.addWidget(self.right_box)
         self.control_buttons_layout.addWidget(self.right_button)
 
-        self.visualization_box_layout.addLayout(self.control_buttons_layout)
+        self.visualization_box_layout.addLayout(self.control_buttons_layout, 0)
 
         self.layout.addWidget(self.settings_box)
         self.layout.addWidget(self.visualization_box)
