@@ -1,7 +1,9 @@
 from functools import partial
 from typing import List
-from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout, QWidget, \
-    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
+    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea
 
 from widgets import UnfoldWidget, QtTable
 
@@ -48,8 +50,6 @@ class ImportWidget(UnfoldWidget):
         self.import_state_label.setMinimumHeight(16)
         self.load_data_group_layout.addRow(self.import_state_label)
 
-        self.load_data_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         # options group
         self.options_group = QGroupBox(self.frame)
         self.options_layout = QVBoxLayout(self.options_group)
@@ -78,14 +78,21 @@ class ImportWidget(UnfoldWidget):
         self.warning_label = QLabel(self.options_group)
         self.warning_label.setMinimumHeight(31)
 
-        self.options_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         # columns group
         self.columns_group = QGroupBox(self.frame)
         self.columns_group.setTitle("Columns")
-        self.columns_grid = QGridLayout()
-        self.columns_group.setLayout(self.columns_grid)
+        self.columns_group_layout = QVBoxLayout(self.columns_group)
 
+        self.scroll_box = QGroupBox(self.frame)
+        self.columns_group_form_layout = QFormLayout(self.scroll_box)
+
+        self.scroll = QScrollArea()
+        self.scroll.setWidget(self.scroll_box)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setMinimumHeight(26)
+
+        self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.columns_group_layout.addWidget(self.scroll)
         self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # data table
@@ -95,21 +102,20 @@ class ImportWidget(UnfoldWidget):
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # layouts for sections
-        layout = QHBoxLayout(self.frame)
+        self.layout = QHBoxLayout(self.frame)
 
         self.first_column = QVBoxLayout()
-        self.first_column.addStretch(1)
-        self.first_column.addWidget(self.load_data_group)
-        self.first_column.addStretch(1)
-        self.first_column.addWidget(self.options_group)
-        self.first_column.addStretch(1)
+        self.first_column.addWidget(self.load_data_group, 0)
+        self.first_column.addWidget(self.options_group, 0)
+        self.first_column.addWidget(self.columns_group, 1)
+
+        self.first_column.setSpacing(35)
 
         self.second_column = QVBoxLayout()
-        self.second_column.addWidget(self.columns_group)
         self.second_column.addWidget(self.data_table)
 
-        layout.addLayout(self.first_column, 0)
-        layout.addLayout(self.second_column, 1)
+        self.layout.addLayout(self.first_column, 0)
+        self.layout.addLayout(self.second_column, 1)
 
     # set titles to box
     def set_available_tables(self):
@@ -131,20 +137,18 @@ class ImportWidget(UnfoldWidget):
         self.not_save_button.setEnabled(False)
         self.import_state_label.clear()
         self.warning_label.clear()
-        for i in reversed(range(self.columns_grid.count())):
-            self.columns_grid.itemAt(i).widget().deleteLater()
+        for i in reversed(range(self.columns_group_form_layout.count())):
+            self.columns_group_form_layout.itemAt(i).widget().deleteLater()
 
     # draw columns and checkbox to choose them
     def set_columns_grid(self):
         columns = self.engine.get_columns()
-        col = max(len(columns) // 11 + 1, 2)
-        rows = (len(columns) - 1) // col + 1
-        self.columns_group.setFixedHeight(min(rows*60, 450))
-        positions = [(i, j) for i in range(rows) for j in range(col)]
-        for name, position in zip(columns, positions):
-            checkbox = QCheckBox(name)
+
+        for column in columns:
+            checkbox = QCheckBox(column)
+            checkbox.setMinimumHeight(26)
             checkbox.setChecked(True)
-            self.columns_grid.addWidget(checkbox, *position)
+            self.columns_group_form_layout.addRow(checkbox)
 
     def display_data(self):
         self.engine.read_data()
@@ -154,12 +158,12 @@ class ImportWidget(UnfoldWidget):
     def reset_data_table(self):
         self.data_table.setModel(None)
 
-    # get chose columns
     def get_checked_columns(self) -> List[str]:
+        """ get chosen columns """
         columns = []
-        for i in range(self.columns_grid.count()):
-            if self.columns_grid.itemAt(i).widget().isChecked():
-                columns.append(self.columns_grid.itemAt(i).widget().text())
+        for i in range(self.columns_group_form_layout.count()):
+            if self.columns_group_form_layout.itemAt(i).widget().isChecked():
+                columns.append(self.columns_group_form_layout.itemAt(i).widget().text())
         return columns
 
     def click_listener(self, button_type: str):

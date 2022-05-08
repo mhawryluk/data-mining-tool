@@ -9,6 +9,9 @@ UnfoldWidget QGroupBox:title {
     margin-right: 5px;
 }
 
+QScrollArea { background: transparent; }
+QScrollArea QWidget {background: transparent; }
+
 #import_widget > QPushButton, #import_widget QGroupBox:title {
     background-color: #054a91;
     color: white;
