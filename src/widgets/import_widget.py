@@ -1,7 +1,6 @@
 from functools import partial
 from typing import List
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
     QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea
 
@@ -117,22 +116,22 @@ class ImportWidget(UnfoldWidget):
         self.layout.addLayout(self.first_column, 0)
         self.layout.addLayout(self.second_column, 1)
 
-    # set titles to box
     def set_available_tables(self):
+        """ set titles to box """
         names = self.engine.get_table_names_from_database()
         for name in names:
             self.database_box.addItem(name)
 
-    # enable buttons after load data
     def set_options(self):
+        """ enable buttons after load data """
         self.save_button.setEnabled(True)
         if self.engine.is_data_big():
             self.warning_label.setText("This file is too big.\nYou must save it in database!")
         else:
             self.not_save_button.setEnabled(True)
 
-    # clear import widget from loaded data
     def clear_widgets(self):
+        """ clear import widget from loaded data """
         self.save_button.setEnabled(False)
         self.not_save_button.setEnabled(False)
         self.import_state_label.clear()
@@ -140,8 +139,8 @@ class ImportWidget(UnfoldWidget):
         for i in reversed(range(self.columns_group_form_layout.count())):
             self.columns_group_form_layout.itemAt(i).widget().deleteLater()
 
-    # draw columns and checkbox to choose them
     def set_columns_grid(self):
+        """ draw columns and checkbox to choose them """
         columns = self.engine.get_columns()
 
         for column in columns:
@@ -159,11 +158,11 @@ class ImportWidget(UnfoldWidget):
         self.data_table.setModel(None)
 
     def get_checked_columns(self) -> List[str]:
-        """ get chosen columns """
         columns = []
         for i in range(self.columns_group_form_layout.count()):
             if self.columns_group_form_layout.itemAt(i).widget().isChecked():
                 columns.append(self.columns_group_form_layout.itemAt(i).widget().text())
+        print(columns)
         return columns
 
     def click_listener(self, button_type: str):
