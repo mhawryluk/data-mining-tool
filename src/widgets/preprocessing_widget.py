@@ -102,11 +102,8 @@ class PreprocessingWidget(UnfoldWidget):
         layout = QVBoxLayout(self.frame)
 
         self.first_row = QHBoxLayout()
-        self.first_row.addStretch(1)
         self.first_row.addWidget(self.plot_picker_group, 0)
-        self.first_row.addStretch(1)
-        self.first_row.addWidget(self.plot_widget, 10)
-        self.first_row.addStretch(1)
+        self.first_row.addWidget(self.plot_widget, 1)
 
         self.second_row = QHBoxLayout()
         self.second_row.addWidget(self.estimate_group, 1)
