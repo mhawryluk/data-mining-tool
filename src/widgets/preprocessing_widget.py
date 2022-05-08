@@ -101,8 +101,13 @@ class PreprocessingWidget(UnfoldWidget):
         # layouts for sections
         layout = QVBoxLayout(self.frame)
 
+        self.plot_picker_column = QVBoxLayout()
+        self.plot_picker_column.addStretch(1)
+        self.plot_picker_column.addWidget(self.plot_picker_group)
+        self.plot_picker_column.addStretch(1)
+
         self.first_row = QHBoxLayout()
-        self.first_row.addWidget(self.plot_picker_group, 0)
+        self.first_row.addLayout(self.plot_picker_column, 0)
         self.first_row.addWidget(self.plot_widget, 1)
 
         self.second_row = QHBoxLayout()
