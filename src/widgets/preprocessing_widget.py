@@ -1,7 +1,8 @@
-from widgets import UnfoldWidget
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QGridLayout, QPushButton, QCheckBox, \
-    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy
 from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QPushButton, QCheckBox, \
+    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy, QScrollArea
+
+from widgets import UnfoldWidget
 
 
 class PreprocessingWidget(UnfoldWidget):
@@ -75,9 +76,27 @@ class PreprocessingWidget(UnfoldWidget):
         # column rejection group
         self.columns_group = QGroupBox(self.frame)
         self.columns_group.setTitle("Columns")
-        self.columns_grid = QGridLayout()
-        self.columns_group.setLayout(self.columns_grid)
-        self.set_columns_grid()
+        self.columns_group_layout = QHBoxLayout(self.columns_group)
+
+        self.scroll_box = QGroupBox(self.frame)
+        self.columns_group_form_layout = QFormLayout(self.scroll_box)
+
+        self.scroll = QScrollArea()
+        self.scroll.setWidget(self.scroll_box)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setMinimumHeight(26)
+
+        self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.columns_group_layout.addWidget(self.scroll)
+        self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.submit_checkboxes_button = QPushButton()
+        self.submit_checkboxes_button.setFixedHeight(23)
+        self.submit_checkboxes_button.setText("Select")
+        self.submit_checkboxes_button.clicked.connect(lambda: self.submit_columns())
+        self.columns_group_layout.addWidget(self.submit_checkboxes_button)
+
+        self.add_columns_to_layout()
 
         # layouts for sections
         layout = QVBoxLayout(self.frame)
@@ -90,8 +109,8 @@ class PreprocessingWidget(UnfoldWidget):
         self.first_row.addStretch(1)
 
         self.second_row = QHBoxLayout()
-        self.second_row.addWidget(self.estimate_group, 0)
-        self.second_row.addWidget(self.auto_reduction_group, 0)
+        self.second_row.addWidget(self.estimate_group, 1)
+        self.second_row.addWidget(self.auto_reduction_group, 1)
         self.second_row.addWidget(self.columns_group, 1)
 
         layout.addLayout(self.first_row, 1)
@@ -117,7 +136,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.parent().unfold(self)
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
-        self.set_columns_grid()
+        self.add_columns_to_layout()
         self.engine.clean_data()
         loading_screen.close()
 
@@ -130,31 +149,22 @@ class PreprocessingWidget(UnfoldWidget):
         for i in reversed(range(self.plot_layout.count())):
             self.plot_layout.itemAt(i).widget().setParent(None)
 
-    def set_columns_grid(self):
-        self.clear_grid()
+    def add_columns_to_layout(self):
+        self.clear_column_layout()
         columns = self.engine.get_columns()
-        col = max(len(columns) // 11 + 1, 2)
-        rows = (len(columns) - 1) // col + 1
-        self.columns_group.setFixedHeight(min(rows * 60, 280) + 70)
-        positions = [(i, j) for i in range(rows) for j in range(col)]
-        for name, position in zip(columns, positions):
-            checkbox = QCheckBox(name)
+        for column in columns:
+            checkbox = QCheckBox(column)
             checkbox.setChecked(True)
-            self.columns_grid.addWidget(checkbox, *position)
-        submit_checkboxes_button = QPushButton()
-        submit_checkboxes_button.setFixedHeight(23)
-        submit_checkboxes_button.setText("Select")
-        submit_checkboxes_button.clicked.connect(lambda: self.submit_columns())
-        self.columns_grid.addWidget(submit_checkboxes_button, rows, 0)
+            self.columns_group_form_layout.addRow(checkbox)
 
-    def clear_grid(self):
-        for i in reversed(range(self.columns_grid.count())):
-            self.columns_grid.itemAt(i).widget().setParent(None)
+    def clear_column_layout(self):
+        for i in reversed(range(self.columns_group_form_layout.count())):
+            self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
     def submit_columns(self):
         columns = []
-        for i in range(self.columns_grid.count()):
-            if self.columns_grid.itemAt(i).widget().isChecked():
-                columns.append(self.columns_grid.itemAt(i).widget().text())
+        for i in range(self.columns_group_form_layout.count()):
+            if self.columns_group_form_layout.itemAt(i).widget().isChecked():
+                columns.append(self.columns_group_form_layout.itemAt(i).widget().text())
         self.engine.set_state(columns)
         self.get_data()

@@ -162,7 +162,6 @@ class ImportWidget(UnfoldWidget):
         for i in range(self.columns_group_form_layout.count()):
             if self.columns_group_form_layout.itemAt(i).widget().isChecked():
                 columns.append(self.columns_group_form_layout.itemAt(i).widget().text())
-        print(columns)
         return columns
 
     def click_listener(self, button_type: str):
