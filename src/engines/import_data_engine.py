@@ -50,6 +50,7 @@ class ImportDataEngine:
 
     def clear_import(self):
         self.reader_data = None
+        self.state.imported_data = None
 
     def read_data(self, columns: Optional[List[str]] = None):
         self.imported_data = self.reader_data.read(columns)
