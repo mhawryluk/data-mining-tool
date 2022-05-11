@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from engines import ImportDataEngine, AlgorithmsEngine, PreprocessingEngine
+from engines import ImportDataEngine, PreprocessingEngine, AlgorithmsEngine
 from state import State
 
 from widgets import MainWindow

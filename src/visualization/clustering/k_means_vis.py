@@ -42,7 +42,7 @@ class KMeansCanvas(FigureCanvasQTAgg):
                            name_x, name_y, min_x, max_x, min_y, max_y):
         self.axes.cla()
         max_label = len(vector_x_centroids)
-        if not old_vector_x_centroids is None:
+        if old_vector_x_centroids is not None:
             self.axes.scatter(old_vector_x_centroids, old_vector_y_centroids, c=np.arange(max_label),
                               marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, alpha=0.3)
         self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label),
@@ -168,21 +168,22 @@ class KMeansStepsVisualization(QWidget):
         return list(array[:self.num_samples])
 
     def click_listener(self, button_type: str):
-        if button_type == 'new_samples':
-            num = self.sample_box.value()
-            self.num_samples = num
-            self.samples = self.get_samples()
-            self.update_plot()
-        elif button_type == 'set_axis':
-            self.ox = self.ox_box.currentText()
-            self.oy = self.oy_box.currentText()
-            self.update_plot()
-        elif button_type == 'prev':
-            num = self.left_box.value()
-            self.change_step(-1 * num)
-        elif button_type == 'next':
-            num = self.right_box.value()
-            self.change_step(num)
+        match button_type:
+            case 'new_samples':
+                num = self.sample_box.value()
+                self.num_samples = num
+                self.samples = self.get_samples()
+                self.update_plot()
+            case 'set_axis':
+                self.ox = self.ox_box.currentText()
+                self.oy = self.oy_box.currentText()
+                self.update_plot()
+            case 'prev':
+                num = self.left_box.value()
+                self.change_step(-1 * num)
+            case 'next':
+                num = self.right_box.value()
+                self.change_step(num)
 
     def change_step(self, change: int):
         new_step = max(0, min(self.max_step, self.current_step + change))
