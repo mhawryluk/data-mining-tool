@@ -37,4 +37,4 @@ class Reader:
         return self.collection.count_documents({})
 
     def get_columns_names(self):
-        return list(self.collection.find_one().keys())
+        return list(self.collection.find_one({}, {"_id": 0}).keys())
