@@ -128,9 +128,6 @@ class KMeansStepsVisualization(QWidget):
         self.update_plot()
 
         self.visualization_box_layout.addWidget(self.canvas, 1)
-
-        self.visualization_box_layout.addStretch()
-
         # control buttons
         self.control_buttons_layout = QHBoxLayout()
         self.left_box = QSpinBox()
