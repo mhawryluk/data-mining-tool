@@ -94,6 +94,10 @@ class PreprocessingWidget(UnfoldWidget):
         self.engine.clean_data()
 
     def plot_data(self, column_name, plot_type):
+        loading = LoadingWidget(self.plot_data_handle, column_name, plot_type)
+        loading.execute()
+
+    def plot_data_handle(self, column_name, plot_type):
         self._clear_plot()
         plot_box = self.engine.create_plot(column_name, plot_type)
         self.plot_layout.addWidget(plot_box)
