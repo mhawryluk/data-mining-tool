@@ -1,21 +1,14 @@
 from functools import partial
 
-from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QGroupBox, QLabel, QVBoxLayout, QFormLayout, QSpinBox, QPushButton, QDialog, \
     QHBoxLayout
 
-from widgets import UnfoldWidget, WINDOW_HEIGHT, UNFOLD_WIDGET_WIDTH
+from widgets import UnfoldWidget
 
 
 class AlgorithmRunWidget(UnfoldWidget):
     def __init__(self, parent, engine):
-        super().__init__(parent)
-        self.engine = engine
-        self.setObjectName('algorithm_run_widget')
-
-        # unfold button
-        self.button.setText("ALGORITHM RUN")
-        self.button.clicked.connect(lambda: self.parent().unfold(3))
+        super().__init__(parent, engine, 'algorithm_run_widget', 'ALGORITHM RUN')
 
         # layout
         self.layout = QVBoxLayout(self.frame)
