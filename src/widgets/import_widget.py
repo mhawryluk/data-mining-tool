@@ -139,23 +139,14 @@ class ImportWidget(UnfoldWidget):
                 loading = LoadingWidget(self.load_from_database_handle)
                 loading.execute()
             case 'reject_data':
-                self.clear_widgets()
-                self.engine.clear_import()
-                self.reset_data_table()
+                loading = LoadingWidget(self.reject_data_handle)
+                loading.execute()
             case 'save_data':
-                self.engine.read_data(self.get_checked_columns())
-                text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
-                if is_ok:
-                    if text:
-                        label = self.engine.save_to_database(str(text))
-                        if label:
-                            self.import_state_label.setText(label)
-                        else:
-                            self.import_state_label.setText("Data was stored in database.")
-                    else:
-                        self.import_state_label.setText("The name of collection is not valid.")
+                loading = LoadingWidget(self.save_data_handle)
+                loading.execute()
             case 'not_save_data':
-                self.engine.read_data(self.get_checked_columns())
+                loading = LoadingWidget(self.not_save_data_handle)
+                loading.execute()
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
@@ -180,3 +171,24 @@ class ImportWidget(UnfoldWidget):
         self.set_options()
         self.set_columns_grid()
         self.display_data()
+
+    def reject_data_handle(self):
+        self.clear_widgets()
+        self.engine.clear_import()
+        self.reset_data_table()
+
+    def save_data_handle(self):
+        self.engine.read_data(self.get_checked_columns())
+        text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
+        if is_ok:
+            if text:
+                label = self.engine.save_to_database(str(text))
+                if label:
+                    self.import_state_label.setText(label)
+                else:
+                    self.import_state_label.setText("Data was stored in database.")
+            else:
+                self.import_state_label.setText("The name of collection is not valid.")
+
+    def not_save_data_handle(self):
+        self.engine.read_data(self.get_checked_columns())
