@@ -68,7 +68,7 @@ class KMeansCanvas(FigureCanvasQTAgg):
 
 
 class KMeansStepsVisualization(QWidget):
-    def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[np.ndarray, pd.DataFrame]]):
+    def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[np.ndarray, pd.DataFrame]], animation_speed: int):
         super().__init__()
 
         self.layout = QHBoxLayout(self)

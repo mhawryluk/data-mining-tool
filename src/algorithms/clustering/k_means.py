@@ -82,16 +82,19 @@ class KMeans:
             return False
         return True
 
-    def run(self) -> Tuple[np.ndarray, pd.DataFrame]:
+    def run(self, with_steps) -> Tuple[np.ndarray, pd.DataFrame]:
         steps = 0
-        self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
+        if with_steps:
+            self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
         while self.step():
             steps += 1
-            self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
+            if with_steps:
+                self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
             if self.max_step and steps > self.max_step:
                 break
         self.step_counter = steps
-        self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
+        if with_steps:
+            self.steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
         return self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)
 
     # def run_by_steps(self) -> Generator[Tuple[np.ndarray, pd.DataFrame], None, None]:

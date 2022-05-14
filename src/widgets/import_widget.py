@@ -1,8 +1,9 @@
 from functools import partial
 from typing import List
 
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
-    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea
+    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox
 
 from widgets import UnfoldWidget, QtTable
 
@@ -61,21 +62,11 @@ class ImportWidget(UnfoldWidget):
         self.options_layout.addWidget(self.reject_button, 1)
 
         self.save_button = QPushButton(self.options_group)
-        self.save_button.setText("Save to database and set data")
+        self.save_button.setText("Save to database")
         self.save_button.clicked.connect(partial(self.click_listener, 'save_data'))
         self.save_button.setEnabled(False)
         self.save_button.setMinimumHeight(23)
         self.options_layout.addWidget(self.save_button, 1)
-
-        self.not_save_button = QPushButton(self.options_group)
-        self.not_save_button.setText("Set data")
-        self.not_save_button.clicked.connect(partial(self.click_listener, 'not_save_data'))
-        self.not_save_button.setEnabled(False)
-        self.not_save_button.setMinimumHeight(23)
-        self.options_layout.addWidget(self.not_save_button, 1)
-
-        self.warning_label = QLabel(self.options_group)
-        self.warning_label.setMinimumHeight(31)
 
         # columns group
         self.columns_group = QGroupBox(self.frame)
@@ -90,8 +81,14 @@ class ImportWidget(UnfoldWidget):
         self.scroll.setWidgetResizable(True)
         self.scroll.setMinimumHeight(26)
 
+        self.columns_button = QPushButton("Select columns")
+        self.columns_button.setMaximumWidth(150)
+        self.columns_button.setEnabled(False)
+        self.columns_button.clicked.connect(self.display_data)
+
         self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.columns_group_layout.addWidget(self.scroll)
+        self.columns_group_layout.addWidget(self.columns_button, alignment=Qt.AlignCenter)
         self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # data table
@@ -125,17 +122,18 @@ class ImportWidget(UnfoldWidget):
     def set_options(self):
         """ enable buttons after load data """
         self.save_button.setEnabled(True)
+        self.columns_button.setEnabled(True)
         if self.engine.is_data_big():
-            self.warning_label.setText("This file is too big.\nYou must save it in database!")
-        else:
-            self.not_save_button.setEnabled(True)
+            error = QMessageBox()
+            error.setText('This file is too big.\nYou must save it in database!')
+            error.setWindowTitle("Warning")
+            error.exec_()
 
     def clear_widgets(self):
         """ clear import widget from loaded data """
         self.save_button.setEnabled(False)
-        self.not_save_button.setEnabled(False)
+        self.columns_button.setEnabled(False)
         self.import_state_label.clear()
-        self.warning_label.clear()
         for i in reversed(range(self.columns_group_form_layout.count())):
             self.columns_group_form_layout.itemAt(i).widget().deleteLater()
 
@@ -150,7 +148,7 @@ class ImportWidget(UnfoldWidget):
             self.columns_group_form_layout.addRow(checkbox)
 
     def display_data(self):
-        self.engine.read_data()
+        self.engine.read_data(self.get_checked_columns())
         if (data := self.engine.imported_data) is not None:
             self.data_table.setModel(QtTable(data))
 
@@ -204,5 +202,3 @@ class ImportWidget(UnfoldWidget):
                             self.import_state_label.setText("Data was stored in database.")
                     else:
                         self.import_state_label.setText("The name of collection is not valid.")
-            case 'not_save_data':
-                self.engine.read_data(self.get_checked_columns())
