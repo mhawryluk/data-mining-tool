@@ -4,7 +4,7 @@ from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout, QWidget, \
     QInputDialog, QTableView
 
-from widgets import UnfoldWidget, QtTable
+from widgets import UnfoldWidget, QtTable, LoadingWidget
 
 
 class ImportWidget(UnfoldWidget):
@@ -133,27 +133,11 @@ class ImportWidget(UnfoldWidget):
     def click_listener(self, button_type: str):
         match button_type:
             case 'load_file':
-                self.import_state_label.setText("Loading ...")
-                filepath = self.filepath_line.text()
-                result = self.engine.load_data_from_file(filepath)
-                if result:
-                    self.import_state_label.setText(result)
-                    return
-                self.clear_widgets()
-                self.set_options()
-                self.set_columns_grid()
-                self.display_data()
+                loading = LoadingWidget(self.load_from_file_handle)
+                loading.execute()
             case 'load_database':
-                self.import_state_label.setText("Loading ...")
-                document_name = self.database_box.currentText()
-                result = self.engine.load_data_from_database(document_name)
-                if result:
-                    self.import_state_label.setText(result)
-                    return
-                self.clear_widgets()
-                self.set_options()
-                self.set_columns_grid()
-                self.display_data()
+                loading = LoadingWidget(self.load_from_database_handle)
+                loading.execute()
             case 'reject_data':
                 self.clear_widgets()
                 self.engine.clear_import()
@@ -172,3 +156,27 @@ class ImportWidget(UnfoldWidget):
                         self.import_state_label.setText("The name of collection is not valid.")
             case 'not_save_data':
                 self.engine.read_data(self.get_checked_columns())
+
+    def load_from_file_handle(self):
+        self.import_state_label.setText("Loading ...")
+        filepath = self.filepath_line.text()
+        result = self.engine.load_data_from_file(filepath)
+        if result:
+            self.import_state_label.setText(result)
+            return
+        self.clear_widgets()
+        self.set_options()
+        self.set_columns_grid()
+        self.display_data()
+
+    def load_from_database_handle(self):
+        self.import_state_label.setText("Loading ...")
+        document_name = self.database_box.currentText()
+        result = self.engine.load_data_from_database(document_name)
+        if result:
+            self.import_state_label.setText(result)
+            return
+        self.clear_widgets()
+        self.set_options()
+        self.set_columns_grid()
+        self.display_data()
