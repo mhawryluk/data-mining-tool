@@ -8,5 +8,11 @@ class PiePlot(Plot):
     def plot(self):
         ax = self.canvas.figure.subplots()
         counts = self.data.value_counts().to_dict()
-        ax.pie(counts.values(), labels=counts.keys())
+        data_size = self.data.size
+        labels = [k if counts[k]/data_size > self.min_pie_plot_label_ratio else '' for k in counts.keys()]
+        ax.pie(counts.values(), labels=labels)
+
         return self.canvas
+
+    def _reduce_labels(self, ax, frequency_ratio):
+        pass
