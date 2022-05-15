@@ -7,5 +7,5 @@ class HistogramPlot(Plot):
 
     def plot(self):
         ax = self.canvas.figure.subplots()
-        ax.hist(self.data)
+        ax.hist(self.data, align='left')
         return self.canvas

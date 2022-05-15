@@ -12,7 +12,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
 
-        self.plot_types = ['Histogram', 'Pie']
+        self.plot_types = ['Histogram', 'Pie', "Null frequency"]
 
         # plot picker group
         self.plot_picker_group = QGroupBox(self.frame)
@@ -139,7 +139,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.add_columns_to_layout()
-        self.engine.clean_data()
+        self.engine.clean_data() # whole data cleaning process here
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):

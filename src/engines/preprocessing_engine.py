@@ -1,11 +1,13 @@
+import numpy as np
 from state import State
-from widgets.plots import HistogramPlot, PiePlot, FallbackPlot
-from time import sleep
+from widgets.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
+from preprocess import DataFiller
 
 
 class PreprocessingEngine:
     def __init__(self, state: State):
         self.state = state
+        self.data_filler = DataFiller(self.state)
 
     def get_columns(self):
         if self.state.imported_data is None:
@@ -26,10 +28,9 @@ class PreprocessingEngine:
                 plotter = HistogramPlot(column)
             case 'Pie':
                 plotter = PiePlot(column)
+            case 'Null frequency':
+                plotter = NullFrequencyPlot(column)
         return plotter.plot()
 
-    def _cast_nulls(self):
-        self.state.imported_data = self.state.imported_data.fillna("null")
-
     def clean_data(self):
-        self._cast_nulls()
+        self.data_filler.cast_nulls("null")
