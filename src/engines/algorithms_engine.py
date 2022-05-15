@@ -9,10 +9,22 @@ class AlgorithmsEngine:
 
         self.algorithms_options = {
             'clustering': {
-                'K-Means': (KMeans, KMeansStepsVisualization)
+                'K-Means': (KMeans, KMeansStepsVisualization),
+                'DBSCAN': None,
+                'Partition Around Medoids': None,
+                'Gaussian Mixture Models': None,
+                'Agglomerative clustering': None,
+                'Divisive clustering': None
             },
             'associations': {
-                'algorithm': None
+                'A-priori': None,
+                'A-prioriTID': None,
+                'FP-Growth': None
+            },
+            'classification': {
+                'KNN': None,
+                'Decision Tree': None,
+                'SVM': None
             }
         }
 

@@ -18,10 +18,22 @@ class AlgorithmSetupWidget(UnfoldWidget):
 
         self.algorithms_options = {
             'clustering': {
-                'K-Means': KMeansOptions(engine)
+                'K-Means': KMeansOptions(engine),
+                'DBSCAN': Algorithm(engine),
+                'Partition Around Medoids': Algorithm(engine),
+                'Gaussian Mixture Models': Algorithm(engine),
+                'Agglomerative clustering': Algorithm(engine),
+                'Divisive clustering': Algorithm(engine)
             },
             'associations': {
-                'algorithm': Algorithm(engine)
+                'A-priori': Algorithm(engine),
+                'A-prioriTID': Algorithm(engine),
+                'FP-Growth': Algorithm(engine)
+            },
+            'classification': {
+                'KNN': Algorithm(engine),
+                'Decision Tree': Algorithm(engine),
+                'SVM': Algorithm(engine)
             }
         }
 
@@ -100,6 +112,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.run_button.setText("Submit and run")
         self.run_button.setFixedWidth(300)
         self.run_button.clicked.connect(partial(self.click_listener, 'run'))
+        self.enable_button()
 
         self.layout.addStretch()
         self.layout.addLayout(self.vertical_layout)
@@ -117,6 +130,13 @@ class AlgorithmSetupWidget(UnfoldWidget):
 
         self.parent().unfold(self)
 
+    def enable_button(self):
+        done = ['K-Means']
+        if self.algorithm_box.currentText() in done:
+            self.run_button.setEnabled(True)
+        else:
+            self.run_button.setEnabled(False)
+
     def click_listener(self, button_type: str):
         technique = self.technique_box.currentText()
         algorithm = self.algorithm_box.currentText()
@@ -129,6 +149,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
                     self.options_group_layout.itemAt(i).widget().setParent(None)
                 if algorithm:
                     self.options_group_layout.addWidget(self.algorithms_options[technique][algorithm])
+                    self.enable_button()
             case 'run':
                 loading_screen = QSplashScreen()
                 size = QDesktopWidget().screenGeometry(-1)

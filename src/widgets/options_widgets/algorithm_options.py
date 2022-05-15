@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QFormLayout, QSpinBox, QLabel
+from PyQt5.QtWidgets import QWidget, QFormLayout, QSpinBox, QLabel, QComboBox
 
 
 class Algorithm(QWidget):
@@ -7,15 +7,9 @@ class Algorithm(QWidget):
 
         self.layout = QFormLayout(self)
 
-        self.num_clusters_spinbox = QSpinBox()
-        self.num_clusters_spinbox.setMinimum(2)
-        # self.num_clusters_spinbox.setMaximum(engine.get_maximum_clusters())
-        self.num_clusters_spinbox.setMaximum(10)
-        self.num_clusters_spinbox.setValue(3)
-        self.layout.addRow(QLabel("Something:"), self.num_clusters_spinbox)
+        self.layout.addRow(QLabel("Future"))
+        self.layout.addRow(QLabel("Some ComboBox"), QComboBox())
+        self.layout.addRow(QLabel("Some SpinBox"), QSpinBox())
 
     def get_data(self) -> dict:
-        return {
-            'num_clusters': self.num_clusters_spinbox.value(),
-            'metrics': 2
-        }
+        return {}
