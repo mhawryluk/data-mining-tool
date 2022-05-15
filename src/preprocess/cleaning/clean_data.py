@@ -9,4 +9,4 @@ class DataCleaner:
         self.state.imported_data = self.state.imported_data.fillna(value)
 
     def remove_nulls(self):
-        self.state.imported_data = self.state.imported_data.loc[(self.state.imported_data != "null").any(axis=1)]
+        self.state.imported_data = self.state.imported_data.loc[(self.state.imported_data != "null").all(axis=1)]

@@ -36,7 +36,6 @@ class PreprocessingEngine:
             case "cast":
                 self.cleaner.cast_nulls("null")
             case "remove":
-                print("remove")
                 self.cleaner.remove_nulls()
 
     def has_rows_with_nulls(self):
