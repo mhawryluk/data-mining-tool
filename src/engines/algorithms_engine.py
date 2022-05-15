@@ -16,7 +16,7 @@ class AlgorithmsEngine:
             }
         }
 
-    def run(self, technique, algorithm, will_be_visualized, is_animation, animation_speed, **kwargs):
+    def run(self, technique, algorithm, will_be_visualized, is_animation, **kwargs):
         chosen_alg = self.algorithms_options[technique][algorithm]
         if chosen_alg is None:
             return
@@ -24,7 +24,7 @@ class AlgorithmsEngine:
         alg.run(will_be_visualized)
         if will_be_visualized:
             steps = alg.get_steps()
-            self.state.steps_visualization = chosen_alg[1](self.state.imported_data, steps, is_animation, animation_speed)
+            self.state.steps_visualization = chosen_alg[1](self.state.imported_data, steps, is_animation)
         else:
             self.state.steps_visualization = None
 

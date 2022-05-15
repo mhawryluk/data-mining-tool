@@ -84,10 +84,6 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.animation_type.addItems(["Step by step", "Animation", "No visualization"])
         self.animation_group_layout.addRow(QLabel("Visualization type"), self.animation_type)
 
-        self.animation_speed_box = QSpinBox()
-        self.animation_speed_box.setMinimum(1)
-        self.animation_group_layout.addRow(QLabel("Speed of animation"), self.animation_speed_box)
-
         self.third_column.addWidget(self.animation_group)
         self.third_column.addStretch()
 
@@ -146,8 +142,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
                 type_visualization = self.animation_type.currentText()
                 will_be_visualized = type_visualization != 'No visualization'
                 is_animation = type_visualization == 'Animation'
-                speed = self.animation_speed_box.value()
-                self.engine.run(technique, algorithm, will_be_visualized, is_animation, speed, **data)
+                self.engine.run(technique, algorithm, will_be_visualized, is_animation, **data)
                 if will_be_visualized:
                     self.parent().unfold_by_id('algorithm_run_widget')
                 else:
