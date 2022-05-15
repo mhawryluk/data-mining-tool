@@ -9,6 +9,7 @@ class PreprocessingWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
         super().__init__(parent, engine, 'preprocessing_widget', 'PREPROCESSING')
 
+        self.data_submitted = False
         self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
 
@@ -139,7 +140,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.add_columns_to_layout()
-        self.engine.clean_data() # whole data cleaning process here
+        self.engine.clean_data("cast")
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
@@ -156,7 +157,7 @@ class PreprocessingWidget(UnfoldWidget):
         columns = self.engine.get_columns()
         for column in columns:
             checkbox = QCheckBox(column)
-            checkbox.setChecked(True)
+            checkbox.setChecked(False)
             self.columns_group_form_layout.addRow(checkbox)
 
     def clear_column_layout(self):
@@ -164,9 +165,40 @@ class PreprocessingWidget(UnfoldWidget):
             self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
     def submit_columns(self):
+        self.data_submitted = False
         columns = []
         for i in range(self.columns_group_form_layout.count()):
             if self.columns_group_form_layout.itemAt(i).widget().isChecked():
                 columns.append(self.columns_group_form_layout.itemAt(i).widget().text())
-        self.engine.set_state(columns)
-        self.get_data()
+        if not columns:
+            error = QMessageBox()
+            error.setIcon(QMessageBox.Critical)
+            error.setText('No columns were chosen')
+            error.setWindowTitle("Error")
+            error.exec_()
+            return
+        if self.engine.has_rows_with_nulls():
+            self.remove_nulls_warning()
+        if self.data_submitted:
+            self.engine.set_state(columns)
+            self.engine.clean_data("remove")
+            self.get_data()
+
+    def remove_nulls_warning(self):
+        warning = QMessageBox()
+        warning.setIcon(QMessageBox.Warning)
+        warning.setText("Null values in set")
+        warning.setInformativeText("Some rows will be deleted cause of the null values. You can check your data or "
+                                   "estimate it. Or you might go further, letting app remove some rows automatically. "
+                                   "Continue?")
+        warning.setWindowTitle("Cleaning data")
+        warning.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        warning.buttonClicked.connect(self.handle_warning_click)
+        warning.exec_()
+
+    def handle_warning_click(self, button):
+        match button.text():
+            case 'OK':
+                self.data_submitted = True
+            case 'Cancel':
+                self.data_submitted = False

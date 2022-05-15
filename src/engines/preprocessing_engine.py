@@ -1,13 +1,12 @@
-import numpy as np
 from state import State
 from widgets.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
-from preprocess import DataFiller
+from preprocess import DataCleaner
 
 
 class PreprocessingEngine:
     def __init__(self, state: State):
         self.state = state
-        self.data_filler = DataFiller(self.state)
+        self.cleaner = DataCleaner(self.state)
 
     def get_columns(self):
         if self.state.imported_data is None:
@@ -32,5 +31,13 @@ class PreprocessingEngine:
                 plotter = NullFrequencyPlot(column)
         return plotter.plot()
 
-    def clean_data(self):
-        self.data_filler.cast_nulls("null")
+    def clean_data(self, op_type):
+        match op_type:
+            case "cast":
+                self.cleaner.cast_nulls("null")
+            case "remove":
+                print("remove")
+                self.cleaner.remove_nulls()
+
+    def has_rows_with_nulls(self):
+        return "null" in self.state.imported_data.values
