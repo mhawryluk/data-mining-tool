@@ -133,16 +133,13 @@ class PreprocessingWidget(UnfoldWidget):
         loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
         loading_screen.setGeometry(QRect(size.width()//2-125, size.height()//2-50, 250, 100)) # hardcoded alignment
         loading_screen.show()
-        # sleep(2)
         QApplication.processEvents()
-        # sleep(5)
 
         self.parent().unfold(self)
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.add_columns_to_layout()
         self.engine.clean_data()
-        # sleep(3)
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
