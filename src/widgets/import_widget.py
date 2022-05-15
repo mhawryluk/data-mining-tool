@@ -1,10 +1,9 @@
 from functools import partial
 from typing import List
 
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
-    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox, \
-    QSplashScreen, QDesktopWidget, QApplication
+    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox
 
 from widgets import UnfoldWidget, QtTable
 
@@ -114,13 +113,6 @@ class ImportWidget(UnfoldWidget):
         self.layout.addLayout(self.first_column, 0)
         self.layout.addLayout(self.second_column, 1)
 
-        # loading screen
-        self.loading_screen = QSplashScreen()
-        size = QDesktopWidget().screenGeometry(-1)
-        self.loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
-        self.loading_screen.setGeometry(
-            QRect(size.width() // 2 - 125, size.height() // 2 - 50, 250, 100))  # hardcoded alignment
-
     def set_available_tables(self):
         """ set titles to box """
         names = self.engine.get_table_names_from_database()
@@ -173,42 +165,27 @@ class ImportWidget(UnfoldWidget):
     def click_listener(self, button_type: str):
         match button_type:
             case 'load_file':
-                self.loading_screen.show()
-                QApplication.processEvents()
-
                 self.import_state_label.setText("Loading ...")
                 filepath = self.filepath_line.text()
                 result = self.engine.load_data_from_file(filepath)
                 if result:
                     self.import_state_label.setText(result)
-
-                    self.loading_screen.close()
-
                     return
                 self.clear_widgets()
                 self.set_options()
                 self.set_columns_grid()
                 self.display_data()
-                self.loading_screen.close()
             case 'load_database':
-                self.loading_screen.show()
-                QApplication.processEvents()
-
                 self.import_state_label.setText("Loading ...")
                 document_name = self.database_box.currentText()
                 result = self.engine.load_data_from_database(document_name)
                 if result:
                     self.import_state_label.setText(result)
-
-                    self.loading_screen.close()
-
                     return
                 self.clear_widgets()
                 self.set_options()
                 self.set_columns_grid()
                 self.display_data()
-
-                self.loading_screen.close()
             case 'reject_data':
                 self.clear_widgets()
                 self.engine.clear_import()
@@ -218,13 +195,7 @@ class ImportWidget(UnfoldWidget):
                 text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
                 if is_ok:
                     if text:
-
-                        self.loading_screen.show()
-                        QApplication.processEvents()
-
                         label = self.engine.save_to_database(str(text))
-
-                        self.loading_screen.close()
                         if label:
                             self.import_state_label.setText(label)
                         else:
@@ -232,5 +203,4 @@ class ImportWidget(UnfoldWidget):
                     else:
                         self.import_state_label.setText("The name of collection is not valid.")
             case 'columns':
-
                 self.display_data()

@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, 
     QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy, QScrollArea
 
 from widgets import UnfoldWidget
-from time import sleep
 
 
 class PreprocessingWidget(UnfoldWidget):
