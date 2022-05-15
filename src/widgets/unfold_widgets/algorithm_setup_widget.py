@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QGroupBox, QLabel, QSpinBox, QComboBox, QPushButton,
 
 from widgets import UnfoldWidget
 
-from .options_widgets import KMeansOptions, Algorithm
+from widgets.options_widgets import KMeansOptions, Algorithm
 
 
 class AlgorithmSetupWidget(UnfoldWidget):
