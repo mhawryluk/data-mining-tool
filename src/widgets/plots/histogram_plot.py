@@ -1,3 +1,4 @@
+import numpy as np
 from widgets.plots import Plot
 
 
@@ -7,5 +8,7 @@ class HistogramPlot(Plot):
 
     def plot(self):
         ax = self.canvas.figure.subplots()
-        ax.hist(self.data, align='left')
+        stats = self.data.value_counts().to_dict()
+        labels, values = zip(*stats.items())
+        ax.bar(labels, values, align='center')
         return self.canvas
