@@ -2,7 +2,7 @@ from functools import partial
 
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtWidgets import QGroupBox, QLabel, QSpinBox, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFormLayout, QCheckBox, QMessageBox, QSplashScreen, QDesktopWidget, QApplication
+    QFormLayout, QMessageBox, QSplashScreen, QDesktopWidget, QApplication
 
 from widgets import UnfoldWidget
 
@@ -80,9 +80,9 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.animation_group.setMinimumSize(220, 200)
         self.animation_group_layout = QFormLayout(self.animation_group)
 
-        self.animation_checkbox = QCheckBox()
-        self.animation_checkbox.setChecked(True)
-        self.animation_group_layout.addRow(QLabel("Visualization of steps"), self.animation_checkbox)
+        self.animation_type = QComboBox()
+        self.animation_type.addItems(["Step by step", "Animation", "No visualization"])
+        self.animation_group_layout.addRow(QLabel("Visualization type"), self.animation_type)
 
         self.animation_speed_box = QSpinBox()
         self.animation_speed_box.setMinimum(1)
@@ -143,10 +143,12 @@ class AlgorithmSetupWidget(UnfoldWidget):
                 QApplication.processEvents()
 
                 data = self.algorithms_options[technique][algorithm].get_data()
-                will_be_visualized = self.animation_checkbox.isChecked()
+                type_visualization = self.animation_type.currentText()
+                will_be_visualized = type_visualization != 'No visualization'
+                is_animation = type_visualization == 'Animation'
                 speed = self.animation_speed_box.value()
-                self.engine.run(technique, algorithm, will_be_visualized, speed, **data)
+                self.engine.run(technique, algorithm, will_be_visualized, is_animation, speed, **data)
                 if will_be_visualized:
-                    self.parent().unfold_by_id('algorithm_run_widget') #to load steps call !!!!!!!
+                    self.parent().unfold_by_id('algorithm_run_widget')
                 else:
                     self.parent().unfold_by_id('results_widget')

@@ -85,7 +85,7 @@ class ImportWidget(UnfoldWidget):
         self.columns_button = QPushButton("Select columns")
         self.columns_button.setMaximumWidth(150)
         self.columns_button.setEnabled(False)
-        self.columns_button.clicked.connect(partial(self.display_data, 'columns'))
+        self.columns_button.clicked.connect(partial(self.click_listener, 'columns'))
 
         self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.columns_group_layout.addWidget(self.scroll)
@@ -232,9 +232,5 @@ class ImportWidget(UnfoldWidget):
                     else:
                         self.import_state_label.setText("The name of collection is not valid.")
             case 'columns':
-                self.loading_screen.show()
-                QApplication.processEvents()
 
                 self.display_data()
-
-                self.loading_screen.close()

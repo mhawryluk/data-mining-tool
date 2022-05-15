@@ -9,22 +9,22 @@ class AlgorithmsEngine:
 
         self.algorithms_options = {
             'clustering': {
-                'K-Means': KMeans
+                'K-Means': (KMeans, KMeansStepsVisualization)
             },
             'associations': {
                 'algorithm': None
             }
         }
 
-    def run(self, technique, algorithm, will_be_visualized, animation_speed, **kwargs):
+    def run(self, technique, algorithm, will_be_visualized, is_animation, animation_speed, **kwargs):
         chosen_alg = self.algorithms_options[technique][algorithm]
         if chosen_alg is None:
             return
-        alg = chosen_alg(self.state.imported_data, **kwargs)
+        alg = chosen_alg[0](self.state.imported_data, **kwargs)
         alg.run(will_be_visualized)
         if will_be_visualized:
             steps = alg.get_steps()
-            self.state.steps_visualization = KMeansStepsVisualization(self.state.imported_data, steps, animation_speed)
+            self.state.steps_visualization = chosen_alg[1](self.state.imported_data, steps, is_animation, animation_speed)
         else:
             self.state.steps_visualization = None
 
