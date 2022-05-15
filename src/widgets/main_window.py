@@ -25,8 +25,3 @@ class MainWindow(QMainWindow):
         self.generalLayout.addWidget(MainWidget(engines))
 
         self.show()
-
-    def on_click_listener(self):
-        value = self.generator.get_number()
-        self.generate_widget.display_number(value)
-        self.chart_widget.display_number(value)
