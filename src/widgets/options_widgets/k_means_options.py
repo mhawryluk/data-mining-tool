@@ -1,27 +1,46 @@
-from PyQt5.QtWidgets import QWidget, QFormLayout, QSpinBox, QLabel
+from PyQt5.QtWidgets import QSpinBox, QLabel, QComboBox
+
+from .options import Options
 
 
-class KMeansOptions(QWidget):
+class KMeansOptions(Options):
     def __init__(self, engine):
         super().__init__()
-
-        self.layout = QFormLayout(self)
 
         self.num_clusters_spinbox = QSpinBox()
         self.num_clusters_spinbox.setMinimum(2)
         self.num_clusters_spinbox.setMaximum(engine.get_maximum_clusters())
-        self.num_clusters_spinbox.setMaximum(10)
         self.num_clusters_spinbox.setValue(3)
         self.layout.addRow(QLabel("Number of clusters:"), self.num_clusters_spinbox)
 
+        self.start_type_box = QComboBox()
+        self.start_type_box.addItems(['random', 'kmeans++'])
+        self.layout.addRow(QLabel('Type of initial solution:'), self.start_type_box)
+
         self.metrics_spinbox = QSpinBox()
         self.metrics_spinbox.setMinimum(1)
-        self.metrics_spinbox.setValue(1)
+        self.metrics_spinbox.setValue(2)
         self.metrics_spinbox.setMaximum(6)
         self.layout.addRow(QLabel("Exponent in metrics:"), self.metrics_spinbox)
+
+        self.num_steps_spinbox = QSpinBox()
+        self.num_steps_spinbox.setMinimum(0)
+        self.num_steps_spinbox.setMaximum(1000)
+        self.num_steps_spinbox.setSpecialValueText('no limit')
+        self.num_steps_spinbox.setValue(0)
+        self.layout.addRow(QLabel("Maximum number of iterations:"), self.num_steps_spinbox)
+
+        self.num_repeat_spinbox = QSpinBox()
+        self.num_repeat_spinbox.setMinimum(1)
+        self.num_repeat_spinbox.setMaximum(100)
+        self.num_repeat_spinbox.setValue(1)
+        self.layout.addRow(QLabel("Number of repeating:"), self.num_repeat_spinbox)
 
     def get_data(self) -> dict:
         return {
             'num_clusters': self.num_clusters_spinbox.value(),
-            'metrics': self.metrics_spinbox.value()
+            'metrics': self.metrics_spinbox.value(),
+            'repeats': self.num_repeat_spinbox.value(),
+            'iterations': None if self.num_steps_spinbox.value() == 0 else self.num_steps_spinbox.value(),
+            'init_type': self.start_type_box.currentText()
         }
