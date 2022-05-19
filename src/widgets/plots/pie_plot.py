@@ -11,8 +11,13 @@ class PiePlot(Plot):
             ax = self.canvas.figure.subplots()
             counts = self.data.value_counts().to_dict()
             data_size = self.data.size
-            labels = [k if counts[k]/data_size > self.min_pie_plot_label_ratio else '' for k in counts.keys()]
-            ax.pie(counts.values(), labels=labels)
+            labels = [k for k in counts.keys() if counts[k]/data_size > self.min_pie_plot_label_ratio]
+            values = [counts[label] for label in labels]
+            values_sum = sum(values)
+            if values_sum < data_size:
+                labels.append('Other')
+                values.append(data_size-values_sum)
+            ax.pie(values, labels=labels)
             return self.canvas
         except Exception:
             error = QMessageBox()
