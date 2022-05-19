@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List, Tuple, Generator, Union, Optional
+from typing import List, Tuple, Union, Optional
 
 initial_types = ['random', 'kmeans++']
 
@@ -104,7 +104,8 @@ class KMeans:
             return False
         return True
 
-    def check_solution(self, labels, centroids): # return dunn index
+    def check_solution(self, labels, centroids):
+        """ dunn index """
         max_distance_intra = 0
         min_distance_inter = np.inf
         for i, first in enumerate(centroids):
