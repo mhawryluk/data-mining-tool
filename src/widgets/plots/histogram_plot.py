@@ -28,5 +28,3 @@ class HistogramPlot(Plot):
         for n, label in enumerate(ax.xaxis.get_ticklabels()):
             if n % every_nth != 0:
                 label.set_visible(False)
-            else:
-                label.set_rotation(90)
