@@ -40,4 +40,4 @@ class PreprocessingEngine:
                 self.cleaner.remove_nulls()
 
     def has_rows_with_nulls(self):
-        return np.NaN in self.state.imported_data.values
+        return self.state.imported_data.isnull().values.any()
