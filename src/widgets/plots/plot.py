@@ -8,7 +8,7 @@ class Plot(ABC):
     def __init__(self, data):
         self.data = data
         self.max_labels_show = 10
-        self.min_pie_plot_label_ratio = 0.05
+        self.min_pie_plot_label_ratio = 0.03
         self.plot_box = QVBoxLayout()
         self.figure = Figure(figsize=(15, 6))
         self.canvas = FigureCanvasQTAgg(self.figure)

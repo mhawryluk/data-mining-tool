@@ -8,6 +8,7 @@ class PiePlot(Plot):
 
     def plot(self):
         try:
+            self.data.dropna(inplace=True)
             ax = self.canvas.figure.subplots()
             counts = self.data.value_counts().to_dict()
             data_size = self.data.size
