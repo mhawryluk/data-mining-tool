@@ -1,7 +1,7 @@
 from functools import partial
 
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QGroupBox, QLabel, QSpinBox, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
+from PyQt5.QtWidgets import QGroupBox, QLabel, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFormLayout, QMessageBox, QSplashScreen, QDesktopWidget, QApplication
 
 from widgets import UnfoldWidget

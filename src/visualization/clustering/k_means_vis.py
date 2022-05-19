@@ -86,9 +86,9 @@ class KMeansStepsVisualization(QWidget):
     def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[np.ndarray, pd.DataFrame]], is_animation: bool):
         super().__init__()
 
-        self.animation = is_animation
+        self.is_animation = is_animation
         self.is_running = False
-        self.anim = None
+        self.animation = None
 
         self.layout = QHBoxLayout(self)
 
@@ -146,7 +146,7 @@ class KMeansStepsVisualization(QWidget):
         self.left_column_layout.addWidget(self.settings_box)
         self.left_column_layout.addStretch(1)
 
-        if self.animation:
+        if self.is_animation:
             # animation
             self.animation_box = QGroupBox()
             self.animation_box.setTitle("Animation:")
@@ -158,11 +158,12 @@ class KMeansStepsVisualization(QWidget):
             self.run_button = QPushButton("Start animation")
             self.run_button.clicked.connect(partial(self.click_listener, 'run'))
             self.interval_box = QSpinBox()
-            self.interval_box.setMinimum(1)
-            self.interval_box.setValue(50)
-            self.interval_box.setMaximum(200)
+            self.interval_box.setMinimum(20)
+            self.interval_box.setMaximum(2000)
+            self.interval_box.setValue(200)
+            self.interval_box.setSingleStep(20)
 
-            self.animation_box_layout.addRow(QLabel("Interval time:"), self.interval_box)
+            self.animation_box_layout.addRow(QLabel("Interval time [ms]:"), self.interval_box)
             self.animation_box_layout.addRow(self.restart_button)
             self.animation_box_layout.addRow(self.run_button)
 
@@ -171,11 +172,11 @@ class KMeansStepsVisualization(QWidget):
 
         # plot
         self.fig, axes = plt.subplots()
-        self.canvas = KMeansCanvas(self.fig, axes, self.animation)
+        self.canvas = KMeansCanvas(self.fig, axes, self.is_animation)
         self.visualization_box_layout.addWidget(self.canvas, 1)
         self.update_plot()
 
-        if not self.animation:
+        if not self.is_animation:
             self.visualization_box_layout.addStretch()
 
             # control buttons
@@ -235,33 +236,34 @@ class KMeansStepsVisualization(QWidget):
                 num = self.right_box.value()
                 self.change_step(num)
             case 'restart':
-                self.anim = None
+                self.animation = None
                 self.change_step(-1 * self.current_step)
                 self.change_enabled_buttons(True)
+                self.interval_box.setEnabled(True)
+                self.run_button.setEnabled(True)
             case 'run':
                 self.is_running = not self.is_running
                 self.change_enabled_buttons(False)
+                self.interval_box.setEnabled(False)
                 self.restart_button.setEnabled(not self.is_running)
                 if self.is_running:
-                    if self.anim is None:
-                        self.anim = FuncAnimation(self.fig, self.update_plot, frames=self.max_step,
-                                                  interval=self.interval_box.value() * 10, blit=True,
-                                                  cache_frame_data=False, repeat=False)
+                    if self.animation is None:
+                        self.animation = FuncAnimation(self.fig, self.update_plot, frames=self.max_step + 1,
+                                                       interval=self.interval_box.value(), blit=True,
+                                                       cache_frame_data=False, repeat=False)
                         self.canvas.draw()
                     else:
-                        self.anim.resume()
+                        self.animation.resume()
                     self.run_button.setText("Stop animation")
                 else:
-                    self.anim.pause()
+                    self.animation.pause()
                     self.run_button.setText("Start animation")
 
     def change_enabled_buttons(self, value):
         self.ox_box.setEnabled(value)
         self.oy_box.setEnabled(value)
-        self.interval_box.setEnabled(value)
         self.sample_button.setEnabled(value)
         self.sample_box.setEnabled(value)
-        # self.restart_button.setEnabled(value)
 
     def change_step(self, change: int):
         new_step = max(0, min(self.max_step, self.current_step + change))
@@ -273,6 +275,12 @@ class KMeansStepsVisualization(QWidget):
         self.step_label.update()
 
     def update_plot(self, step: int = -1):
+        if step == self.max_step:
+            self.run_button.setText("Start animation")
+            self.change_enabled_buttons(True)
+            self.run_button.setEnabled(False)
+            self.restart_button.setEnabled(True)
+            self.is_running = False
         if step == -1:
             step = self.current_step
         else:

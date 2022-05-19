@@ -125,6 +125,7 @@ class ImportWidget(UnfoldWidget):
         self.columns_button.setEnabled(True)
         if self.engine.is_data_big():
             error = QMessageBox()
+            error.setIcon(QMessageBox.Warning)
             error.setText('This file is too big.\nYou must save it in database!')
             error.setWindowTitle("Warning")
             error.exec_()
@@ -135,7 +136,7 @@ class ImportWidget(UnfoldWidget):
         self.columns_button.setEnabled(False)
         self.import_state_label.clear()
         for i in reversed(range(self.columns_group_form_layout.count())):
-            self.columns_group_form_layout.itemAt(i).widget().deleteLater()
+            self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
     def set_columns_grid(self):
         """ draw columns and checkbox to choose them """
