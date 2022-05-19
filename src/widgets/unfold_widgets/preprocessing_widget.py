@@ -188,9 +188,8 @@ class PreprocessingWidget(UnfoldWidget):
         warning = QMessageBox()
         warning.setIcon(QMessageBox.Warning)
         warning.setText("Null values in set")
-        warning.setInformativeText("Some rows will be deleted cause of the null values. You can check your data or "
-                                   "estimate it. Or you might go further, letting app remove some rows automatically. "
-                                   "Continue?")
+        warning.setInformativeText("This data contains some empty values. After proceeding some of the rows will be "
+                                   "discarded. Continue?")
         warning.setWindowTitle("Cleaning data")
         warning.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         warning.buttonClicked.connect(self.handle_warning_click)
