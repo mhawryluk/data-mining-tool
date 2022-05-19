@@ -1,3 +1,4 @@
+import numpy as np
 from state import State
 from widgets.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
 from preprocess import DataCleaner
@@ -34,9 +35,9 @@ class PreprocessingEngine:
     def clean_data(self, op_type):
         match op_type:
             case "cast":
-                self.cleaner.cast_nulls("null")
+                self.cleaner.cast_nulls(np.NaN)
             case "remove":
                 self.cleaner.remove_nulls()
 
     def has_rows_with_nulls(self):
-        return "null" in self.state.imported_data.values
+        return np.NaN in self.state.imported_data.values

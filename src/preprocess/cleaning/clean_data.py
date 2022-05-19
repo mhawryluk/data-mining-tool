@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.state import State
 
 
@@ -9,4 +11,4 @@ class DataCleaner:
         self.state.imported_data = self.state.imported_data.fillna(value)
 
     def remove_nulls(self):
-        self.state.imported_data = self.state.imported_data.loc[(self.state.imported_data != "null").all(axis=1)]
+        self.state.imported_data = self.state.imported_data.loc[(self.state.imported_data != np.NaN).all(axis=1)]
