@@ -34,13 +34,13 @@ class KMeansOptions(Options):
         self.num_repeat_spinbox.setMinimum(1)
         self.num_repeat_spinbox.setMaximum(100)
         self.num_repeat_spinbox.setValue(1)
-        self.layout.addRow(QLabel("Number of repeating:"), self.num_repeat_spinbox)
+        self.layout.addRow(QLabel("Number of repetitions:"), self.num_repeat_spinbox)
 
     def get_data(self) -> dict:
         return {
             'num_clusters': self.num_clusters_spinbox.value(),
             'metrics': self.metrics_spinbox.value(),
             'repeats': self.num_repeat_spinbox.value(),
-            'iterations': None if self.num_steps_spinbox.value() == 0 else self.num_steps_spinbox.value(),
+            'iterations': self.num_steps_spinbox.value() or None,
             'init_type': self.start_type_box.currentText()
         }

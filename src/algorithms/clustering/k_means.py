@@ -2,16 +2,16 @@ import pandas as pd
 import numpy as np
 from typing import List, Tuple, Union, Optional
 
-initial_types = ['random', 'kmeans++']
+init_types = ['random', 'kmeans++']
 
 
 class KMeans:
-    def __init__(self, data: pd.DataFrame, num_clusters: int, metrics: int = 1, iterations: Optional[int] = None, repeats: int = 1, init_type: initial_types = 'random'):
+    def __init__(self, data: pd.DataFrame, num_clusters: int, metrics: int = 1, iterations: Optional[int] = None, repeats: int = 1, init_type: init_types = 'random'):
         self.num_clusters = num_clusters
         self.metrics = metrics
         self.max_iterations = iterations
         self.repeats = repeats
-        if init_type not in initial_types:
+        if init_type not in init_types:
             raise TypeError(f"{init_type} is invalid value of init_type parameter")
         self.step_counter = 0
         self.data = data
