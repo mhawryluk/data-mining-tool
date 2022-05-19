@@ -202,7 +202,8 @@ class KMeansStepsVisualization(QWidget):
             self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
         # description
-        description = "description"
+        description = "K-Means algorithm - steps visualization.\nEach color represents one cluster.\n" \
+                      "Circles are the points of the data set. Squares are centroids of the clusters."
         self.description_label = QLabel(description)
         self.description_label.setWordWrap(True)
 
