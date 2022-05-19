@@ -11,11 +11,15 @@ class NullFrequencyPlot(Plot):
             ax = self.canvas.figure.subplots()
             nulls = self.data.value_counts(normalize=True).get('null', 0)
             not_nulls = 1 - nulls
-            nulls_bar = ax.bar(0.25, nulls, 0.5, label='NULL')
-            not_nulls_bar = ax.bar(0.75, not_nulls, 0.5, label='NOT NULL')
-            ax.legend()
-            ax.bar_label(nulls_bar)
-            ax.bar_label(not_nulls_bar)
+            values = []
+            labels = []
+            if nulls:
+                values.append(nulls)
+                labels.append("NULLs")
+            if not_nulls:
+                values.append(not_nulls)
+                labels.append("Not NULLs")
+            ax.pie(values, labels=labels, autopct='%1.0f%%')
             return self.canvas
         except Exception:
             error = QMessageBox()
