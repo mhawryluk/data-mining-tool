@@ -3,7 +3,7 @@ from functools import partial
 import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
-    QSpinBox, QPushButton, QComboBox, QLabel
+    QSpinBox, QPushButton, QComboBox, QLabel, QScrollArea, QSizePolicy
 import pandas as pd
 from typing import List, Tuple
 
@@ -112,7 +112,7 @@ class KMeansStepsVisualization(QWidget):
         # settings layout
         self.settings_box = QGroupBox()
         self.settings_box.setTitle("Settings:")
-        self.settings_box.setFixedWidth(200)
+        self.settings_box.setFixedWidth(250)
         self.settings_box_layout = QFormLayout(self.settings_box)
 
         # samples
@@ -143,14 +143,13 @@ class KMeansStepsVisualization(QWidget):
         self.visualization_box.setTitle("Visualization:")
         self.visualization_box_layout = QVBoxLayout(self.visualization_box)
 
-        self.left_column_layout.addWidget(self.settings_box)
-        self.left_column_layout.addStretch(1)
+        self.left_column_layout.addWidget(self.settings_box, 0)
 
         if self.is_animation:
             # animation
             self.animation_box = QGroupBox()
             self.animation_box.setTitle("Animation:")
-            self.animation_box.setFixedWidth(200)
+            self.animation_box.setFixedWidth(250)
             self.animation_box_layout = QFormLayout(self.animation_box)
 
             self.restart_button = QPushButton("Restart")
@@ -167,8 +166,7 @@ class KMeansStepsVisualization(QWidget):
             self.animation_box_layout.addRow(self.restart_button)
             self.animation_box_layout.addRow(self.run_button)
 
-            self.left_column_layout.addWidget(self.animation_box)
-            self.left_column_layout.addStretch(3)
+            self.left_column_layout.addWidget(self.animation_box, 0)
 
         # plot
         self.fig, axes = plt.subplots()
@@ -202,6 +200,34 @@ class KMeansStepsVisualization(QWidget):
         else:
             self.step_label = QLabel("STEP: {}".format(self.current_step))
             self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
+
+        # description
+        description = "K-Means algorithm - steps visualization.\nEach color represents one cluster.\n" \
+                      "Circles are the points of the data set. Squares are centroids of the clusters."
+        self.description_label = QLabel(description)
+        self.description_label.setWordWrap(True)
+
+        self.description_group_box = QGroupBox()
+        self.description_group_box.setFixedWidth(250)
+        self.description_group_box.setTitle("Description")
+        self.description_group_box_layout = QVBoxLayout(self.description_group_box)
+
+        self.scroll_box = QGroupBox()
+        self.scroll_box_layout = QFormLayout(self.scroll_box)
+        self.scroll = QScrollArea()
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.scroll.setWidget(self.scroll_box)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setMinimumHeight(26)
+        self.description_group_box_layout.addWidget(self.scroll)
+
+        self.scroll_box_layout.addWidget(self.description_label)
+
+        self.left_column_layout.addWidget(self.description_group_box, 1)
+
+        self.left_column_layout.setSpacing(35)
 
         self.layout.addLayout(self.left_column_layout)
         self.layout.addWidget(self.visualization_box)

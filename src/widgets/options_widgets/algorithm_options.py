@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import QWidget, QFormLayout, QSpinBox, QLabel, QComboBox
+from PyQt5.QtWidgets import QSpinBox, QLabel, QComboBox
+
+from .options import Options
 
 
-class Algorithm(QWidget):
+class Algorithm(Options):
     def __init__(self, engine):
         super().__init__()
-
-        self.layout = QFormLayout(self)
 
         self.layout.addRow(QLabel("Future"))
         self.layout.addRow(QLabel("Some ComboBox"), QComboBox())
