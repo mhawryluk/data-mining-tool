@@ -5,3 +5,8 @@ class State:
         self.imported_data = None
         self.steps_visualization = None
         self.result_visualization = None
+        self.algorithm_results = {
+                'clustering': {},
+                'associations': {},
+                'classification': {}
+        }

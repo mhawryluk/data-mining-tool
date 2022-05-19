@@ -33,10 +33,11 @@ class AlgorithmsEngine:
         if chosen_alg is None:
             return
         alg = chosen_alg[0](self.state.imported_data, **kwargs)
-        alg.run(will_be_visualized)
+        result = alg.run(will_be_visualized)
         if will_be_visualized:
             steps = alg.get_steps()
             self.state.steps_visualization = chosen_alg[1](self.state.imported_data, steps, is_animation)
+            self.state.algorithm_results[technique][algorithm] = result
         else:
             self.state.steps_visualization = None
 

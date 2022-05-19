@@ -17,7 +17,7 @@ class ResultsWidget(UnfoldWidget):
 
         # algorithm results tab widget
         self.results_tab_widget = QTabWidget(self)
-        self.results_tab_widget.addTab(QLabel("Result"), "Clastering")
+        # self.results_tab_widget.addTab(QLabel("Result"), "Clastering")
 
         # layouts for sections
         self.layout = QVBoxLayout(self.frame)
@@ -36,3 +36,13 @@ class ResultsWidget(UnfoldWidget):
         self.parent().unfold(self)
         if (data := self.engine.state.imported_data) is not None:
             self.data_table.setModel(QtTable(data))
+
+        for i in reversed(range(self.results_tab_widget.count())):
+            self.results_tab_widget.removeTab(i)
+
+        for technique, algorithms in self.engine.state.algorithm_results.items():
+            tab_widget = QTabWidget()
+            for algorithm, result in algorithms.items():
+                tab_widget.addTab(QLabel("\n".join(list(map(str, result)))), algorithm)
+            self.results_tab_widget.addTab(tab_widget, technique)
+
