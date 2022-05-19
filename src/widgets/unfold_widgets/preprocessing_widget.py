@@ -197,8 +197,4 @@ class PreprocessingWidget(UnfoldWidget):
         warning.exec_()
 
     def handle_warning_click(self, button):
-        match button.text():
-            case 'OK':
-                self.data_submitted = True
-            case 'Cancel':
-                self.data_submitted = False
+        self.data_submitted = button.text() == "OK"
