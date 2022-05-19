@@ -125,6 +125,7 @@ class ImportWidget(UnfoldWidget):
         self.columns_button.setEnabled(True)
         if self.engine.is_data_big():
             error = QMessageBox()
+            error.setIcon(QMessageBox.Warning)
             error.setText('This file is too big.\nYou must save it in database!')
             error.setWindowTitle("Warning")
             error.exec_()

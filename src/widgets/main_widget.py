@@ -33,9 +33,9 @@ class MainWidget(QWidget):
         self.unfolded_widget = self.import_widget
         self.unfold(self.import_widget)
 
-    def unfold_by_id(self, name):
-        if name in self.widgets.keys():
-            self.widgets[name].load_widget()
+    def unfold_by_id(self, widget_name):
+        if widget_name in self.widgets.keys():
+            self.widgets[widget_name].load_widget()
 
     def unfold(self, widget):
         self.unfolded_widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
