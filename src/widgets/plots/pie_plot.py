@@ -11,8 +11,9 @@ class PiePlot(Plot):
             self.data.dropna(inplace=True)
             ax = self.canvas.figure.subplots()
             counts = self.data.value_counts().to_dict()
+            first_key = next(iter(counts.keys()))
             data_size = self.data.size
-            labels = [k for k in counts.keys() if counts[k]/data_size > self.min_pie_plot_label_ratio]
+            labels = [k for k in counts.keys() if counts[k]/data_size > self.min_pie_plot_label_ratio or k == first_key]
             values = [counts[label] for label in labels]
             values_sum = sum(values)
             if values_sum < data_size:
