@@ -1,6 +1,6 @@
 from state import State
 from algorithms.clustering import KMeans
-from visualization.clustering import KMeansStepsVisualization
+from visualization.clustering import KMeansStepsVisualization, KMeansResultsWidget
 
 
 class AlgorithmsEngine:
@@ -9,7 +9,7 @@ class AlgorithmsEngine:
 
         self.algorithms_options = {
             'clustering': {
-                'K-Means': (KMeans, KMeansStepsVisualization),
+                'K-Means': (KMeans, KMeansStepsVisualization, KMeansResultsWidget),
                 'DBSCAN': None,
                 'Partition Around Medoids': None,
                 'Gaussian Mixture Models': None,
@@ -37,7 +37,13 @@ class AlgorithmsEngine:
         if will_be_visualized:
             steps = alg.get_steps()
             self.state.steps_visualization = chosen_alg[1](self.state.imported_data, steps, is_animation)
-            self.state.algorithm_results[technique][algorithm] = result
+            if not self.state.algorithm_results.get(technique):
+                self.state.algorithm_results[technique] = {}
+
+            if not self.state.algorithm_results[technique].get(algorithm):
+                self.state.algorithm_results[technique][algorithm] = []
+
+            self.state.algorithm_results[technique][algorithm].append(chosen_alg[2](self.state.imported_data, *result))
         else:
             self.state.steps_visualization = None
 

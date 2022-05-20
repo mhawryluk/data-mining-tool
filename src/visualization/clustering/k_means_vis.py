@@ -362,9 +362,12 @@ class KMeansStepsVisualization(QWidget):
 
 
 class KMeansResultsWidget(QWidget):
-    def __init__(self, labels, centroids, data):
+    def __init__(self, data, labels, centroids):
         super().__init__()
         self.data = data
+        self.labels = labels
+        self.centroids = centroids
+
         columns = [col for col in self.data.columns if check_numeric(self.data[col])]
         for column in columns:
             self.data[column] = pd.to_numeric(self.data[column])
@@ -375,18 +378,13 @@ class KMeansResultsWidget(QWidget):
         self.samples = get_samples(self.data, self.num_samples)
         self.ox = self.oy = columns[0]
 
-        # left column layout
-        self.left_column_layout = QVBoxLayout()
+        # clustering result group
+        self.clustering_result_group = QGroupBox()
+        self.clustering_group_layout = QVBoxLayout(self.clustering_result_group)
+        self.clustering_result_group.setTitle("Clustering result")
 
-        # settings layout
-        self.settings_box = QGroupBox()
-        self.settings_box.setTitle("Settings:")
-        self.settings_box.setFixedWidth(250)
-        self.settings_box_layout = QFormLayout(self.settings_box)
-
-        # samples
+        self.settings_box_layout = QFormLayout()
         self.settings_box_layout.addRow(QLabel("Set samples:"))
-
         self.sample_box = QSpinBox()
         self.sample_box.setMinimum(1)
         self.sample_box.setMaximum(min(self.data.shape[0], 200))
@@ -407,38 +405,43 @@ class KMeansResultsWidget(QWidget):
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
         self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
 
-        # visualization layout
-        self.visualization_box = QGroupBox()
-        self.visualization_box.setTitle("Visualization:")
-        self.visualization_box_layout = QVBoxLayout(self.visualization_box)
-
-        self.left_column_layout.addWidget(self.settings_box, 0)
-
-        if self.is_animation:
-            # animation
-            self.animation_box = QGroupBox()
-            self.animation_box.setTitle("Animation:")
-            self.animation_box.setFixedWidth(250)
-            self.animation_box_layout = QFormLayout(self.animation_box)
-
-            self.restart_button = QPushButton("Restart")
-            self.restart_button.clicked.connect(partial(self.click_listener, 'restart'))
-            self.run_button = QPushButton("Start animation")
-            self.run_button.clicked.connect(partial(self.click_listener, 'run'))
-            self.interval_box = QSpinBox()
-            self.interval_box.setMinimum(20)
-            self.interval_box.setMaximum(2000)
-            self.interval_box.setValue(200)
-            self.interval_box.setSingleStep(20)
-
-            self.animation_box_layout.addRow(QLabel("Interval time [ms]:"), self.interval_box)
-            self.animation_box_layout.addRow(self.restart_button)
-            self.animation_box_layout.addRow(self.run_button)
-
-            self.left_column_layout.addWidget(self.animation_box, 0)
+        self.clustering_group_layout.addLayout(self.settings_box_layout)
 
         # plot
         self.fig, axes = plt.subplots()
-        self.canvas = KMeansCanvas(self.fig, axes, self.is_animation)
-        self.visualization_box_layout.addWidget(self.canvas, 1)
+        self.canvas = KMeansCanvas(self.fig, axes, False)
+        self.clustering_group_layout.addWidget(self.canvas, 1)
+
+        self.layout.addWidget(self.clustering_result_group)
+
         self.update_plot()
+
+    def click_listener(self, button_type: str):
+        match button_type:
+            case 'new_samples':
+                num = self.sample_box.value()
+                self.num_samples = num
+                self.samples = get_samples(self.data, self.num_samples)
+                self.update_plot()
+            case 'set_axis':
+                self.ox = self.ox_box.currentText()
+                self.oy = self.oy_box.currentText()
+                self.update_plot()
+
+    def update_plot(self):
+        samples_data = self.data.iloc[self.samples]
+        x = samples_data[self.ox]
+        y = samples_data[self.oy]
+        min_x = self.data[self.ox].min()
+        max_x = self.data[self.ox].max()
+        min_y = self.data[self.oy].min()
+        max_y = self.data[self.oy].max()
+        sep_x = 0.1 * (max_x - min_x)
+        sep_y = 0.1 * (max_y - min_y)
+
+        labels = [self.labels[sample] for sample in self.samples]
+        x_centroids = self.centroids[self.ox]
+        y_centroids = self.centroids[self.oy]
+
+        return self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
+                                    min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
