@@ -210,8 +210,8 @@ class KMeansStepsVisualization(QWidget):
             self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
         # description
-        description = "K-Means algorithm - steps visualization.\nEach color represents one cluster.\n" \
-                      "Circles are the points of the data set. Squares are centroids of the clusters."
+        description = "K-Means algorithm - steps visualization.\n\nEach color represents one cluster.\n\n" \
+                      "Circles are the points of the data set.\nSquares are centroids of the clusters."
         self.description_label = QLabel(description)
         self.description_label.setWordWrap(True)
 
@@ -436,7 +436,10 @@ class KMeansResultsWidget(QWidget):
         self.centroids_group.setTitle("Centroids")
 
         self.centroids_table = QTableView()
-        self.centroids_table.setModel(QtTable(self.centroids))
+        self.centroids_table.setModel(QtTable(self.centroids.round(3)))
+
+        for i in range(len(columns)):
+            self.centroids_table.setColumnWidth(i, 120)
 
         self.fig_centroids, ax = plt.subplots(1, 1)
         self.centroids_canvas = KMeansCanvas(self.fig_centroids, ax, False)
@@ -476,19 +479,6 @@ class KMeansResultsWidget(QWidget):
 
         self.clusters_canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
                                       min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
-
-        self.update_centroids()
-
-    def update_centroids(self):
-        min_x = self.data[self.ox].min()
-        max_x = self.data[self.ox].max()
-        min_y = self.data[self.oy].min()
-        max_y = self.data[self.oy].max()
-        sep_x = 0.1 * (max_x - min_x)
-        sep_y = 0.1 * (max_y - min_y)
-
-        x_centroids = self.centroids[self.ox]
-        y_centroids = self.centroids[self.oy]
 
         self.centroids_canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
                                                  min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,

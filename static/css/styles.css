@@ -42,6 +42,6 @@ QScrollArea QWidget { background: transparent; }
     border: none;
 }
 
-#results_widget QTabWidget QTabWidget QTabWidget QGroupBox QGroupBox {
+#results_widget QTabWidget QTabWidget QGroupBox QGroupBox {
     border-radius: 10px;
 }
