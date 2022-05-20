@@ -3,7 +3,7 @@ from functools import partial
 import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
-    QSpinBox, QPushButton, QComboBox, QLabel, QScrollArea, QSizePolicy
+    QSpinBox, QPushButton, QComboBox, QLabel, QScrollArea, QSizePolicy, QTableView
 import pandas as pd
 from typing import List, Tuple
 
@@ -11,6 +11,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
 from algorithms import get_samples, check_numeric
+from widgets import QtTable
 
 
 class KMeansCanvas(FigureCanvasQTAgg):
@@ -103,7 +104,11 @@ class KMeansStepsVisualization(QWidget):
         self.current_step = 0
         self.num_samples = min(35, self.data.shape[0] // 2)
         self.samples = get_samples(self.data, self.num_samples)
-        self.ox = self.oy = columns[0]
+        if len(columns) > 1:
+            self.ox = columns[0]
+            self.oy = columns[1]
+        else:
+            self.ox = self.oy = columns[0]
 
         self.setObjectName("k_means_steps_visualization")
 
@@ -134,6 +139,8 @@ class KMeansStepsVisualization(QWidget):
         self.ox_box.addItems(columns)
         self.oy_box = QComboBox()
         self.oy_box.addItems(columns)
+        if len(columns) > 1:
+            self.oy_box.setCurrentIndex(1)
         self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
@@ -376,7 +383,12 @@ class KMeansResultsWidget(QWidget):
 
         self.num_samples = min(35, self.data.shape[0] // 2)
         self.samples = get_samples(self.data, self.num_samples)
-        self.ox = self.oy = columns[0]
+
+        if len(columns) > 1:
+            self.ox = columns[0]
+            self.oy = columns[1]
+        else:
+            self.ox = self.oy = columns[0]
 
         # clustering result group
         self.clustering_result_group = QGroupBox()
@@ -401,6 +413,8 @@ class KMeansResultsWidget(QWidget):
         self.ox_box.addItems(columns)
         self.oy_box = QComboBox()
         self.oy_box.addItems(columns)
+        if len(columns) > 1:
+            self.oy_box.setCurrentIndex(1)
         self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
@@ -410,12 +424,27 @@ class KMeansResultsWidget(QWidget):
         self.clustering_group_layout.addWidget(self.settings_group_box)
 
         # plot
-        self.fig, axes = plt.subplots()
-        self.canvas = KMeansCanvas(self.fig, axes, False)
-        self.clustering_group_layout.addWidget(self.canvas, 1)
+        self.fig, axes = plt.subplots(1, 1)
+        self.clusters_canvas = KMeansCanvas(self.fig, axes, False)
+        self.clustering_group_layout.addWidget(self.clusters_canvas, 1)
 
-        self.layout.addWidget(self.clustering_result_group)
+        self.layout.addWidget(self.clustering_result_group, 1)
 
+        # centroids
+        self.centroids_group = QGroupBox()
+        self.centroids_group_layout = QVBoxLayout(self.centroids_group)
+        self.centroids_group.setTitle("Centroids")
+
+        self.centroids_table = QTableView()
+        self.centroids_table.setModel(QtTable(self.centroids))
+
+        self.fig_centroids, ax = plt.subplots(1, 1)
+        self.centroids_canvas = KMeansCanvas(self.fig_centroids, ax, False)
+
+        self.centroids_group_layout.addWidget(self.centroids_table, 1)
+        self.centroids_group_layout.addWidget(self.centroids_canvas, 1)
+
+        self.layout.addWidget(self.centroids_group, 1)
         self.update_plot()
 
     def click_listener(self, button_type: str):
@@ -445,5 +474,22 @@ class KMeansResultsWidget(QWidget):
         x_centroids = self.centroids[self.ox]
         y_centroids = self.centroids[self.oy]
 
-        self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
-                             min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+        self.clusters_canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
+                                      min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+
+        self.update_centroids()
+
+    def update_centroids(self):
+        min_x = self.data[self.ox].min()
+        max_x = self.data[self.ox].max()
+        min_y = self.data[self.oy].min()
+        max_y = self.data[self.oy].max()
+        sep_x = 0.1 * (max_x - min_x)
+        sep_y = 0.1 * (max_y - min_y)
+
+        x_centroids = self.centroids[self.ox]
+        y_centroids = self.centroids[self.oy]
+
+        self.centroids_canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
+                                                 min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
+                                                 )
