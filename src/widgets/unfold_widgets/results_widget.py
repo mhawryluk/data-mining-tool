@@ -12,12 +12,10 @@ class ResultsWidget(UnfoldWidget):
 
         # data table
         self.data_table = QTableView(self)
-        # self.data_table.setMinimumHeight(300)
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # algorithm results tab widget
         self.results_tab_widget = QTabWidget(self)
-        # self.results_tab_widget.addTab(QLabel("Result"), "Clastering")
 
         # layouts for sections
         self.layout = QVBoxLayout(self.frame)

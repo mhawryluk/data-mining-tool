@@ -10,6 +10,7 @@ from typing import List, Tuple
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
+from algorithms import get_samples, check_numeric
 
 
 class KMeansCanvas(FigureCanvasQTAgg):
@@ -95,13 +96,13 @@ class KMeansStepsVisualization(QWidget):
         self.algorithms_steps = algorithms_steps
         self.num_cluster = algorithms_steps[0][1].shape[0]
         self.data = data
-        columns = [col for col in self.data.columns if self.check_numeric(self.data[col])]
+        columns = [col for col in self.data.columns if check_numeric(self.data[col])]
         for column in columns:
             self.data[column] = pd.to_numeric(self.data[column])
         self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
         self.current_step = 0
         self.num_samples = min(35, self.data.shape[0] // 2)
-        self.samples = self.get_samples()
+        self.samples = get_samples(self.data, self.num_samples)
         self.ox = self.oy = columns[0]
 
         self.setObjectName("k_means_steps_visualization")
@@ -232,24 +233,12 @@ class KMeansStepsVisualization(QWidget):
         self.layout.addLayout(self.left_column_layout)
         self.layout.addWidget(self.visualization_box)
 
-    def check_numeric(self, element: any) -> bool:
-        try:
-            pd.to_numeric(element)
-            return True
-        except ValueError:
-            return False
-
-    def get_samples(self) -> List[int]:
-        array = np.arange(self.data.shape[0])
-        np.random.shuffle(array)
-        return list(array[:self.num_samples])
-
     def click_listener(self, button_type: str):
         match button_type:
             case 'new_samples':
                 num = self.sample_box.value()
                 self.num_samples = num
-                self.samples = self.get_samples()
+                self.samples = get_samples(self.data, self.num_samples)
                 self.update_plot()
             case 'set_axis':
                 self.ox = self.ox_box.currentText()
@@ -370,3 +359,86 @@ class KMeansStepsVisualization(QWidget):
         else:
             return self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
                                         min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y, not self.is_running)
+
+
+class KMeansResultsWidget(QWidget):
+    def __init__(self, labels, centroids, data):
+        super().__init__()
+        self.data = data
+        columns = [col for col in self.data.columns if check_numeric(self.data[col])]
+        for column in columns:
+            self.data[column] = pd.to_numeric(self.data[column])
+
+        self.layout = QHBoxLayout(self)
+
+        self.num_samples = min(35, self.data.shape[0] // 2)
+        self.samples = get_samples(self.data, self.num_samples)
+        self.ox = self.oy = columns[0]
+
+        # left column layout
+        self.left_column_layout = QVBoxLayout()
+
+        # settings layout
+        self.settings_box = QGroupBox()
+        self.settings_box.setTitle("Settings:")
+        self.settings_box.setFixedWidth(250)
+        self.settings_box_layout = QFormLayout(self.settings_box)
+
+        # samples
+        self.settings_box_layout.addRow(QLabel("Set samples:"))
+
+        self.sample_box = QSpinBox()
+        self.sample_box.setMinimum(1)
+        self.sample_box.setMaximum(min(self.data.shape[0], 200))
+        self.sample_box.setProperty("value", self.num_samples)
+        self.sample_button = QPushButton("Refresh samples")
+        self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
+        self.settings_box_layout.addRow(self.sample_box, self.sample_button)
+
+        # axis
+        self.settings_box_layout.addRow(QLabel("Set axis:"))
+
+        self.ox_box = QComboBox()
+        self.ox_box.addItems(columns)
+        self.oy_box = QComboBox()
+        self.oy_box.addItems(columns)
+        self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
+        self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
+        self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
+        self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
+
+        # visualization layout
+        self.visualization_box = QGroupBox()
+        self.visualization_box.setTitle("Visualization:")
+        self.visualization_box_layout = QVBoxLayout(self.visualization_box)
+
+        self.left_column_layout.addWidget(self.settings_box, 0)
+
+        if self.is_animation:
+            # animation
+            self.animation_box = QGroupBox()
+            self.animation_box.setTitle("Animation:")
+            self.animation_box.setFixedWidth(250)
+            self.animation_box_layout = QFormLayout(self.animation_box)
+
+            self.restart_button = QPushButton("Restart")
+            self.restart_button.clicked.connect(partial(self.click_listener, 'restart'))
+            self.run_button = QPushButton("Start animation")
+            self.run_button.clicked.connect(partial(self.click_listener, 'run'))
+            self.interval_box = QSpinBox()
+            self.interval_box.setMinimum(20)
+            self.interval_box.setMaximum(2000)
+            self.interval_box.setValue(200)
+            self.interval_box.setSingleStep(20)
+
+            self.animation_box_layout.addRow(QLabel("Interval time [ms]:"), self.interval_box)
+            self.animation_box_layout.addRow(self.restart_button)
+            self.animation_box_layout.addRow(self.run_button)
+
+            self.left_column_layout.addWidget(self.animation_box, 0)
+
+        # plot
+        self.fig, axes = plt.subplots()
+        self.canvas = KMeansCanvas(self.fig, axes, self.is_animation)
+        self.visualization_box_layout.addWidget(self.canvas, 1)
+        self.update_plot()
