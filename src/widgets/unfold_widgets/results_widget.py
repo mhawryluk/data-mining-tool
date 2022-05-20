@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QTableView, QSizePolicy, QHBoxLayout, QVBoxLayout, QTabWidget, QLabel
+from PyQt5.QtWidgets import QHBoxLayout, QTabWidget
 
-from widgets import UnfoldWidget, QtTable
+from widgets import UnfoldWidget
 
 
 class ResultsWidget(UnfoldWidget):
@@ -10,30 +10,15 @@ class ResultsWidget(UnfoldWidget):
         self.button.clicked.connect(self.load_widget)
         self.engine = engine
 
-        # data table
-        self.data_table = QTableView(self)
-        self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         # algorithm results tab widget
         self.results_tab_widget = QTabWidget(self)
 
-        # layouts for sections
-        self.layout = QVBoxLayout(self.frame)
-
-        self.first_row = QHBoxLayout()
-        self.first_row.addWidget(self.results_tab_widget)
-        self.first_row.setSpacing(35)
-
-        self.second_row = QHBoxLayout()
-        self.second_row.addWidget(self.data_table, 0)
-
-        self.layout.addLayout(self.first_row, 3)
-        self.layout.addLayout(self.second_row, 1)
+        # layout setup
+        self.layout = QHBoxLayout(self.frame)
+        self.layout.addWidget(self.results_tab_widget)
 
     def load_widget(self):
         self.parent().unfold(self)
-        if (data := self.engine.state.imported_data) is not None:
-            self.data_table.setModel(QtTable(data))
 
         for i in reversed(range(self.results_tab_widget.count())):
             self.results_tab_widget.removeTab(i)

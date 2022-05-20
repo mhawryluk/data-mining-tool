@@ -112,7 +112,7 @@ class KMeansStepsVisualization(QWidget):
 
         # settings layout
         self.settings_box = QGroupBox()
-        self.settings_box.setTitle("Settings:")
+        self.settings_box.setTitle("Settings")
         self.settings_box.setFixedWidth(250)
         self.settings_box_layout = QFormLayout(self.settings_box)
 
@@ -141,7 +141,7 @@ class KMeansStepsVisualization(QWidget):
 
         # visualization layout
         self.visualization_box = QGroupBox()
-        self.visualization_box.setTitle("Visualization:")
+        self.visualization_box.setTitle("Visualization")
         self.visualization_box_layout = QVBoxLayout(self.visualization_box)
 
         self.left_column_layout.addWidget(self.settings_box, 0)
@@ -149,7 +149,7 @@ class KMeansStepsVisualization(QWidget):
         if self.is_animation:
             # animation
             self.animation_box = QGroupBox()
-            self.animation_box.setTitle("Animation:")
+            self.animation_box.setTitle("Animation")
             self.animation_box.setFixedWidth(250)
             self.animation_box_layout = QFormLayout(self.animation_box)
 
@@ -383,7 +383,9 @@ class KMeansResultsWidget(QWidget):
         self.clustering_group_layout = QVBoxLayout(self.clustering_result_group)
         self.clustering_result_group.setTitle("Clustering result")
 
-        self.settings_box_layout = QFormLayout()
+        # samples
+        self.settings_group_box = QGroupBox()
+        self.settings_box_layout = QFormLayout(self.settings_group_box)
         self.settings_box_layout.addRow(QLabel("Set samples:"))
         self.sample_box = QSpinBox()
         self.sample_box.setMinimum(1)
@@ -395,7 +397,6 @@ class KMeansResultsWidget(QWidget):
 
         # axis
         self.settings_box_layout.addRow(QLabel("Set axis:"))
-
         self.ox_box = QComboBox()
         self.ox_box.addItems(columns)
         self.oy_box = QComboBox()
@@ -405,7 +406,8 @@ class KMeansResultsWidget(QWidget):
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
         self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
 
-        self.clustering_group_layout.addLayout(self.settings_box_layout)
+        self.settings_box_layout.setSpacing(10)
+        self.clustering_group_layout.addWidget(self.settings_group_box)
 
         # plot
         self.fig, axes = plt.subplots()
@@ -443,5 +445,5 @@ class KMeansResultsWidget(QWidget):
         x_centroids = self.centroids[self.ox]
         y_centroids = self.centroids[self.oy]
 
-        return self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
-                                    min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+        self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
+                             min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
