@@ -24,11 +24,9 @@ class ResultsWidget(UnfoldWidget):
             self.results_tab_widget.removeTab(i)
 
         for technique, algorithms in self.engine.state.algorithm_results.items():
-            algorithm_tab_widget = QTabWidget()
             for algorithm, results in algorithms.items():
                 algorithm_result_tab_widget = QTabWidget()
                 for i, result_widget in enumerate(results):
                     algorithm_result_tab_widget.addTab(result_widget, f'{i+1}')
-                algorithm_tab_widget.addTab(algorithm_result_tab_widget, algorithm)
-            self.results_tab_widget.addTab(algorithm_tab_widget, technique)
+                self.results_tab_widget.addTab(algorithm_result_tab_widget, f'{technique}: {algorithm}')
 
