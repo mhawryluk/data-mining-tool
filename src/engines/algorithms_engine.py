@@ -44,11 +44,11 @@ class AlgorithmsEngine:
             self.state.steps_visualization = None
 
         # create a widget for the results
-        if not self.state.algorithm_results.get(technique):
-            self.state.algorithm_results[technique] = {}
-        if not self.state.algorithm_results[technique].get(algorithm):
-            self.state.algorithm_results[technique][algorithm] = []
-        self.state.algorithm_results[technique][algorithm].append(chosen_alg[2](self.state.imported_data, *result, options=kwargs))
+        if not self.state.algorithm_results_widgets.get(technique):
+            self.state.algorithm_results_widgets[technique] = {}
+        if not self.state.algorithm_results_widgets[technique].get(algorithm):
+            self.state.algorithm_results_widgets[technique][algorithm] = []
+        self.state.algorithm_results_widgets[technique][algorithm].append(chosen_alg[2](self.state.imported_data, *result, options=kwargs))
 
     def get_maximum_clusters(self) -> int:
         if self.state.imported_data is None:

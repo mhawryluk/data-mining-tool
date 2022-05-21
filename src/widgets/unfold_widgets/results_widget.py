@@ -23,7 +23,7 @@ class ResultsWidget(UnfoldWidget):
         for i in reversed(range(self.results_tab_widget.count())):
             self.results_tab_widget.removeTab(i)
 
-        for technique, algorithms in self.engine.state.algorithm_results.items():
+        for technique, algorithms in self.engine.state.algorithm_results_widgets.items():
             for algorithm, results in algorithms.items():
                 algorithm_result_tab_widget = QTabWidget()
                 for i, result_widget in enumerate(results):
