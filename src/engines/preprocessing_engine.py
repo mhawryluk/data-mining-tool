@@ -1,6 +1,5 @@
 from state import State
 from widgets.plots import HistogramPlot, PiePlot, FallbackPlot
-from time import sleep
 
 
 class PreprocessingEngine:

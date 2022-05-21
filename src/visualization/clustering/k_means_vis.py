@@ -96,19 +96,19 @@ class KMeansStepsVisualization(QWidget):
 
         self.algorithms_steps = algorithms_steps
         self.num_cluster = algorithms_steps[0][1].shape[0]
+
         self.data = data
         columns = [col for col in self.data.columns if check_numeric(self.data[col])]
         for column in columns:
             self.data[column] = pd.to_numeric(self.data[column])
+
         self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
         self.current_step = 0
         self.num_samples = min(35, self.data.shape[0] // 2)
         self.samples = get_samples(self.data, self.num_samples)
-        if len(columns) > 1:
-            self.ox = columns[0]
-            self.oy = columns[1]
-        else:
-            self.ox = self.oy = columns[0]
+
+        self.ox = columns[0]
+        self.oy = columns[0] if len(columns) < 2 else columns[1]
 
         self.setObjectName("k_means_steps_visualization")
 
@@ -308,6 +308,7 @@ class KMeansStepsVisualization(QWidget):
         else:
             self.current_step = step
             self.step_label.setText("STEP: {}".format(self.current_step))
+
         samples_data = self.data.iloc[self.samples]
         x = samples_data[self.ox]
         y = samples_data[self.oy]
@@ -384,11 +385,8 @@ class KMeansResultsWidget(QWidget):
         self.num_samples = min(35, self.data.shape[0] // 2)
         self.samples = get_samples(self.data, self.num_samples)
 
-        if len(columns) > 1:
-            self.ox = columns[0]
-            self.oy = columns[1]
-        else:
-            self.ox = self.oy = columns[0]
+        self.ox = columns[0]
+        self.oy = columns[0] if len(columns) < 2 else columns[1]
 
         # algorithm parameters
         self.params_group = QGroupBox()
