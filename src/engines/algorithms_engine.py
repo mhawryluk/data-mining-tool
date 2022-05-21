@@ -1,6 +1,7 @@
 from state import State
 from algorithms.clustering import KMeans
-from visualization.clustering import KMeansStepsVisualization, KMeansResultsWidget
+from visualization.clustering import KMeansStepsVisualization
+from widgets.results_widgets import KMeansResultsWidget
 
 
 class AlgorithmsEngine:

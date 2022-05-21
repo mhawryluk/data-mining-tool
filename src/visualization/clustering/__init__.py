@@ -1,1 +1,1 @@
-from .k_means_vis import KMeansStepsVisualization, KMeansResultsWidget
+from .k_means_vis import KMeansStepsVisualization, KMeansCanvas
