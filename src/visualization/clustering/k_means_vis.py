@@ -369,7 +369,7 @@ class KMeansStepsVisualization(QWidget):
 
 
 class KMeansResultsWidget(QWidget):
-    def __init__(self, data, labels, centroids):
+    def __init__(self, data, labels, centroids, options):
         super().__init__()
         self.data = data
         self.labels = labels
@@ -389,6 +389,16 @@ class KMeansResultsWidget(QWidget):
             self.oy = columns[1]
         else:
             self.ox = self.oy = columns[0]
+
+        # algorithm parameters
+        self.params_group = QGroupBox()
+        self.params_group.setTitle("Parameters")
+        self.params_layout = QFormLayout(self.params_group)
+
+        for option, value in options.items():
+            self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
+
+        self.layout.addWidget(self.params_group)
 
         # clustering result group
         self.clustering_result_group = QGroupBox()
