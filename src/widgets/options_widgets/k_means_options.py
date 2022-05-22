@@ -4,12 +4,11 @@ from .options import Options
 
 
 class KMeansOptions(Options):
-    def __init__(self, engine):
+    def __init__(self):
         super().__init__()
 
         self.num_clusters_spinbox = QSpinBox()
         self.num_clusters_spinbox.setMinimum(2)
-        self.num_clusters_spinbox.setMaximum(engine.get_maximum_clusters())
         self.num_clusters_spinbox.setValue(3)
         self.layout.addRow(QLabel("Number of clusters:"), self.num_clusters_spinbox)
 

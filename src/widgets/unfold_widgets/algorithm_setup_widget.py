@@ -18,7 +18,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
 
         self.algorithms_options = {
             'clustering': {
-                'K-Means': KMeansOptions(engine),
+                'K-Means': KMeansOptions(),
                 'DBSCAN': Algorithm(engine),
                 'Partition Around Medoids': Algorithm(engine),
                 'Gaussian Mixture Models': Algorithm(engine),
