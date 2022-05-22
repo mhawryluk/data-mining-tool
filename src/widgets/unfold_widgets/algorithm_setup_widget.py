@@ -128,6 +128,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
             error.exec_()
             return
 
+        self.update_clusters_bound()
         self.parent().unfold(self)
 
     def enable_button(self):
@@ -168,3 +169,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
                     self.parent().unfold_by_id('algorithm_run_widget')
                 else:
                     self.parent().unfold_by_id('results_widget')
+
+    def update_clusters_bound(self):
+        clusters = min(self.engine.get_maximum_clusters(), 100)
+        self.algorithms_options["clustering"]["K-Means"].set_max_clusters(clusters)

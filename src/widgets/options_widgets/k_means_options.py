@@ -44,3 +44,6 @@ class KMeansOptions(Options):
             'iterations': self.num_steps_spinbox.value() or None,
             'init_type': self.start_type_box.currentText()
         }
+
+    def set_max_clusters(self, clusters_num):
+        self.num_clusters_spinbox.setMaximum(clusters_num)
