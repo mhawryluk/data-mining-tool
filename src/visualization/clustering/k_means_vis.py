@@ -10,6 +10,7 @@ from typing import List, Tuple
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
+from algorithms import get_samples, check_numeric
 
 
 class KMeansCanvas(FigureCanvasQTAgg):
@@ -94,15 +95,19 @@ class KMeansStepsVisualization(QWidget):
 
         self.algorithms_steps = algorithms_steps
         self.num_cluster = algorithms_steps[0][1].shape[0]
+
         self.data = data
-        columns = [col for col in self.data.columns if self.check_numeric(self.data[col])]
+        columns = [col for col in self.data.columns if check_numeric(self.data[col])]
         for column in columns:
             self.data[column] = pd.to_numeric(self.data[column])
+
         self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
         self.current_step = 0
         self.num_samples = min(35, self.data.shape[0] // 2)
-        self.samples = self.get_samples()
-        self.ox = self.oy = columns[0]
+        self.samples = get_samples(self.data, self.num_samples)
+
+        self.ox = columns[0]
+        self.oy = columns[0] if len(columns) < 2 else columns[1]
 
         self.setObjectName("k_means_steps_visualization")
 
@@ -111,7 +116,7 @@ class KMeansStepsVisualization(QWidget):
 
         # settings layout
         self.settings_box = QGroupBox()
-        self.settings_box.setTitle("Settings:")
+        self.settings_box.setTitle("Settings")
         self.settings_box.setFixedWidth(250)
         self.settings_box_layout = QFormLayout(self.settings_box)
 
@@ -133,6 +138,8 @@ class KMeansStepsVisualization(QWidget):
         self.ox_box.addItems(columns)
         self.oy_box = QComboBox()
         self.oy_box.addItems(columns)
+        if len(columns) > 1:
+            self.oy_box.setCurrentIndex(1)
         self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
@@ -140,7 +147,7 @@ class KMeansStepsVisualization(QWidget):
 
         # visualization layout
         self.visualization_box = QGroupBox()
-        self.visualization_box.setTitle("Visualization:")
+        self.visualization_box.setTitle("Visualization")
         self.visualization_box_layout = QVBoxLayout(self.visualization_box)
 
         self.left_column_layout.addWidget(self.settings_box, 0)
@@ -148,7 +155,7 @@ class KMeansStepsVisualization(QWidget):
         if self.is_animation:
             # animation
             self.animation_box = QGroupBox()
-            self.animation_box.setTitle("Animation:")
+            self.animation_box.setTitle("Animation")
             self.animation_box.setFixedWidth(250)
             self.animation_box_layout = QFormLayout(self.animation_box)
 
@@ -202,8 +209,8 @@ class KMeansStepsVisualization(QWidget):
             self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
         # description
-        description = "K-Means algorithm - steps visualization.\nEach color represents one cluster.\n" \
-                      "Circles are the points of the data set. Squares are centroids of the clusters."
+        description = "K-Means algorithm - steps visualization.\n\nEach color represents one cluster.\n\n" \
+                      "Circles are the points of the data set.\nSquares are centroids of the clusters."
         self.description_label = QLabel(description)
         self.description_label.setWordWrap(True)
 
@@ -232,24 +239,12 @@ class KMeansStepsVisualization(QWidget):
         self.layout.addLayout(self.left_column_layout)
         self.layout.addWidget(self.visualization_box)
 
-    def check_numeric(self, element: any) -> bool:
-        try:
-            pd.to_numeric(element)
-            return True
-        except ValueError:
-            return False
-
-    def get_samples(self) -> List[int]:
-        array = np.arange(self.data.shape[0])
-        np.random.shuffle(array)
-        return list(array[:self.num_samples])
-
     def click_listener(self, button_type: str):
         match button_type:
             case 'new_samples':
                 num = self.sample_box.value()
                 self.num_samples = num
-                self.samples = self.get_samples()
+                self.samples = get_samples(self.data, self.num_samples)
                 self.update_plot()
             case 'set_axis':
                 self.ox = self.ox_box.currentText()
@@ -312,6 +307,7 @@ class KMeansStepsVisualization(QWidget):
         else:
             self.current_step = step
             self.step_label.setText("STEP: {}".format(self.current_step))
+
         samples_data = self.data.iloc[self.samples]
         x = samples_data[self.ox]
         y = samples_data[self.oy]
