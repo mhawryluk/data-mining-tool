@@ -39,5 +39,5 @@ class PreprocessingEngine:
             case "remove":
                 self.cleaner.remove_nulls()
 
-    def has_rows_with_nulls(self):
-        return self.state.imported_data.isnull().values.any()
+    def has_rows_with_nulls(self, columns):
+        return self.state.imported_data[columns].isnull().values.any()

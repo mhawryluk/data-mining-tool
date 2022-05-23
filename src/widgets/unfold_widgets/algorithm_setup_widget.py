@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtWidgets import QGroupBox, QLabel, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFormLayout, QMessageBox, QSplashScreen, QDesktopWidget, QApplication
 
-from widgets import UnfoldWidget
+from widgets import UnfoldWidget, LoadingWidget
 
 from widgets.options_widgets import KMeansOptions, Algorithm
 
@@ -152,24 +152,22 @@ class AlgorithmSetupWidget(UnfoldWidget):
                     self.options_group_layout.addWidget(self.algorithms_options[technique][algorithm])
                     self.enable_button()
             case 'run':
-                loading_screen = QSplashScreen()
-                size = QDesktopWidget().screenGeometry(-1)
-                loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
-                loading_screen.setGeometry(
-                    QRect(size.width() // 2 - 125, size.height() // 2 - 50, 250, 100))  # hardcoded alignment
-                loading_screen.show()
-                QApplication.processEvents()
-
-                data = self.algorithms_options[technique][algorithm].get_data()
-                type_visualization = self.animation_type.currentText()
-                will_be_visualized = type_visualization != 'No visualization'
-                is_animation = type_visualization == 'Animation'
-                self.engine.run(technique, algorithm, will_be_visualized, is_animation, **data)
-                if will_be_visualized:
-                    self.parent().unfold_by_id('algorithm_run_widget')
-                else:
-                    self.parent().unfold_by_id('results_widget')
+                loading = LoadingWidget(self.run_handle)
+                loading.execute()
 
     def update_clusters_bound(self):
         clusters = min(self.engine.get_maximum_clusters(), 100)
         self.algorithms_options["clustering"]["K-Means"].set_max_clusters(clusters)
+
+    def run_handle(self):
+        technique = self.technique_box.currentText()
+        algorithm = self.algorithm_box.currentText()
+        data = self.algorithms_options[technique][algorithm].get_data()
+        type_visualization = self.animation_type.currentText()
+        will_be_visualized = type_visualization != 'No visualization'
+        is_animation = type_visualization == 'Animation'
+        self.engine.run(technique, algorithm, will_be_visualized, is_animation, **data)
+        if will_be_visualized:
+            self.parent().unfold_by_id('algorithm_run_widget')
+        else:
+            self.parent().unfold_by_id('results_widget')
