@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from engines import ImportDataEngine, PreprocessingEngine, AlgorithmsEngine
+from engines import ImportDataEngine, PreprocessingEngine, AlgorithmsEngine, ResultsEngine
 from state import State
 
 from widgets import MainWindow
@@ -14,7 +14,7 @@ def main():
         'preprocess': PreprocessingEngine(state),
         'algorithm_setup': algorithm_engine,
         'algorithm_run': algorithm_engine,
-        'results': None
+        'results': ResultsEngine(state)
     }
     app = QApplication(sys.argv)
     window = MainWindow(engines)

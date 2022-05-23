@@ -52,8 +52,8 @@ class PreprocessingWidget(UnfoldWidget):
         self.estimate_group.setTitle("Estimate missing values")
         self.estimate_group_layout = QFormLayout(self.estimate_group)
 
-        self.estimate_group_todo = QLabel(self.estimate_group)
-        self.estimate_group_todo.setText("Future")
+        self.estimate_group_todo = QPushButton(self.estimate_group)
+        self.estimate_group_todo.setText("Estimate")
         self.estimate_group_todo.setMinimumHeight(23)
         self.estimate_group_layout.addRow(self.estimate_group_todo)
 
@@ -62,8 +62,8 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction_group.setTitle("Reduce dimensions automatically")
         self.auto_reduction_group_layout = QFormLayout(self.auto_reduction_group)
 
-        self.auto_reduction_todo = QLabel(self.auto_reduction_group)
-        self.auto_reduction_todo.setText("Future")
+        self.auto_reduction_todo = QPushButton(self.auto_reduction_group)
+        self.auto_reduction_todo.setText("Reduce")
         self.auto_reduction_todo.setMinimumHeight(23)
         self.auto_reduction_group_layout.addRow(self.auto_reduction_todo)
 

@@ -15,11 +15,16 @@ class MainWidget(QWidget):
         self.algorithm_run_widget = AlgorithmRunWidget(self, engines['algorithm_run'])
         self.results_widget = ResultsWidget(self, engines['results'])
 
-        self.widgets = [self.import_widget, self.preprocessing_widget, self.algorithm_setup_widget,
-                        self.algorithm_run_widget, self.results_widget]
+        self.widgets = {
+            'import_widget': self.import_widget,
+            'preprocessing_widget': self.preprocessing_widget,
+            'algorithm_setup_widget': self.algorithm_setup_widget,
+            'algorithm_run_widget': self.algorithm_run_widget,
+            'results_widget': self.results_widget
+        }
 
         layout = QHBoxLayout()
-        for widget in self.widgets:
+        for widget in self.widgets.values():
             layout.addWidget(widget)
 
         layout.setSpacing(0)
@@ -27,6 +32,10 @@ class MainWidget(QWidget):
 
         self.unfolded_widget = self.import_widget
         self.unfold(self.import_widget)
+
+    def unfold_by_id(self, widget_name):
+        if widget_name in self.widgets.keys():
+            self.widgets[widget_name].load_widget()
 
     def unfold(self, widget):
         self.unfolded_widget.setFixedWidth(UNFOLD_BUTTON_WIDTH)
