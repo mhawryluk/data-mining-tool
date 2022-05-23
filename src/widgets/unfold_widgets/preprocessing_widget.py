@@ -9,10 +9,11 @@ class PreprocessingWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
         super().__init__(parent, engine, 'preprocessing_widget', 'PREPROCESSING')
 
+        self.data_submitted = False
         self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
 
-        self.plot_types = ['Histogram', 'Pie']
+        self.plot_types = ['Histogram', 'Pie', "Null frequency"]
 
         # plot picker group
         self.plot_picker_group = QGroupBox(self.frame)
@@ -139,7 +140,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.add_columns_to_layout()
-        self.engine.clean_data()
+        self.engine.clean_data("cast")
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
@@ -156,7 +157,7 @@ class PreprocessingWidget(UnfoldWidget):
         columns = self.engine.get_columns()
         for column in columns:
             checkbox = QCheckBox(column)
-            checkbox.setChecked(True)
+            checkbox.setChecked(False)
             self.columns_group_form_layout.addRow(checkbox)
 
     def clear_column_layout(self):
@@ -164,9 +165,35 @@ class PreprocessingWidget(UnfoldWidget):
             self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
     def submit_columns(self):
+        self.data_submitted = False
         columns = []
         for i in range(self.columns_group_form_layout.count()):
             if self.columns_group_form_layout.itemAt(i).widget().isChecked():
                 columns.append(self.columns_group_form_layout.itemAt(i).widget().text())
-        self.engine.set_state(columns)
-        self.get_data()
+        if not columns:
+            error = QMessageBox()
+            error.setIcon(QMessageBox.Critical)
+            error.setText('No columns were chosen')
+            error.setWindowTitle("Error")
+            error.exec_()
+            return
+        if self.engine.has_rows_with_nulls():
+            self.remove_nulls_warning()
+        if self.data_submitted:
+            self.engine.set_state(columns)
+            self.engine.clean_data("remove")
+            self.get_data()
+
+    def remove_nulls_warning(self):
+        warning = QMessageBox()
+        warning.setIcon(QMessageBox.Warning)
+        warning.setText("Null values in set")
+        warning.setInformativeText("This data contains some empty values. After proceeding some of the rows will be "
+                                   "discarded. Continue?")
+        warning.setWindowTitle("Cleaning data")
+        warning.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        warning.buttonClicked.connect(self.handle_warning_click)
+        warning.exec_()
+
+    def handle_warning_click(self, button):
+        self.data_submitted = button.text() == "OK"
