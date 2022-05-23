@@ -1,133 +1,166 @@
 from functools import partial
 from typing import List
-from PyQt5.QtCore import QRect
-from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QGridLayout, QWidget, \
-    QInputDialog, QTableView
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
+    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox
 
 from widgets import UnfoldWidget, QtTable, LoadingWidget
 
 
 class ImportWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
-        super().__init__(parent)
-        self.engine = engine
-        self.setObjectName("import_widget")
-
-        # unfold button
-        self.button.setText("IMPORT DATA")
-        self.button.clicked.connect(lambda: self.parent().unfold(0))
+        super().__init__(parent, engine, 'import_widget', 'IMPORT DATA')
 
         # load data group
         self.load_data_group = QGroupBox(self.frame)
+        self.load_data_group_layout = QFormLayout(self.load_data_group)
         self.load_data_group.setTitle("Load data")
-        self.load_data_group.setGeometry(QRect(30, 30, 250, 161))
 
         self.filepath_label = QLabel(self.load_data_group)
         self.filepath_label.setText("Set path to file:")
-        self.filepath_label.setGeometry(QRect(10, 30, 101, 16))
+        self.filepath_label.setMinimumHeight(16)
         self.filepath_line = QLineEdit(self.load_data_group)
-        self.filepath_line.setGeometry(QRect(10, 50, 160, 23))
+        self.filepath_line.setMinimumHeight(23)
+        self.load_data_group_layout.addRow(self.filepath_label)
+
         self.file_button = QPushButton(self.load_data_group)
         self.file_button.setText("LOAD")
         self.file_button.clicked.connect(partial(self.click_listener, 'load_file'))
-        self.file_button.setGeometry(QRect(170, 50, 80, 23))
+        self.file_button.setMinimumHeight(23)
+
+        self.load_data_group_layout.addRow(self.filepath_line, self.file_button)
 
         self.database_label = QLabel(self.load_data_group)
         self.database_label.setText("Choose data from database:")
-        self.database_label.setGeometry(QRect(10, 80, 181, 16))
+        self.database_label.setMinimumHeight(16)
+        self.load_data_group_layout.addRow(self.database_label)
+
         self.database_box = QComboBox(self.load_data_group)
         self.set_available_tables()
-        self.database_box.setGeometry(QRect(10, 100, 160, 23))
+        self.database_box.setMinimumHeight(23)
         self.database_button = QPushButton(self.load_data_group)
         self.database_button.setText("LOAD")
         self.database_button.clicked.connect(partial(self.click_listener, 'load_database'))
-        self.database_button.setGeometry(QRect(170, 100, 80, 23))
+        self.database_button.setMinimumHeight(23)
+
+        self.load_data_group_layout.addRow(self.database_box, self.database_button)
 
         self.import_state_label = QLabel(self.load_data_group)
-        self.import_state_label.setGeometry(QRect(10, 130, 240, 16))
+        self.import_state_label.setMinimumHeight(16)
+        self.load_data_group_layout.addRow(self.import_state_label)
 
         # options group
         self.options_group = QGroupBox(self.frame)
+        self.options_layout = QVBoxLayout(self.options_group)
         self.options_group.setTitle("Options")
-        self.options_group.setGeometry(QRect(30, 220, 250, 171))
 
         self.reject_button = QPushButton(self.options_group)
         self.reject_button.setText("Reject this data")
         self.reject_button.clicked.connect(partial(self.click_listener, 'reject_data'))
-        self.reject_button.setGeometry(QRect(20, 30, 210, 23))
+        self.reject_button.setMinimumHeight(23)
+        self.options_layout.addWidget(self.reject_button, 1)
+
         self.save_button = QPushButton(self.options_group)
-        self.save_button.setText("Save to database and set data")
+        self.save_button.setText("Save to database")
         self.save_button.clicked.connect(partial(self.click_listener, 'save_data'))
         self.save_button.setEnabled(False)
-        self.save_button.setGeometry(QRect(20, 60, 210, 23))
-        self.not_save_button = QPushButton(self.options_group)
-        self.not_save_button.setText("Set data")
-        self.not_save_button.clicked.connect(partial(self.click_listener, 'not_save_data'))
-        self.not_save_button.setEnabled(False)
-        self.not_save_button.setGeometry(QRect(20, 90, 210, 23))
-        self.warning_label = QLabel(self.options_group)
-        self.warning_label.setGeometry(QRect(20, 120, 210, 31))
+        self.save_button.setMinimumHeight(23)
+        self.options_layout.addWidget(self.save_button, 1)
 
         # columns group
         self.columns_group = QGroupBox(self.frame)
         self.columns_group.setTitle("Columns")
-        self.columns_group.setGeometry(QRect(360, 30, 400, 100))
-        self.columns_grid = QGridLayout()
-        self.columns_group.setLayout(self.columns_grid)
+        self.columns_group_layout = QVBoxLayout(self.columns_group)
+
+        self.scroll_box = QGroupBox(self.frame)
+        self.columns_group_form_layout = QFormLayout(self.scroll_box)
+
+        self.scroll = QScrollArea()
+        self.scroll.setWidget(self.scroll_box)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setMinimumHeight(26)
+
+        self.columns_button = QPushButton("Select columns")
+        self.columns_button.setMaximumWidth(150)
+        self.columns_button.setEnabled(False)
+        self.columns_button.clicked.connect(partial(self.click_listener, 'columns'))
+
+        self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.columns_group_layout.addWidget(self.scroll)
+        self.columns_group_layout.addWidget(self.columns_button, alignment=Qt.AlignCenter)
+        self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # data table
         self.data_table = QTableView(self.frame)
-        self.data_table.setGeometry(QRect(360, 230, 400, 300))
+        self.data_table.setMinimumHeight(300)
 
-    # set titles to box
+        self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        # layouts for sections
+        self.layout = QHBoxLayout(self.frame)
+
+        self.first_column = QVBoxLayout()
+        self.first_column.addWidget(self.load_data_group, 0)
+        self.first_column.addWidget(self.options_group, 0)
+        self.first_column.addWidget(self.columns_group, 1)
+
+        self.first_column.setSpacing(35)
+
+        self.second_column = QVBoxLayout()
+        self.second_column.addWidget(self.data_table)
+
+        self.layout.addLayout(self.first_column, 0)
+        self.layout.addLayout(self.second_column, 1)
+
     def set_available_tables(self):
+        """ set titles to box """
         names = self.engine.get_table_names_from_database()
         for name in names:
             self.database_box.addItem(name)
 
-    # enable buttons after load data
     def set_options(self):
+        """ enable buttons after load data """
         self.save_button.setEnabled(True)
+        self.columns_button.setEnabled(True)
         if self.engine.is_data_big():
-            self.warning_label.setText("This file is too big.\nYou must save it in database!")
-        else:
-            self.not_save_button.setEnabled(True)
+            error = QMessageBox()
+            error.setIcon(QMessageBox.Warning)
+            error.setText('This file is too big.\nYou must save it in database!')
+            error.setWindowTitle("Warning")
+            error.exec_()
 
-    # clear import widget from loaded data
     def clear_widgets(self):
+        """ clear import widget from loaded data """
         self.save_button.setEnabled(False)
-        self.not_save_button.setEnabled(False)
+        self.columns_button.setEnabled(False)
         self.import_state_label.clear()
-        self.warning_label.clear()
-        for i in reversed(range(self.columns_grid.count())):
-            self.columns_grid.itemAt(i).widget().deleteLater()
+        for i in reversed(range(self.columns_group_form_layout.count())):
+            self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
-    # draw columns and checkbox to choose them
     def set_columns_grid(self):
+        """ draw columns and checkbox to choose them """
         columns = self.engine.get_columns()
-        col = max(len(columns) // 11 + 1, 2)
-        rows = (len(columns) - 1) // col + 1
-        self.columns_group.setFixedHeight(min(rows*60, 450))
-        positions = [(i, j) for i in range(rows) for j in range(col)]
-        for name, position in zip(columns, positions):
-            checkbox = QCheckBox(name)
+
+        for column in columns:
+            checkbox = QCheckBox(column)
+            checkbox.setMinimumHeight(26)
             checkbox.setChecked(True)
-            self.columns_grid.addWidget(checkbox, *position)
+            self.columns_group_form_layout.addRow(checkbox)
 
     def display_data(self):
-        self.engine.read_data()
+        self.engine.read_data(self.get_checked_columns())
         if (data := self.engine.imported_data) is not None:
             self.data_table.setModel(QtTable(data))
 
     def reset_data_table(self):
         self.data_table.setModel(None)
 
-    # get chose columns
     def get_checked_columns(self) -> List[str]:
         columns = []
-        for i in range(self.columns_grid.count()):
-            if self.columns_grid.itemAt(i).widget().isChecked():
-                columns.append(self.columns_grid.itemAt(i).widget().text())
+        for i in range(self.columns_group_form_layout.count()):
+            if self.columns_group_form_layout.itemAt(i).widget().isChecked():
+                columns.append(self.columns_group_form_layout.itemAt(i).widget().text())
         return columns
 
     def click_listener(self, button_type: str):
@@ -147,6 +180,8 @@ class ImportWidget(UnfoldWidget):
             case 'not_save_data':
                 loading = LoadingWidget(self.not_save_data_handle)
                 loading.execute()
+            case 'columns':
+                self.display_data()
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
@@ -192,3 +227,13 @@ class ImportWidget(UnfoldWidget):
 
     def not_save_data_handle(self):
         self.engine.read_data(self.get_checked_columns())
+        text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
+        if is_ok:
+            if text:
+                label = self.engine.save_to_database(str(text))
+                if label:
+                    self.import_state_label.setText(label)
+                else:
+                    self.import_state_label.setText("Data was stored in database.")
+            else:
+                self.import_state_label.setText("The name of collection is not valid.")
