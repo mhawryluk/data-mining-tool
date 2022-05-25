@@ -1,5 +1,6 @@
 from .config import UNFOLD_BUTTON_WIDTH
 from .table_model import QtTable
+from .loading_widget import LoadingWidget
 from .unfold_widgets.unfold_widget import UnfoldWidget
 from .unfold_widgets.algorithm_setup_widget import AlgorithmSetupWidget
 from .unfold_widgets.algorithm_run_widget import AlgorithmRunWidget

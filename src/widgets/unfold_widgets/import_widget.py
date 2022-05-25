@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
     QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox
 
-from widgets import UnfoldWidget, QtTable
+from widgets import UnfoldWidget, QtTable, LoadingWidget
 
 
 class ImportWidget(UnfoldWidget):
@@ -166,42 +166,74 @@ class ImportWidget(UnfoldWidget):
     def click_listener(self, button_type: str):
         match button_type:
             case 'load_file':
-                self.import_state_label.setText("Loading ...")
-                filepath = self.filepath_line.text()
-                result = self.engine.load_data_from_file(filepath)
-                if result:
-                    self.import_state_label.setText(result)
-                    return
-                self.clear_widgets()
-                self.set_options()
-                self.set_columns_grid()
-                self.display_data()
+                loading = LoadingWidget(self.load_from_file_handle)
+                loading.execute()
             case 'load_database':
-                self.import_state_label.setText("Loading ...")
-                document_name = self.database_box.currentText()
-                result = self.engine.load_data_from_database(document_name)
-                if result:
-                    self.import_state_label.setText(result)
-                    return
-                self.clear_widgets()
-                self.set_options()
-                self.set_columns_grid()
-                self.display_data()
+                loading = LoadingWidget(self.load_from_database_handle)
+                loading.execute()
             case 'reject_data':
-                self.clear_widgets()
-                self.engine.clear_import()
-                self.reset_data_table()
+                loading = LoadingWidget(self.reject_data_handle)
+                loading.execute()
             case 'save_data':
-                self.engine.read_data(self.get_checked_columns())
-                text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
-                if is_ok:
-                    if text:
-                        label = self.engine.save_to_database(str(text))
-                        if label:
-                            self.import_state_label.setText(label)
-                        else:
-                            self.import_state_label.setText("Data was stored in database.")
-                    else:
-                        self.import_state_label.setText("The name of collection is not valid.")
+                loading = LoadingWidget(self.save_data_handle)
+                loading.execute()
+            case 'not_save_data':
+                loading = LoadingWidget(self.not_save_data_handle)
+                loading.execute()
             case 'columns':
                 self.display_data()
+
+    def load_from_file_handle(self):
+        self.import_state_label.setText("Loading ...")
+        filepath = self.filepath_line.text()
+        result = self.engine.load_data_from_file(filepath)
+        if result:
+            self.import_state_label.setText(result)
+            return
+        self.clear_widgets()
+        self.set_options()
+        self.set_columns_grid()
+        self.display_data()
+
+    def load_from_database_handle(self):
+        self.import_state_label.setText("Loading ...")
+        document_name = self.database_box.currentText()
+        result = self.engine.load_data_from_database(document_name)
+        if result:
+            self.import_state_label.setText(result)
+            return
+        self.clear_widgets()
+        self.set_options()
+        self.set_columns_grid()
+        self.display_data()
+
+    def reject_data_handle(self):
+        self.clear_widgets()
+        self.engine.clear_import()
+        self.reset_data_table()
+
+    def save_data_handle(self):
+        self.engine.read_data(self.get_checked_columns())
+        text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
+        if is_ok:
+            if text:
+                label = self.engine.save_to_database(str(text))
+                if label:
+                    self.import_state_label.setText(label)
+                else:
+                    self.import_state_label.setText("Data was stored in database.")
+            else:
+                self.import_state_label.setText("The name of collection is not valid.")
+
+    def not_save_data_handle(self):
+        self.engine.read_data(self.get_checked_columns())
+        text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
+        if is_ok:
+            if text:
+                label = self.engine.save_to_database(str(text))
+                if label:
+                    self.import_state_label.setText(label)
+                else:
+                    self.import_state_label.setText("Data was stored in database.")
+            else:
+                self.import_state_label.setText("The name of collection is not valid.")

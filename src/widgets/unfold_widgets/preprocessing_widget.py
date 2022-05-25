@@ -177,8 +177,10 @@ class PreprocessingWidget(UnfoldWidget):
             error.setWindowTitle("Error")
             error.exec_()
             return
-        if self.engine.has_rows_with_nulls():
+        if self.engine.has_rows_with_nulls(columns):
             self.remove_nulls_warning()
+        else:
+            self.data_submitted = True
         if self.data_submitted:
             self.engine.set_state(columns)
             self.engine.clean_data("remove")
