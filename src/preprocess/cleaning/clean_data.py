@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.state import State
+from state import State
 
 
 class DataCleaner:
