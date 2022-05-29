@@ -91,9 +91,13 @@ class KMeansResultsWidget(QWidget):
         for i in range(len(columns)):
             self.centroids_table.setColumnWidth(i, 120)
 
+        self.centroids_table_instruction = QLabel("Double click on any field to preview a cluster")
+        self.centroids_table_instruction.setFixedHeight(30)
+
         self.fig_centroids, ax = plt.subplots(1, 1)
         self.centroids_canvas = KMeansCanvas(self.fig_centroids, ax, False)
 
+        self.centroids_group_layout.addWidget(self.centroids_table_instruction)
         self.centroids_group_layout.addWidget(self.centroids_table, 1)
         self.centroids_group_layout.addWidget(self.centroids_canvas, 1)
 
@@ -135,15 +139,20 @@ class KMeansResultsWidget(QWidget):
                                                  )
 
     def show_cluster(self):
-        row = 0
+        cluster_num = 0
         for idx in self.centroids_table.selectionModel().selectedIndexes():
-            row = idx.row()
-        self.centroids_table.setModel(QtTable(self.centroids.iloc[row:row+1].round(3)))
+            cluster_num = idx.row()
+        rows = [i for i in range(len(self.labels)) if self.labels[i] == cluster_num]
+        self.centroids_table.setModel(QtTable(self.data.iloc[rows]))
         exit_button = QPushButton("X")
         exit_button.clicked.connect(self.exit_from_cluster)
         exit_button.setFixedWidth(50)
         self.centroids_group_layout.insertWidget(0, exit_button)
+        self.centroids_table_instruction.hide()
+        self.centroids_table.doubleClicked.disconnect()
 
     def exit_from_cluster(self):
         self.centroids_table.setModel(QtTable(self.centroids.round(3)))
         self.centroids_group_layout.itemAt(0).widget().setParent(None)
+        self.centroids_table_instruction.show()
+        self.centroids_table.doubleClicked.connect(self.show_cluster)
