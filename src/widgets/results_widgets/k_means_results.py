@@ -138,6 +138,41 @@ class KMeansResultsWidget(QWidget):
                                                  min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
                                                  )
 
+    def update_cluster_plot(self, row=None):
+        if row is not None:
+            indexes = [i for i in range(len(self.labels)) if self.labels[i] == row]
+            x = self.data.iloc[indexes][self.ox]
+            y = self.data.iloc[indexes][self.oy]
+            min_x = x.min()
+            max_x = x.max()
+            min_y = y.min()
+            max_y = y.max()
+            sep_x = 0.1 * (max_x - min_x)
+            sep_y = 0.1 * (max_y - min_y)
+
+            x_centroids = self.centroids[self.ox]
+            y_centroids = self.centroids[self.oy]
+
+            self.centroids_canvas.chosen_centroid_plot(x, y, None, None, x_centroids.iloc[row], y_centroids.iloc[row],
+                                                       row, len(x_centroids), self.ox, self.oy, min_x - sep_x,
+                                                       max_x + sep_x, min_y - sep_y, max_y + sep_y,)
+        else:
+            x = self.data[self.ox]
+            y = self.data[self.oy]
+            min_x = x.min()
+            max_x = x.max()
+            min_y = y.min()
+            max_y = y.max()
+            sep_x = 0.1 * (max_x - min_x)
+            sep_y = 0.1 * (max_y - min_y)
+
+            x_centroids = self.centroids[self.ox]
+            y_centroids = self.centroids[self.oy]
+
+            self.centroids_canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
+                                                     min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
+                                                     )
+
     def show_cluster(self):
         cluster_num = 0
         for idx in self.centroids_table.selectionModel().selectedIndexes():
@@ -150,9 +185,11 @@ class KMeansResultsWidget(QWidget):
         self.centroids_group_layout.insertWidget(0, exit_button)
         self.centroids_table_instruction.hide()
         self.centroids_table.doubleClicked.disconnect()
+        self.update_cluster_plot(cluster_num)
 
     def exit_from_cluster(self):
         self.centroids_table.setModel(QtTable(self.centroids.round(3)))
         self.centroids_group_layout.itemAt(0).widget().setParent(None)
         self.centroids_table_instruction.show()
         self.centroids_table.doubleClicked.connect(self.show_cluster)
+        self.update_cluster_plot()
