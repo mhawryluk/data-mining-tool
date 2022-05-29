@@ -86,6 +86,7 @@ class KMeansResultsWidget(QWidget):
 
         self.centroids_table = QTableView()
         self.centroids_table.setModel(QtTable(self.centroids.round(3)))
+        self.centroids_table.doubleClicked.connect(self.show_cluster)
 
         for i in range(len(columns)):
             self.centroids_table.setColumnWidth(i, 120)
@@ -132,3 +133,17 @@ class KMeansResultsWidget(QWidget):
         self.centroids_canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
                                                  min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
                                                  )
+
+    def show_cluster(self):
+        row = 0
+        for idx in self.centroids_table.selectionModel().selectedIndexes():
+            row = idx.row()
+        self.centroids_table.setModel(QtTable(self.centroids.iloc[row:row+1].round(3)))
+        exit_button = QPushButton("X")
+        exit_button.clicked.connect(self.exit_from_cluster)
+        exit_button.setFixedWidth(50)
+        self.centroids_group_layout.insertWidget(0, exit_button)
+
+    def exit_from_cluster(self):
+        self.centroids_table.setModel(QtTable(self.centroids.round(3)))
+        self.centroids_group_layout.itemAt(0).widget().setParent(None)
