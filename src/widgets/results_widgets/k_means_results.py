@@ -1,8 +1,9 @@
 from functools import partial
 
 import pandas as pd
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGroupBox, QFormLayout, QLabel, QVBoxLayout, QSpinBox, QPushButton, \
-    QComboBox, QTableView
+    QComboBox, QTableView, QInputDialog, QMessageBox
 from matplotlib import pyplot as plt
 
 from algorithms import check_numeric, get_samples
@@ -178,11 +179,21 @@ class KMeansResultsWidget(QWidget):
         for idx in self.centroids_table.selectionModel().selectedIndexes():
             cluster_num = idx.row()
         rows = [i for i in range(len(self.labels)) if self.labels[i] == cluster_num]
-        self.centroids_table.setModel(QtTable(self.data.iloc[rows]))
+        elements = self.data.iloc[rows]
+        self.centroids_table.setModel(QtTable(elements))
+        buttons_widget = QWidget()
+        buttons_layout = QHBoxLayout()
         exit_button = QPushButton("X")
         exit_button.clicked.connect(self.exit_from_cluster)
         exit_button.setFixedWidth(50)
-        self.centroids_group_layout.insertWidget(0, exit_button)
+        save_button = QPushButton("SAVE")
+        save_button.clicked.connect(partial(self.on_save_button_click, elements))
+        save_button.setFixedWidth(100)
+        buttons_layout.addWidget(save_button)
+        buttons_layout.addWidget(exit_button)
+        buttons_layout.setAlignment(Qt.AlignRight)
+        buttons_widget.setLayout(buttons_layout)
+        self.centroids_group_layout.insertWidget(0, buttons_widget)
         self.centroids_table_instruction.hide()
         self.centroids_table.doubleClicked.disconnect()
         self.update_cluster_plot(cluster_num)
@@ -193,3 +204,14 @@ class KMeansResultsWidget(QWidget):
         self.centroids_table_instruction.show()
         self.centroids_table.doubleClicked.connect(self.show_cluster)
         self.update_cluster_plot()
+
+    def on_save_button_click(self, elements):
+        path, is_ok = QInputDialog.getText(self, 'input name', 'Enter filename')
+        if is_ok and path and path.endswith(".csv"):
+            elements.to_csv(path)
+        else:
+            error = QMessageBox()
+            error.setIcon(QMessageBox.Critical)
+            error.setText("An error has occurred while trying to write cluster to file")
+            error.setWindowTitle("Error")
+            error.exec_()
