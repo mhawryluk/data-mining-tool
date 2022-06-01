@@ -66,17 +66,19 @@ class KMeansCanvas(FigureCanvasQTAgg):
         if self.animation:
             return self.axes.collections
 
-    def chosen_centroid_plot(self, vector_x, vector_y, old_x_centroid, old_y_centroid, x_centroid, y_centroid,
-                             label, max_label, name_x, name_y, min_x, max_x, min_y, max_y, drawing=True):
+    def chosen_centroid_plot(self, vector_x, vector_y, other_x, other_y, old_x_centroid, old_y_centroid, x_centroid,
+                             y_centroid, label, max_label, name_x, name_y, min_x, max_x, min_y, max_y, drawing=True):
         self.axes.cla()
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
         self.axes.set_ylim(min_y, max_y)
+        self.axes.scatter(other_x, other_y, c='white', edgecolor='grey')
         self.axes.scatter(vector_x, vector_y, c=[label] * len(vector_x), cmap='gist_rainbow',
-                          vmin=0, vmax=max_label, alpha=0.6)
-        self.axes.scatter([old_x_centroid], [old_y_centroid], c='black', marker='s', alpha=0.3)
-        self.axes.scatter([x_centroid], [y_centroid], c='black', marker='s')
+                          vmin=0, vmax=max_label, alpha=0.9)
+        self.axes.scatter([old_x_centroid], [old_y_centroid], c='black', marker='s', alpha=0.3, s=40)
+        self.axes.scatter([x_centroid], [y_centroid], c=[label], cmap='gist_rainbow', vmin=0, vmax=max_label,
+                          edgecolor='black', linewidths=1, marker='s', alpha=0.7, s=50)
         if drawing:
             self.draw()
         if self.animation:
@@ -350,9 +352,12 @@ class KMeansStepsVisualization(QWidget):
         old_y_centroids = old_step_centroids[self.oy]
 
         if mode < self.num_cluster:
-            vector_x = self.data.loc[old_step_labels == mode][self.ox]
-            vector_y = self.data.loc[old_step_labels == mode][self.oy]
-            return self.canvas.chosen_centroid_plot(vector_x, vector_y, old_x_centroids.iloc[mode],
+            old_labels = np.array([old_step_labels[sample] for sample in self.samples])
+            vector_x = x.loc[old_labels == mode]
+            vector_y = y.loc[old_labels == mode]
+            other_x = x.loc[old_labels != mode]
+            other_y = y.loc[old_labels != mode]
+            return self.canvas.chosen_centroid_plot(vector_x, vector_y, other_x, other_y, old_x_centroids.iloc[mode],
                                                     old_y_centroids.iloc[mode], x_centroids.iloc[mode],
                                                     y_centroids.iloc[mode],
                                                     mode, len(x_centroids), self.ox, self.oy,
