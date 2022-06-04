@@ -93,13 +93,20 @@ class KMeansResultsWidget(QWidget):
         for i in range(len(columns)):
             self.centroids_table.setColumnWidth(i, 120)
 
+        self.centroids_table_header = QWidget()
+        self.centroids_table_header_layout = QHBoxLayout()
         self.centroids_table_instruction = QLabel("Double click on any field to preview a cluster")
-        self.centroids_table_instruction.setFixedHeight(30)
+        self.save_all_button = QPushButton("SAVE CLUSTERS")
+        self.save_all_button.clicked.connect(self.on_save_all_button_click)
+        self.save_all_button.setFixedWidth(120)
+        self.centroids_table_header_layout.addWidget(self.centroids_table_instruction)
+        self.centroids_table_header_layout.addWidget(self.save_all_button)
+        self.centroids_table_header.setLayout(self.centroids_table_header_layout)
 
         self.fig_centroids, ax = plt.subplots(1, 1)
         self.centroids_canvas = KMeansCanvas(self.fig_centroids, ax, False)
 
-        self.centroids_group_layout.addWidget(self.centroids_table_instruction)
+        self.centroids_group_layout.addWidget(self.centroids_table_header)
         self.centroids_group_layout.addWidget(self.centroids_table, 1)
         self.centroids_group_layout.addWidget(self.centroids_canvas, 1)
 
@@ -231,3 +238,6 @@ class KMeansResultsWidget(QWidget):
             error.setText("This file extension is not supported.")
             error.setWindowTitle("Unsupported extension")
             error.exec_()
+
+    def on_save_all_button_click(self):
+        print("Click")
