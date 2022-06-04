@@ -207,7 +207,7 @@ class KMeansResultsWidget(QWidget):
         self.update_cluster_plot()
 
     def on_save_button_click(self, elements):
-        path, is_ok = QInputDialog.getText(self, 'input name', 'Enter filename')
+        path, is_ok = QInputDialog.getText(self, 'Save to file', 'Enter filename')
         if is_ok and path and path.endswith(".csv"):
             elements.to_csv(path)
         else:
