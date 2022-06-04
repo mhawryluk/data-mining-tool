@@ -96,8 +96,8 @@ class KMeansResultsWidget(QWidget):
         self.centroids_table_header = QWidget()
         self.centroids_table_header_layout = QHBoxLayout()
         self.centroids_table_instruction = QLabel("Double click on any field to preview a cluster")
-        self.save_all_button = QPushButton("SAVE CLUSTERS")
-        self.save_all_button.clicked.connect(self.on_save_all_button_click)
+        self.save_all_button = QPushButton("SAVE RESULTS")
+        self.save_all_button.clicked.connect(partial(self.on_save_button_click, self.data.assign(cluster=self.labels)))
         self.save_all_button.setFixedWidth(120)
         self.centroids_table_header_layout.addWidget(self.centroids_table_instruction)
         self.centroids_table_header_layout.addWidget(self.save_all_button)
@@ -201,14 +201,14 @@ class KMeansResultsWidget(QWidget):
         buttons_layout.setAlignment(Qt.AlignRight)
         buttons_widget.setLayout(buttons_layout)
         self.centroids_group_layout.insertWidget(0, buttons_widget)
-        self.centroids_table_instruction.hide()
+        self.centroids_table_header.hide()
         self.centroids_table.doubleClicked.disconnect()
         self.update_cluster_plot()
 
     def exit_from_cluster(self):
         self.centroids_table.setModel(QtTable(self.centroids.round(3)))
         self.centroids_group_layout.itemAt(0).widget().setParent(None)
-        self.centroids_table_instruction.show()
+        self.centroids_table_header.show()
         self.centroids_table.doubleClicked.connect(self.show_cluster)
         self.selected_cluster = None
         self.update_cluster_plot()
@@ -238,6 +238,3 @@ class KMeansResultsWidget(QWidget):
             error.setText("This file extension is not supported.")
             error.setWindowTitle("Unsupported extension")
             error.exec_()
-
-    def on_save_all_button_click(self):
-        print("Click")
