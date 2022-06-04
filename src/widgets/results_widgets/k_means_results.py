@@ -209,10 +209,25 @@ class KMeansResultsWidget(QWidget):
     def on_save_button_click(self, elements):
         path, is_ok = QInputDialog.getText(self, 'Save to file', 'Enter filename')
         if is_ok and path and path.endswith(".csv"):
-            elements.to_csv(path)
+            try:
+                elements.to_csv(path)
+            except:
+                error = QMessageBox()
+                error.setIcon(QMessageBox.Critical)
+                error.setText("Something wrong happened while was writing data to file. Try again")
+                error.setWindowTitle("Saving failed")
+                error.exec_()
+        elif not is_ok:
+            pass
+        elif not path:
+            error = QMessageBox()
+            error.setIcon(QMessageBox.Critical)
+            error.setText("No path were provided")
+            error.setWindowTitle("Empty path")
+            error.exec_()
         else:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText("An error has occurred while trying to write cluster to file")
-            error.setWindowTitle("Error")
+            error.setText("This file extension is not supported.")
+            error.setWindowTitle("Unsupported extension")
             error.exec_()
