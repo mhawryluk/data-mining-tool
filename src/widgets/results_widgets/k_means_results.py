@@ -229,7 +229,7 @@ class KMeansResultsWidget(QWidget):
         elif not path:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText("No path were provided")
+            error.setText("No path was provided")
             error.setWindowTitle("Empty path")
             error.exec_()
         else:
