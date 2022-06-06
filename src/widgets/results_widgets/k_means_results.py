@@ -221,7 +221,7 @@ class KMeansResultsWidget(QWidget):
             except:
                 error = QMessageBox()
                 error.setIcon(QMessageBox.Critical)
-                error.setText("Something wrong happened while was writing data to file. Try again")
+                error.setText("Something wrong happened while writing data to file. Try again")
                 error.setWindowTitle("Saving failed")
                 error.exec_()
         elif not is_ok:
