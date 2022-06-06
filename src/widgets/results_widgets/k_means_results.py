@@ -183,8 +183,7 @@ class KMeansResultsWidget(QWidget):
                                                      )
 
     def show_cluster(self):
-        for idx in self.centroids_table.selectionModel().selectedIndexes():
-            self.selected_cluster = idx.row()
+        self.selected_cluster = self.centroids_table.selectionModel().selectedIndexes()[0].row()
         rows = [i for i in range(len(self.labels)) if self.labels[i] == self.selected_cluster]
         elements = self.data.iloc[rows]
         self.centroids_table.setModel(QtTable(elements))
