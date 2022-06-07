@@ -161,7 +161,7 @@ class KMeansResultsWidget(QWidget):
             x_centroids = self.centroids[self.ox]
             y_centroids = self.centroids[self.oy]
 
-            self.centroids_canvas.chosen_centroid_plot(x, y, None, None, x_centroids.iloc[self.selected_cluster],
+            self.centroids_canvas.chosen_centroid_plot(x, y, None, None, None, None, x_centroids.iloc[self.selected_cluster],
                                                        y_centroids.iloc[self.selected_cluster], self.selected_cluster,
                                                        len(x_centroids), self.ox, self.oy, min_x - sep_x, max_x + sep_x,
                                                        min_y - sep_y, max_y + sep_y,)

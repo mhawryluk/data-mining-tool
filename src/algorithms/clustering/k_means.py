@@ -27,10 +27,11 @@ class KMeans:
             if self.is_numeric[i]:
                 diff[i] = np.abs(float(x) - float(y))
             else:
-                if x == y:
-                    diff[i] = 0
-                else:
-                    diff[i] = 1
+                diff[i] = 0
+                # if x == y:
+                #     diff[i] = 0
+                # else:
+                #     diff[i] = 1
         return (np.sum(diff**self.metrics))**(1/self.metrics)
 
     def random_centroids(self) -> List[Tuple]:
@@ -81,15 +82,16 @@ class KMeans:
             if self.is_numeric[i]:
                 result.append(column.mean())
             else:
-                counter = {}
-                most_frequent = None
-                count = 0
-                for element in column:
-                    counter[element] = counter.get(element, 0) + 1
-                    if counter[element] > count:
-                        count = counter[element]
-                        most_frequent = element
-                result.append(most_frequent)
+                result.append("NULL")
+                # counter = {}
+                # most_frequent = None
+                # count = 0
+                # for element in column:
+                #     counter[element] = counter.get(element, 0) + 1
+                #     if counter[element] > count:
+                #         count = counter[element]
+                #         most_frequent = element
+                # result.append(most_frequent)
         return tuple(result)
 
     def update_centroids(self):
@@ -131,7 +133,7 @@ class KMeans:
             result = runner()
             value = self.check_solution(*result)
             if value < best_value:
-                solution = result
+                solution = (result[0].copy(), result[1].copy())
                 steps = [(step[0].copy(), step[1].copy()) for step in self.saved_steps]
                 best_value = value
         self.saved_steps = steps
