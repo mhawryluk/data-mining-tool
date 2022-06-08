@@ -52,7 +52,7 @@ class KMeansResultsWidget(QWidget):
         self.settings_box_layout.addRow(QLabel("Set samples:"))
         self.sample_box = QSpinBox()
         self.sample_box.setMinimum(1)
-        self.sample_box.setMaximum(min(self.data.shape[0], 200))
+        self.sample_box.setMaximum(min(self.data.shape[0], 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
         self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
@@ -140,8 +140,16 @@ class KMeansResultsWidget(QWidget):
         sep_y = 0.1 * (max_y - min_y)
 
         labels = [self.labels[sample] for sample in self.samples]
-        x_centroids = self.centroids[self.ox]
-        y_centroids = self.centroids[self.oy]
+        if self.ox in self.centroids.columns:
+            x_centroids = self.centroids[self.ox]
+        else:
+            x_centroids = pd.Series(
+                [self.data.iloc[self.labels == label][self.ox].mean() for label in range(max(self.labels) + 1)])
+        if self.oy in self.centroids.columns:
+            y_centroids = self.centroids[self.oy]
+        else:
+            y_centroids = pd.Series(
+                [self.data.iloc[self.labels == label][self.oy].mean() for label in range(max(self.labels) + 1)])
 
         self.clusters_canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
                                       min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
@@ -158,8 +166,16 @@ class KMeansResultsWidget(QWidget):
             sep_x = 0.1 * (max_x - min_x)
             sep_y = 0.1 * (max_y - min_y)
 
-            x_centroids = self.centroids[self.ox]
-            y_centroids = self.centroids[self.oy]
+            # x_centroids = self.centroids[self.ox]
+            # y_centroids = self.centroids[self.oy]
+            if self.ox in self.centroids.columns:
+                x_centroids = self.centroids[self.ox]
+            else:
+                x_centroids = pd.Series([self.data.iloc[self.labels == label][self.ox].mean() for label in range(max(self.labels) + 1)])
+            if self.oy in self.centroids.columns:
+                y_centroids = self.centroids[self.oy]
+            else:
+                y_centroids = pd.Series([self.data.iloc[self.labels == label][self.oy].mean() for label in range(max(self.labels) + 1)])
 
             self.centroids_canvas.chosen_centroid_plot(x, y, None, None, None, None, x_centroids.iloc[self.selected_cluster],
                                                        y_centroids.iloc[self.selected_cluster], self.selected_cluster,
@@ -175,8 +191,16 @@ class KMeansResultsWidget(QWidget):
             sep_x = 0.1 * (max_x - min_x)
             sep_y = 0.1 * (max_y - min_y)
 
-            x_centroids = self.centroids[self.ox]
-            y_centroids = self.centroids[self.oy]
+            # x_centroids = self.centroids[self.ox]
+            # y_centroids = self.centroids[self.oy]
+            if self.ox in self.centroids.columns:
+                x_centroids = self.centroids[self.ox]
+            else:
+                x_centroids = pd.Series([self.data.iloc[self.labels == label][self.ox].mean() for label in range(max(self.labels) + 1)])
+            if self.oy in self.centroids.columns:
+                y_centroids = self.centroids[self.oy]
+            else:
+                y_centroids = pd.Series([self.data.iloc[self.labels == label][self.oy].mean() for label in range(max(self.labels) + 1)])
 
             self.centroids_canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
                                                      min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
