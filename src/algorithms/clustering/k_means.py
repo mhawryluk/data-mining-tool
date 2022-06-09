@@ -144,15 +144,15 @@ class KMeans:
         self.saved_steps = []
         self.centroids = self.get_centroids()
         self.mark_labels()
-        self.saved_steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
+        self.saved_steps.append((self.labels.copy(), pd.DataFrame(self.centroids, columns=self.data.columns)))
         while self.step():
             steps += 1
-            self.saved_steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
+            self.saved_steps.append((self.labels.copy(), pd.DataFrame(self.centroids, columns=self.data.columns)))
             if self.max_iterations and steps > self.max_iterations:
                 break
         self.step_counter = steps
-        self.saved_steps.append((self.labels, pd.DataFrame(self.centroids, columns=self.data.columns)))
-        return self.labels, self.centroids
+        self.saved_steps.append((self.labels.copy(), pd.DataFrame(self.centroids, columns=self.data.columns)))
+        return self.labels.copy(), self.centroids
 
     def run_without_saving_steps(self) -> Tuple[np.ndarray, List[Tuple]]:
         steps = 0

@@ -234,7 +234,9 @@ class KMeansResultsWidget(QWidget):
 
     def on_save_button_click(self, elements):
         path, is_ok = QInputDialog.getText(self, 'Save to file', 'Enter filename')
-        if is_ok and path and path.endswith(".csv"):
+        if is_ok and path:
+            if not path.endswith(".csv"):
+                path += ".csv"
             try:
                 elements.to_csv(path)
             except:

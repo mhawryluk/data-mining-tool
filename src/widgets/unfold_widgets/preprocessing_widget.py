@@ -116,8 +116,8 @@ class PreprocessingWidget(UnfoldWidget):
         self.second_row.addWidget(self.auto_reduction_group, 1)
         self.second_row.addWidget(self.columns_group, 1)
 
-        layout.addLayout(self.first_row, 1)
-        layout.addLayout(self.second_row, 0)
+        layout.addLayout(self.first_row, 3)
+        layout.addLayout(self.second_row, 1)
 
     def get_data(self):
         """ check column names every time coming to that frame (potential changes) """
@@ -199,4 +199,4 @@ class PreprocessingWidget(UnfoldWidget):
         warning.exec_()
 
     def handle_warning_click(self, button):
-        self.data_submitted = button.text() == "OK"
+        self.data_submitted = "OK" in button.text()
