@@ -51,12 +51,14 @@ class ImportDataEngine:
     def clear_import(self):
         self.reader_data = None
         self.state.imported_data = None
+        self.state.raw_data = None
         self.state.steps_visualization = None
         self.state.algorithm_results_widgets = {}
 
     def read_data(self, columns: Optional[List[str]] = None):
         self.imported_data = self.reader_data.read(columns)
         self.state.imported_data = self.imported_data
+        self.state.raw_data = self.imported_data.copy()
         self.state.steps_visualization = None
         self.state.algorithm_results_widgets = {}
 

@@ -127,7 +127,7 @@ class KMeansStepsVisualization(QWidget):
 
         self.sample_box = QSpinBox()
         self.sample_box.setMinimum(1)
-        self.sample_box.setMaximum(min(self.data.shape[0], 200))
+        self.sample_box.setMaximum(min(self.data.shape[0], 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
         self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
