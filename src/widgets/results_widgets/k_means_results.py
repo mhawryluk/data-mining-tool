@@ -166,8 +166,6 @@ class KMeansResultsWidget(QWidget):
             sep_x = 0.1 * (max_x - min_x)
             sep_y = 0.1 * (max_y - min_y)
 
-            # x_centroids = self.centroids[self.ox]
-            # y_centroids = self.centroids[self.oy]
             if self.ox in self.centroids.columns:
                 x_centroids = self.centroids[self.ox]
             else:
@@ -191,8 +189,6 @@ class KMeansResultsWidget(QWidget):
             sep_x = 0.1 * (max_x - min_x)
             sep_y = 0.1 * (max_y - min_y)
 
-            # x_centroids = self.centroids[self.ox]
-            # y_centroids = self.centroids[self.oy]
             if self.ox in self.centroids.columns:
                 x_centroids = self.centroids[self.ox]
             else:

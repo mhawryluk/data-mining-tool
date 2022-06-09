@@ -82,7 +82,7 @@ class KMeans:
             if self.is_numeric[i]:
                 result.append(column.mean())
             else:
-                result.append("NULL")
+                result.append(None)
                 # counter = {}
                 # most_frequent = None
                 # count = 0
