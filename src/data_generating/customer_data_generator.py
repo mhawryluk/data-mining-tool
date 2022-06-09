@@ -1,10 +1,9 @@
 import json
 from random import choice, normalvariate
+import requests
+from api_config import RANDOM_PEOPLE_API_URL
 
-with open("random_people.json", "r") as f:
-    customers = json.load(f)
-
-age_groups = ["18-25", "26-40", "41-60", "61+"]
+customers = requests.request("GET", RANDOM_PEOPLE_API_URL).json()
 
 expected_cluster_values = {
     "18-25": {
@@ -36,12 +35,12 @@ expected_cluster_values = {
     },
 }
 
-for i, customer in enumerate(customers):
+for customer in customers:
     age_group, expected_values = choice(list(expected_cluster_values.items()))
     customer["age_group"] = age_group
 
     for key, value in expected_values.items():
-        customer[key] = round(max(0, value * normalvariate(1, .1)), 2)
+        customer[key] = round(max(0, value + normalvariate(0, 50)), 2)
 
 with open("customers.json", "w") as f:
     json.dump(customers, f)
