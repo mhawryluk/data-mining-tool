@@ -116,8 +116,8 @@ class PreprocessingWidget(UnfoldWidget):
         self.second_row.addWidget(self.auto_reduction_group, 1)
         self.second_row.addWidget(self.columns_group, 1)
 
-        layout.addLayout(self.first_row, 1)
-        layout.addLayout(self.second_row, 0)
+        layout.addLayout(self.first_row, 3)
+        layout.addLayout(self.second_row, 1)
 
     def get_data(self):
         """ check column names every time coming to that frame (potential changes) """
@@ -154,10 +154,11 @@ class PreprocessingWidget(UnfoldWidget):
 
     def add_columns_to_layout(self):
         self.clear_column_layout()
-        columns = self.engine.get_columns()
+        columns = self.engine.get_raw_columns()
+        selected_columns = self.engine.get_columns()
         for column in columns:
             checkbox = QCheckBox(column)
-            checkbox.setChecked(False)
+            checkbox.setChecked(column in selected_columns)
             self.columns_group_form_layout.addRow(checkbox)
 
     def clear_column_layout(self):
@@ -198,4 +199,4 @@ class PreprocessingWidget(UnfoldWidget):
         warning.exec_()
 
     def handle_warning_click(self, button):
-        self.data_submitted = button.text() == "OK"
+        self.data_submitted = "OK" in button.text()
