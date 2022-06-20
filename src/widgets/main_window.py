@@ -19,8 +19,58 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
 
-        with open('../static/css/styles.css') as stylesheet:
-            self.setStyleSheet(stylesheet.read())
+        # with open('static/css/styles.css') as stylesheet:
+        #     self.setStyleSheet(stylesheet.read())
+
+        self.setStyleSheet("""
+                UnfoldWidget > QFrame {
+                    background-color: white;
+                }
+                
+                UnfoldWidget QGroupBox:title, UnfoldWidget QTabBar::tab{
+                    padding: 5px;
+                    border-radius: 5px;
+                    margin-bottom: 5px;
+                    margin-right: 5px;
+                }
+                
+                QScrollArea { background: transparent; }
+                QScrollArea QWidget { background: transparent; }
+                
+                #import_widget > QPushButton, #import_widget QGroupBox:title {
+                    background-color: #054a91;
+                    color: white;
+                    border: none;
+                }
+                
+                #preprocessing_widget > QPushButton, #preprocessing_widget QGroupBox:title {
+                    background-color: #3e7cb1;
+                    color: white;
+                    border: none;
+                }
+                
+                #algorithm_setup_widget > QPushButton, #algorithm_setup_widget QGroupBox:title{
+                    background-color: #81a4cd;
+                    color: white;
+                    border: none;
+                }
+                
+                #algorithm_run_widget > QPushButton, #algorithm_run_widget QGroupBox:title{
+                    background-color: #dbe4ee;
+                    color: black;
+                    border: none;
+                }
+                
+                #results_widget > QPushButton, #results_widget QGroupBox:title, #results_widget QTabBar::tab:selected {
+                    background-color: #f17300;
+                    color: white;
+                    border: none;
+                }
+                
+                #results_widget QTabWidget QTabWidget QGroupBox QGroupBox {
+                    border-radius: 10px;
+}     
+        """)
 
         self.generalLayout.addWidget(MainWidget(engines))
 
