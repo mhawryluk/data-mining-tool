@@ -64,6 +64,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction_group_layout = QFormLayout(self.auto_reduction_group)
 
         self.num_dimensions_spinbox = QSpinBox()
+        self.manual_reduction = QPushButton(self.auto_reduction_group)
         self.auto_reduction = QPushButton(self.auto_reduction_group)
 
         # plot stats window
@@ -142,8 +143,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.engine.clean_data("cast")
 
         max_dimensions = self.engine.number_of_numeric_columns()
-        if max_dimensions > 2:
-            self.render_reduction_group(max_dimensions)
+        self.render_reduction_group(max_dimensions)
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
@@ -204,7 +204,8 @@ class PreprocessingWidget(UnfoldWidget):
     def handle_warning_click(self, button):
         self.data_submitted = "OK" in button.text()
 
-    def reduce_dimensions(self, dim_number):
+    def reduce_dimensions(self, dim_number=None):
+        self.manual_reduction.clicked.disconnect()
         self.auto_reduction.clicked.disconnect()
         self.engine.reduce_dimensions(dim_number)
         self.get_data()
@@ -218,7 +219,20 @@ class PreprocessingWidget(UnfoldWidget):
         self.num_dimensions_spinbox.setValue(2)
         self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions"), self.num_dimensions_spinbox)
 
-        self.auto_reduction.setText("Reduce")
+        self.manual_reduction.setText("Reduce")
+        self.manual_reduction.setMinimumHeight(23)
+        self.auto_reduction_group_layout.addRow(self.manual_reduction)
+        self.manual_reduction.clicked.connect(lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value()))
+        if max_dimensions < 3:
+            self.manual_reduction.setDisabled(True)
+        else:
+            self.manual_reduction.setDisabled(False)
+
+        self.auto_reduction.setText("Reduce automatically")
         self.auto_reduction.setMinimumHeight(23)
         self.auto_reduction_group_layout.addRow(self.auto_reduction)
-        self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value()))
+        self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions())
+        if max_dimensions < 3:
+            self.auto_reduction.setDisabled(True)
+        else:
+            self.auto_reduction.setDisabled(False)

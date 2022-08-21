@@ -48,7 +48,7 @@ class PreprocessingEngine:
     def has_rows_with_nulls(self, columns):
         return self.state.raw_data[columns].isnull().values.any()
 
-    def reduce_dimensions(self, dim_number):
+    def reduce_dimensions(self, dim_number=None):
         return self.reducer.reduce(dim_number)
 
     def number_of_numeric_columns(self):
