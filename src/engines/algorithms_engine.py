@@ -48,7 +48,7 @@ class AlgorithmsEngine:
             self.state.algorithm_results_widgets[technique] = {}
         if not self.state.algorithm_results_widgets[technique].get(algorithm):
             self.state.algorithm_results_widgets[technique][algorithm] = []
-        self.state.algorithm_results_widgets[technique][algorithm].append(chosen_alg[2](self.state.raw_data, *result, options=kwargs))
+        self.state.algorithm_results_widgets[technique][algorithm].append(chosen_alg[2](self.state.imported_data, *result, options=kwargs))
 
     def get_maximum_clusters(self) -> int:
         if self.state.imported_data is None:

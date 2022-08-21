@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QPushButton, QCheckBox, \
-    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy, QScrollArea
+    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy, QScrollArea, \
+    QSpinBox
 
 from widgets import UnfoldWidget
 
@@ -62,10 +63,8 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction_group.setTitle("Reduce dimensions automatically")
         self.auto_reduction_group_layout = QFormLayout(self.auto_reduction_group)
 
-        self.auto_reduction_todo = QPushButton(self.auto_reduction_group)
-        self.auto_reduction_todo.setText("Reduce")
-        self.auto_reduction_todo.setMinimumHeight(23)
-        self.auto_reduction_group_layout.addRow(self.auto_reduction_todo)
+        self.num_dimensions_spinbox = QSpinBox()
+        self.auto_reduction = QPushButton(self.auto_reduction_group)
 
         # plot stats window
         self.plot_widget = QGroupBox(self.frame)
@@ -141,6 +140,10 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_select_box.addItems(self.engine.get_columns())
         self.add_columns_to_layout()
         self.engine.clean_data("cast")
+
+        max_dimensions = self.engine.number_of_numeric_columns()
+        if max_dimensions > 2:
+            self.render_reduction_group(max_dimensions)
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
@@ -200,3 +203,22 @@ class PreprocessingWidget(UnfoldWidget):
 
     def handle_warning_click(self, button):
         self.data_submitted = "OK" in button.text()
+
+    def reduce_dimensions(self, dim_number):
+        self.auto_reduction.clicked.disconnect()
+        self.engine.reduce_dimensions(dim_number)
+        self.get_data()
+
+    def render_reduction_group(self, max_dimensions):
+        for i in reversed(range(self.auto_reduction_group_layout.count())):
+            self.auto_reduction_group_layout.itemAt(i).widget().setParent(None)
+
+        self.num_dimensions_spinbox.setMinimum(2)
+        self.num_dimensions_spinbox.setMaximum(max_dimensions - 1)
+        self.num_dimensions_spinbox.setValue(2)
+        self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions"), self.num_dimensions_spinbox)
+
+        self.auto_reduction.setText("Reduce")
+        self.auto_reduction.setMinimumHeight(23)
+        self.auto_reduction_group_layout.addRow(self.auto_reduction)
+        self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value()))

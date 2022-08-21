@@ -1,13 +1,14 @@
 import numpy as np
 from state import State
 from widgets.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
-from preprocess import DataCleaner
+from preprocess import DataCleaner, PCAReducer
 
 
 class PreprocessingEngine:
     def __init__(self, state: State):
         self.state = state
         self.cleaner = DataCleaner(self.state)
+        self.reducer = PCAReducer(self.state)
 
     def get_raw_columns(self):
         if self.state.raw_data is None:
@@ -46,3 +47,11 @@ class PreprocessingEngine:
 
     def has_rows_with_nulls(self, columns):
         return self.state.raw_data[columns].isnull().values.any()
+
+    def reduce_dimensions(self, dim_number):
+        return self.reducer.reduce(dim_number)
+
+    def number_of_numeric_columns(self):
+        if self.state.imported_data is not None:
+            return len(self.state.imported_data.select_dtypes(include=np.number).columns.to_list())
+        return 0
