@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QSpinBox, QLabel, QComboBox
 from .options import Options
 
 
-class Algorithm(Options):
+class ExtraTreesOptions(Options):
     def __init__(self):
         super().__init__()
 

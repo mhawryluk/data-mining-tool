@@ -14,5 +14,5 @@ def check_numeric(element: any) -> bool:
     try:
         pd.to_numeric(element)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False

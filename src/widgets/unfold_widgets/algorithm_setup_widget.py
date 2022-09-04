@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QGroupBox, QLabel, QComboBox, QPushButton, QVBoxLayo
 
 from widgets import UnfoldWidget, LoadingWidget
 
-from widgets.options_widgets import KMeansOptions, Algorithm
+from widgets.options_widgets import KMeansOptions, Algorithm, ExtraTreesOptions
 
 
 class AlgorithmSetupWidget(UnfoldWidget):
@@ -19,21 +19,21 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.algorithms_options = {
             'clustering': {
                 'K-Means': KMeansOptions(),
-                'DBSCAN': Algorithm(engine),
-                'Partition Around Medoids': Algorithm(engine),
-                'Gaussian Mixture Models': Algorithm(engine),
-                'Agglomerative clustering': Algorithm(engine),
-                'Divisive clustering': Algorithm(engine)
+                'DBSCAN': Algorithm(),
+                'Partition Around Medoids': Algorithm(),
+                'Gaussian Mixture Models': Algorithm(),
+                'Agglomerative clustering': Algorithm(),
+                'Divisive clustering': Algorithm()
             },
             'associations': {
-                'A-priori': Algorithm(engine),
-                'A-prioriTID': Algorithm(engine),
-                'FP-Growth': Algorithm(engine)
+                'A-priori': Algorithm(),
+                'A-prioriTID': Algorithm(),
+                'FP-Growth': Algorithm()
             },
             'classification': {
-                'KNN': Algorithm(engine),
-                'Decision Tree': Algorithm(engine),
-                'SVM': Algorithm(engine)
+                'KNN': Algorithm(),
+                'Extra Trees': ExtraTreesOptions(),
+                'SVM': Algorithm()
             }
         }
 
@@ -132,7 +132,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.parent().unfold(self)
 
     def enable_button(self):
-        done = ['K-Means']
+        done = ['K-Means', 'Extra Trees']
         if self.algorithm_box.currentText() in done:
             self.run_button.setEnabled(True)
         else:
