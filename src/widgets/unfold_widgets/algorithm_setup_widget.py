@@ -128,7 +128,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
             error.exec_()
             return
 
-        self.update_clusters_bound()
+        self.update_options()
         self.parent().unfold(self)
 
     def enable_button(self):
@@ -155,9 +155,11 @@ class AlgorithmSetupWidget(UnfoldWidget):
                 loading = LoadingWidget(self.run_handle)
                 loading.execute()
 
-    def update_clusters_bound(self):
+    def update_options(self):
         clusters = min(self.engine.get_maximum_clusters(), 100)
         self.algorithms_options["clustering"]["K-Means"].set_max_clusters(clusters)
+        columns = self.engine.get_columns()
+        self.algorithms_options["classification"]["Extra Trees"].set_values(columns)
 
     def run_handle(self):
         technique = self.technique_box.currentText()

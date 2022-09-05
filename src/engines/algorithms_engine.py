@@ -56,3 +56,6 @@ class AlgorithmsEngine:
         if self.state.imported_data is None:
             return 100
         return self.state.imported_data.shape[0]
+
+    def get_columns(self) -> list:
+        return list(self.state.imported_data.columns)
