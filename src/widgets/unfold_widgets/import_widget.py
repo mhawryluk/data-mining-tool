@@ -3,8 +3,7 @@ from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
-    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox
-
+    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox, QFileDialog
 from widgets import UnfoldWidget, QtTable, LoadingWidget
 
 
@@ -18,14 +17,15 @@ class ImportWidget(UnfoldWidget):
         self.load_data_group.setTitle("Load data")
 
         self.filepath_label = QLabel(self.load_data_group)
-        self.filepath_label.setText("Set path to file:")
+        self.filepath_label.setText("Load data from file:")
         self.filepath_label.setMinimumHeight(16)
         self.filepath_line = QLineEdit(self.load_data_group)
         self.filepath_line.setMinimumHeight(23)
+        self.filepath_line.setReadOnly(True)
         self.load_data_group_layout.addRow(self.filepath_label)
 
         self.file_button = QPushButton(self.load_data_group)
-        self.file_button.setText("LOAD")
+        self.file_button.setText("SELECT FILE")
         self.file_button.clicked.connect(partial(self.click_listener, 'load_file'))
         self.file_button.setMinimumHeight(23)
 
@@ -185,15 +185,17 @@ class ImportWidget(UnfoldWidget):
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
-        filepath = self.filepath_line.text()
-        result = self.engine.load_data_from_file(filepath)
-        if result:
-            self.import_state_label.setText(result)
-            return
-        self.clear_widgets()
-        self.set_options()
-        self.set_columns_grid()
-        self.display_data()
+        file_path: str = QFileDialog.getOpenFileName(self, 'Choose file', '.', "*.csv *.json")[0]
+        try:
+            self.engine.load_data_from_file(file_path)
+        except ValueError as e:
+            self.import_state_label.setText(str(e))
+        else:
+            self.filepath_line.setText(file_path)
+            self.clear_widgets()
+            self.set_options()
+            self.set_columns_grid()
+            self.display_data()
 
     def load_from_database_handle(self):
         self.import_state_label.setText("Loading ...")
