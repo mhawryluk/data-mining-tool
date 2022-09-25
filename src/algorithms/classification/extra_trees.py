@@ -1,8 +1,9 @@
+import matplotlib
 import numpy as np
 import pandas as pd
 import joblib
 from algorithms import check_numeric
-from typing import Tuple, List
+from typing import Tuple, List, Callable
 from algorithms import get_threads_count
 
 metrics_types = ['gini', 'entropy']
@@ -11,6 +12,14 @@ metrics_types = ['gini', 'entropy']
 class Leaf:
     def __init__(self, data: pd.Series):
         self.prediction = data.value_counts().index[0]
+        self.samples = len(data)
+
+    def graphviz_label(self, get_color: Callable) -> str:
+        samples_str = f"samples = {self.samples}"
+        class_str = f"class = {self.prediction}"
+        color_hex = get_color(self.prediction)
+        label_str = f'[label=<{samples_str}<br/>{class_str}>, fillcolor="{color_hex}"]'
+        return label_str
 
 
 class Node:
@@ -18,8 +27,25 @@ class Node:
         self.label = label
         self.pivot = pivot
         self.importance = 0
+        self.samples = 0
+        self.largest_class = None
         self.left = None
         self.right = None
+
+    def graphviz_label(self, get_color: Callable) -> str:
+        if isinstance(self.pivot, bool) or isinstance(self.pivot, str):
+            pivot_str = f"{self.label} == {self.pivot}"
+        elif isinstance(self.pivot, pd.Series):
+            pivot_str = f"{self.label} in {self.pivot}"
+        elif check_numeric(self.pivot):
+            pivot_str = f"{self.label} &gt; {self.pivot}"
+        else:
+            raise TypeError(f"pivot must be bool, string, list or number not {type(self.pivot)}")
+        samples_str = f"samples = {self.samples}"
+        class_str = f"class = {self.largest_class}"
+        color_hex = get_color(self.largest_class)
+        label_str = f'[label=<{pivot_str}<br/>{samples_str}<br/>{class_str}>, fillcolor="{color_hex}"]'
+        return label_str
 
 
 class DecisionTree:
@@ -73,6 +99,8 @@ class DecisionTree:
         node.importance = best_metrics
         node.left = self.create_node(left_mask, depth + 1)
         node.right = self.create_node(right_mask, depth + 1)
+        node.samples = np.sum(mask)
+        node.largest_class = self.data[self.label_name][mask].value_counts().index[0]
         return node
 
     def _can_be_split(self, mask: pd.Series, depth: int) -> bool:
@@ -176,6 +204,36 @@ class DecisionTree:
         values = values / np.sum(values)
         return values
 
+    def graphviz_str(self, get_color: Callable) -> str:
+        def make_next_row(num_from, node_next, side=None):
+            # global idx
+            idx[0] += 1
+            num_next = idx[0]
+            rows.append(f"{num_next} {node_next.graphviz_label(get_color)} ;")
+            if side is None:
+                rows.append(f"{num_from} -> {num_next} ;")
+            elif side:
+                rows.append(f"{num_from} -> {num_next} [labeldistance=2.5, labelangle=-45, headlabel={str(side)}] ;")
+            else:
+                rows.append(f"{num_from} -> {num_next} [labeldistance=2.5, labelangle=45, headlabel={str(side)}] ;")
+            if isinstance(node_next, Node):
+                make_next_row(num_next, node_next.left)
+                make_next_row(num_next, node_next.right)
+
+        rows = [f"0 {self.root.graphviz_label(get_color)} ;"]
+        idx = [0]
+        make_next_row(0, self.root.left, False)
+        make_next_row(0, self.root.right, True)
+        rows_str = "\n".join(rows)
+        dot_str = (
+            "digraph Tree {\n"
+            'node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;\n'
+            'edge [fontname="helvetica"] ;\n'
+            f"{rows_str}\n"
+            "}"
+        )
+        return dot_str
+
 
 class ExtraTrees:
 
@@ -185,7 +243,7 @@ class ExtraTrees:
         self.forest = None
         self.kwargs = kwargs
         self.feature_importance = None
-        self.labels = pd.Series(list(set(self.data[kwargs['label_name']])))
+        self.labels = np.array(list(set(self.data[kwargs['label_name']])))
 
     def _split_int_to_array(self, num: int, div: int) -> List[int]:
         greater = num % div
@@ -213,7 +271,13 @@ class ExtraTrees:
         return result
 
     def get_steps(self) -> list:
-        return self.forest
+        return [tree.graphviz_str(self.get_color) for tree in self.forest]
 
     def get_feature_importance(self) -> list:
         return self.feature_importance
+
+    def get_color(self, label: str) -> str:
+        normalize = matplotlib.colors.Normalize(vmin=0, vmax=len(self.labels))
+        colormap = matplotlib.cm.get_cmap('Spectral')
+        index = np.argwhere(self.labels == label)[0]
+        return matplotlib.colors.to_hex(colormap(normalize(index)))
