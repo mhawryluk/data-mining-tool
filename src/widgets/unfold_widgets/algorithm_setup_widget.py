@@ -1,12 +1,11 @@
 from functools import partial
 
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QLabel, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFormLayout, QMessageBox, QSplashScreen, QDesktopWidget, QApplication
+    QFormLayout, QMessageBox
 
 from widgets import UnfoldWidget, LoadingWidget
-
-from widgets.options_widgets import KMeansOptions, Algorithm
+from widgets.options_widgets import KMeansOptions, Algorithm, AssociationRulesOptions
 
 
 class AlgorithmSetupWidget(UnfoldWidget):
@@ -26,9 +25,9 @@ class AlgorithmSetupWidget(UnfoldWidget):
                 'Divisive clustering': Algorithm(engine)
             },
             'associations': {
-                'A-priori': Algorithm(engine),
-                'A-prioriTID': Algorithm(engine),
-                'FP-Growth': Algorithm(engine)
+                'A-priori': AssociationRulesOptions(),
+                'A-prioriTID': AssociationRulesOptions(),
+                'FP-Growth': AssociationRulesOptions()
             },
             'classification': {
                 'KNN': Algorithm(engine),
@@ -81,7 +80,8 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.options_group.setMinimumSize(220, 200)
         self.options_group_layout = QVBoxLayout(self.options_group)
 
-        self.options_group_layout.addWidget(self.algorithms_options[self.technique_box.currentText()][self.algorithm_box.currentText()])
+        self.options_group_layout.addWidget(
+            self.algorithms_options[self.technique_box.currentText()][self.algorithm_box.currentText()])
 
         self.second_column.addWidget(self.options_group)
         self.second_column.addStretch()
@@ -128,11 +128,11 @@ class AlgorithmSetupWidget(UnfoldWidget):
             error.exec_()
             return
 
-        self.update_clusters_bound()
+        self.update_algorithm_options()
         self.parent().unfold(self)
 
     def enable_button(self):
-        done = ['K-Means']
+        done = ['K-Means', 'A-priori']
         if self.algorithm_box.currentText() in done:
             self.run_button.setEnabled(True)
         else:
@@ -155,9 +155,11 @@ class AlgorithmSetupWidget(UnfoldWidget):
                 loading = LoadingWidget(self.run_handle)
                 loading.execute()
 
-    def update_clusters_bound(self):
+    def update_algorithm_options(self):
         clusters = min(self.engine.get_maximum_clusters(), 100)
         self.algorithms_options["clustering"]["K-Means"].set_max_clusters(clusters)
+        self.algorithms_options["associations"]["A-priori"].set_columns_options(
+            self.engine.state.imported_data.columns.values)
 
     def run_handle(self):
         technique = self.technique_box.currentText()

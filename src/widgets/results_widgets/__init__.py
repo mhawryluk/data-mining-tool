@@ -1,1 +1,2 @@
 from .k_means_results import KMeansResultsWidget
+from .a_priori_results import APrioriResultsWidget
