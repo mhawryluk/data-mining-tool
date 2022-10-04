@@ -18,7 +18,7 @@ class Leaf:
         samples_str = f"samples = {self.samples}"
         class_str = f"class = {self.prediction}"
         color_hex = get_color(self.prediction)
-        label_str = f'[label=<{samples_str}<br/>{class_str}>, fillcolor="{color_hex}"]'
+        label_str = f'[label=<{samples_str}</br>{class_str}>, fillcolor="{color_hex}", shape=circle]'
         return label_str
 
 
@@ -44,7 +44,7 @@ class Node:
         samples_str = f"samples = {self.samples}"
         class_str = f"class = {self.largest_class}"
         color_hex = get_color(self.largest_class)
-        label_str = f'[label=<{pivot_str}<br/>{samples_str}<br/>{class_str}>, fillcolor="{color_hex}"]'
+        label_str = f'[label=<{pivot_str}</br>{samples_str}</br>{class_str}>, fillcolor="{color_hex}", shape=box]'
         return label_str
 
 
@@ -211,19 +211,20 @@ class DecisionTree:
             num_next = idx[0]
             rows.append(f"{num_next} {node_next.graphviz_label(get_color)} ;")
             if side is None:
-                rows.append(f"{num_from} -> {num_next} ;")
+                rows.append(f"{num_from} -> {num_next} [width=3] ;")
             elif side:
-                rows.append(f"{num_from} -> {num_next} [labeldistance=2.5, labelangle=-45, headlabel={str(side)}] ;")
+                rows.append(f"{num_from} -> {num_next} [color=lime, width=3, headlabel={str(side)}] ;")
             else:
-                rows.append(f"{num_from} -> {num_next} [labeldistance=2.5, labelangle=45, headlabel={str(side)}] ;")
+                rows.append(f"{num_from} -> {num_next} [color=red, width=3, headlabel={str(side)}] ;")
             if isinstance(node_next, Node):
-                make_next_row(num_next, node_next.left)
-                make_next_row(num_next, node_next.right)
+                make_next_row(num_next, node_next.left, False)
+                make_next_row(num_next, node_next.right, True)
 
         rows = [f"0 {self.root.graphviz_label(get_color)} ;"]
         idx = [0]
-        make_next_row(0, self.root.left, False)
-        make_next_row(0, self.root.right, True)
+        if isinstance(self.root, Node):
+            make_next_row(0, self.root.left, False)
+            make_next_row(0, self.root.right, True)
         rows_str = "\n".join(rows)
         dot_str = (
             "digraph Tree {\n"
@@ -262,6 +263,7 @@ class ExtraTrees:
         results = joblib.Parallel(n_jobs=threads_count)(joblib.delayed(do_job)(num) for num in arr)
         self.forest = sum([result[0] for result in results], [])
         self.feature_importance = pd.concat([result[1] for result in results]).sum(axis='index') / self.forest_size
+        return []
 
     def predict(self, record: pd.Series) -> any:
         predictions = pd.Series([tree.predict(record) for tree in self.forest]).value_counts() / self.forest_size
