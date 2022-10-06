@@ -55,3 +55,7 @@ class PreprocessingEngine:
         if self.state.imported_data is not None:
             return len(self.state.imported_data.select_dtypes(include=np.number).columns.to_list())
         return 0
+
+    def rename_column(self, index, newHeader):
+        data = self.state.imported_data
+        self.state.imported_data = data.rename(columns={data.columns[index]: newHeader})

@@ -8,14 +8,16 @@ class PCAReducer:
     def __init__(self, state: State, acceptable_ratio=0.05):
         self.state = state
         self.acceptable_ratio = acceptable_ratio
+        self.initial_columns = []
 
     def reduce(self, dim_number: Optional[int]) -> None:
         data = self.state.imported_data.select_dtypes(include=np.number)
         data = data - data.mean()
+        self.initial_columns = list(data.columns)
         covariance_matrix = data.cov()
         reduce_matrix = self._pca(covariance_matrix, dim_number)
         override = np.dot(data, reduce_matrix)
-        columns = ["column {}".format(i) for i in range(dim_number or override.shape[1])]
+        columns = ["{}".format(self.format_column_name(reduce_matrix[:, i])) for i in range(dim_number or override.shape[1])]
         self.state.imported_data = pd.DataFrame(override, columns=columns)
 
     def _pca(self, matrix, dim_number=None):
@@ -56,3 +58,10 @@ class PCAReducer:
 
         U, Sigma = [np.array(x) for x in zip(*svd_components)]
         return U.T, Sigma
+
+    def format_column_name(self, vector):
+        label = ""
+        indexes = np.argpartition(vector, -2)[-2:]
+        for index in indexes:  # arbitrary value
+            label += "{}*{}+".format(round(vector[index], 2), self.initial_columns[index])
+        return label.rstrip("+")

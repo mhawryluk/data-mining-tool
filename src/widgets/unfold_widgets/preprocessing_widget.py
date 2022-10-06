@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, 
     QSpinBox
 
 from widgets import UnfoldWidget
+from widgets.tables import DataPreviewScreen
 
 
 class PreprocessingWidget(UnfoldWidget):
@@ -62,6 +63,9 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction_group = QGroupBox(self.frame)
         self.auto_reduction_group.setTitle("Reduce dimensions")
         self.auto_reduction_group_layout = QFormLayout(self.auto_reduction_group)
+
+        # initialize reduction results screen
+        self.preview_screen = None
 
         self.num_dimensions_spinbox = QSpinBox()
         self.manual_reduction = QPushButton(self.auto_reduction_group)
@@ -209,6 +213,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction.clicked.disconnect()
         self.engine.reduce_dimensions(dim_number)
         self.get_data()
+        self.show_reduction_results()
 
     def render_reduction_group(self, max_dimensions):
         for i in reversed(range(self.auto_reduction_group_layout.count())):
@@ -230,3 +235,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction_group_layout.addRow(self.auto_reduction)
         self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions())
         self.auto_reduction.setDisabled(max_dimensions < 3)
+
+    def show_reduction_results(self):
+        self.preview_screen = DataPreviewScreen(self)
+        self.preview_screen.show()
