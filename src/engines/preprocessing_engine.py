@@ -21,7 +21,7 @@ class PreprocessingEngine:
         return self.state.imported_data.columns
 
     def set_state(self, columns):
-        self.state.imported_data = self.state.raw_data[columns].copy()
+        self.state.imported_data = self.state.imported_data[columns].copy()
 
     def create_plot(self, column_name, plot_type):
         plotter = None
@@ -46,7 +46,7 @@ class PreprocessingEngine:
                 self.cleaner.remove_nulls()
 
     def has_rows_with_nulls(self, columns):
-        return self.state.raw_data[columns].isnull().values.any()
+        return self.state.imported_data[columns].isnull().values.any()
 
     def reduce_dimensions(self, dim_number=None):
         self.reducer.reduce(dim_number)
