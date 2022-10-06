@@ -1,14 +1,15 @@
+from typing import Optional
 from state import State
 import numpy as np
 import pandas as pd
 
 
 class PCAReducer:
-    def __init__(self, state: State, acceptable_ratio = 0.05):
+    def __init__(self, state: State, acceptable_ratio=0.05):
         self.state = state
         self.acceptable_ratio = acceptable_ratio
 
-    def reduce(self, dim_number):
+    def reduce(self, dim_number: Optional[int]) -> None:
         data = self.state.imported_data.select_dtypes(include=np.number)
         data = data - data.mean()
         covariance_matrix = data.cov()
@@ -18,7 +19,7 @@ class PCAReducer:
         self.state.imported_data = pd.DataFrame(override, columns=columns)
 
     def _pca(self, matrix, dim_number=None):
-        reducer, weights, _ = self._svd(matrix, k=dim_number)
+        reducer, weights = self._svd(matrix, k=dim_number)
         if dim_number is None:
             total = sum(weights)
             ratios = [weight/total for weight in weights]
@@ -26,31 +27,32 @@ class PCAReducer:
             return reducer[:, :columns_num]
         return reducer
 
-    def _dominant_component(self, M, eps):
-        m, n = M.shape
+    @staticmethod
+    def _dominant_component(matrix, eps):
+        m, n = matrix.shape
         v = np.ones(n) / np.sqrt(n)
         while True:
-            new_v = np.dot(M, v)
+            new_v = np.dot(matrix, v)
             new_v = new_v / np.linalg.norm(new_v)
             if abs(np.linalg.norm(v - new_v)) < eps:
                 return v
             v = new_v
 
-    def _svd(self, M, k=None, eps=1e-10):
-        matrix = np.array(M)
-        m, n = matrix.shape
+    def _svd(self, matrix, k=None, eps=1e-10):
+        matrix_helper = np.array(matrix)
+        m, n = matrix_helper.shape
         svd_components = []
         if k is None:
             k = n
         for i in range(k):
-            v = self._dominant_component(matrix, eps=eps)
-            u_unnormalized = np.dot(M, v)
+            v = self._dominant_component(matrix_helper, eps=eps)
+            u_unnormalized = np.dot(matrix, v)
             sigma = np.linalg.norm(u_unnormalized)
             u = u_unnormalized / sigma
 
-            matrix -= sigma * np.outer(u, v)
+            matrix_helper -= sigma * np.outer(u, v)
 
-            svd_components.append((u, sigma, v))
+            svd_components.append((u, sigma))
 
-        U, Sigma, V = [np.array(x) for x in zip(*svd_components)]
-        return U.T, Sigma, V
+        U, Sigma = [np.array(x) for x in zip(*svd_components)]
+        return U.T, Sigma

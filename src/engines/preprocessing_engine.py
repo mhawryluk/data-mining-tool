@@ -49,7 +49,7 @@ class PreprocessingEngine:
         return self.state.raw_data[columns].isnull().values.any()
 
     def reduce_dimensions(self, dim_number=None):
-        return self.reducer.reduce(dim_number)
+        self.reducer.reduce(dim_number)
 
     def number_of_numeric_columns(self):
         if self.state.imported_data is not None:

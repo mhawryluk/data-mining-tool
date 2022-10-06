@@ -60,7 +60,7 @@ class PreprocessingWidget(UnfoldWidget):
 
         # automatic reduction group
         self.auto_reduction_group = QGroupBox(self.frame)
-        self.auto_reduction_group.setTitle("Reduce dimensions automatically")
+        self.auto_reduction_group.setTitle("Reduce dimensions")
         self.auto_reduction_group_layout = QFormLayout(self.auto_reduction_group)
 
         self.num_dimensions_spinbox = QSpinBox()
@@ -219,20 +219,14 @@ class PreprocessingWidget(UnfoldWidget):
         self.num_dimensions_spinbox.setValue(2)
         self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions"), self.num_dimensions_spinbox)
 
-        self.manual_reduction.setText("Reduce")
+        self.manual_reduction.setText("Reduce with fixed number")
         self.manual_reduction.setMinimumHeight(23)
         self.auto_reduction_group_layout.addRow(self.manual_reduction)
         self.manual_reduction.clicked.connect(lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value()))
-        if max_dimensions < 3:
-            self.manual_reduction.setDisabled(True)
-        else:
-            self.manual_reduction.setDisabled(False)
+        self.manual_reduction.setDisabled(max_dimensions < 3)
 
-        self.auto_reduction.setText("Reduce automatically")
+        self.auto_reduction.setText("Reduce dynamically")
         self.auto_reduction.setMinimumHeight(23)
         self.auto_reduction_group_layout.addRow(self.auto_reduction)
         self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions())
-        if max_dimensions < 3:
-            self.auto_reduction.setDisabled(True)
-        else:
-            self.auto_reduction.setDisabled(False)
+        self.auto_reduction.setDisabled(max_dimensions < 3)
