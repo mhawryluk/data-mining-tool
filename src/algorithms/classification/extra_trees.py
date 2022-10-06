@@ -246,6 +246,9 @@ class ExtraTrees:
         self.feature_importance = None
         self.labels = np.array(list(set(self.data[kwargs['label_name']])))
 
+    def get_config(self):
+        return [(column, self.data[column].dtype) for column in self.data.columns if column != self.kwargs['label_name']]
+
     def _split_int_to_array(self, num: int, div: int) -> List[int]:
         greater = num % div
         lower = div - greater
@@ -263,13 +266,15 @@ class ExtraTrees:
         results = joblib.Parallel(n_jobs=threads_count)(joblib.delayed(do_job)(num) for num in arr)
         self.forest = sum([result[0] for result in results], [])
         self.feature_importance = pd.concat([result[1] for result in results]).sum(axis='index') / self.forest_size
-        return []
+        self.feature_importance.sort_values(ascending=False, inplace=True)
+        return self.predict, self.get_config(), self.feature_importance
 
     def predict(self, record: pd.Series) -> any:
         predictions = pd.Series([tree.predict(record) for tree in self.forest]).value_counts() / self.forest_size
         result = pd.Series(0, index=self.labels)
         for idx, item in predictions.iteritems():
             result[idx] = item
+        result.sort_values(ascending=False, inplace=True)
         return result
 
     def get_steps(self) -> list:
