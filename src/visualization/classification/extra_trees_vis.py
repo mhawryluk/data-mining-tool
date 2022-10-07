@@ -56,10 +56,10 @@ class ExtraTreesStepsVisualization(QWidget):
         if label is None:
             return ''
         label = label[1:-1]
-        if '</br>' not in label:
-            return label
         label = label.replace('&gt;', '>')
-        return '\n'.join(label.split('</br>'))
+        if '<br/>' not in label:
+            return label
+        return '\n'.join(label.split('<br/>'))
         
     def dict_of_param(self, data: Optional[str]) -> Dict:
         if data is None:
@@ -108,8 +108,8 @@ class ExtraTreesStepsVisualization(QWidget):
                     height = rect.height() * len(label_lines) + 20
                     param_dict['size'] = (width, height)
                 param_dict['pos'] = [float(value) for value in graph_info.get_node(node).attr['pos'].split(',')]
-                param_dict['pos'][0] = int(param_dict['pos'][0] * 2.2)
-                param_dict['pos'][1] = int((pos_delta - param_dict['pos'][1]) * 1.5)
+                param_dict['pos'][0] = int(param_dict['pos'][0])
+                param_dict['pos'][1] = int(pos_delta - param_dict['pos'][1])
                 nodes[node] = qgv.addNode(qgv.engine.graph, str(node), **param_dict)
             elif len(value_list) == 3:
                 node1 = value_list[0]

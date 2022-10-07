@@ -18,7 +18,7 @@ class Leaf:
         samples_str = f"samples = {self.samples}"
         class_str = f"class = {self.prediction}"
         color_hex = get_color(self.prediction)
-        label_str = f'[label=<{samples_str}</br>{class_str}>, fillcolor="{color_hex}", shape=circle]'
+        label_str = f'[label=<{samples_str}<br/>{class_str}>, fillcolor="{color_hex}", shape=circle]'
         return label_str
 
 
@@ -44,7 +44,7 @@ class Node:
         samples_str = f"samples = {self.samples}"
         class_str = f"class = {self.largest_class}"
         color_hex = get_color(self.largest_class)
-        label_str = f'[label=<{pivot_str}</br>{samples_str}</br>{class_str}>, fillcolor="{color_hex}", shape=box]'
+        label_str = f'[label=<{pivot_str}<br/>{samples_str}<br/>{class_str}>, fillcolor="{color_hex}", shape=box]'
         return label_str
 
 
@@ -287,4 +287,5 @@ class ExtraTrees:
         normalize = matplotlib.colors.Normalize(vmin=0, vmax=len(self.labels))
         colormap = matplotlib.cm.get_cmap('Spectral')
         index = np.argwhere(self.labels == label)[0]
-        return matplotlib.colors.to_hex(colormap(normalize(index)))
+        color = [min(1, 1.2 * c) for c in colormap(normalize(index))[0]]
+        return matplotlib.colors.to_hex(color)
