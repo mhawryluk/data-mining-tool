@@ -51,13 +51,11 @@ class PreprocessingWidget(UnfoldWidget):
 
         # estimation group
         self.estimate_group = QGroupBox(self.frame)
-        self.estimate_group.setTitle("Estimate missing values")
         self.estimate_group_layout = QFormLayout(self.estimate_group)
-
-        self.estimate_group_todo = QPushButton(self.estimate_group)
-        self.estimate_group_todo.setText("Estimate")
-        self.estimate_group_todo.setMinimumHeight(23)
-        self.estimate_group_layout.addRow(self.estimate_group_todo)
+        self.estimate_manually_button = QPushButton(self.estimate_group)
+        self.estimate_simple_stats_button = QPushButton(self.estimate_group)
+        self.estimate_complex_stats_button = QPushButton(self.estimate_group)
+        self.render_estimation_group()
 
         # automatic reduction group
         self.auto_reduction_group = QGroupBox(self.frame)
@@ -239,3 +237,21 @@ class PreprocessingWidget(UnfoldWidget):
     def show_reduction_results(self):
         self.preview_screen = DataPreviewScreen(self)
         self.preview_screen.show()
+
+    def render_estimation_group(self):
+        self.estimate_group.setTitle("Estimate missing values")
+
+        self.estimate_manually_button.setText("Enter manually")
+        self.estimate_manually_button.setMinimumHeight(23)
+        self.estimate_group_layout.addRow(self.estimate_manually_button)
+        self.estimate_manually_button.clicked.connect(self.engine.manually_estimate)
+
+        self.estimate_simple_stats_button.setText("Use simple set's params")
+        self.estimate_simple_stats_button.setMinimumHeight(23)
+        self.estimate_group_layout.addRow(self.estimate_simple_stats_button)
+        self.estimate_simple_stats_button.clicked.connect(self.engine.simple_stats_estimate)
+
+        self.estimate_complex_stats_button.setText("Use complex set's params")
+        self.estimate_complex_stats_button.setMinimumHeight(23)
+        self.estimate_group_layout.addRow(self.estimate_complex_stats_button)
+        self.estimate_complex_stats_button.clicked.connect(self.engine.complex_stats_estimate)

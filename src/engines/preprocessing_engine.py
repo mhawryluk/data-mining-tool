@@ -59,3 +59,12 @@ class PreprocessingEngine:
     def rename_column(self, index, newHeader):
         data = self.state.imported_data
         self.state.imported_data = data.rename(columns={data.columns[index]: newHeader})
+
+    def manually_estimate(self):
+        print("Manual")
+
+    def simple_stats_estimate(self):
+        print("Simple stats")
+
+    def complex_stats_estimate(self):
+        print("Complex stats")
