@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, 
     QSpinBox
 
 from widgets import UnfoldWidget
-from widgets.tables import DataPreviewScreen
+from widgets.tables import DataPreviewScreen, PreviewReason
 
 
 class PreprocessingWidget(UnfoldWidget):
@@ -53,8 +53,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.estimate_group = QGroupBox(self.frame)
         self.estimate_group_layout = QFormLayout(self.estimate_group)
         self.estimate_manually_button = QPushButton(self.estimate_group)
-        self.estimate_simple_stats_button = QPushButton(self.estimate_group)
-        self.estimate_complex_stats_button = QPushButton(self.estimate_group)
+        self.estimate_automatically_button = QPushButton(self.estimate_group)
         self.render_estimation_group()
 
         # automatic reduction group
@@ -235,7 +234,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction.setDisabled(max_dimensions < 3)
 
     def show_reduction_results(self):
-        self.preview_screen = DataPreviewScreen(self)
+        self.preview_screen = DataPreviewScreen(self, title="Reduction results", reason=PreviewReason.REDUCTION)
         self.preview_screen.show()
 
     def render_estimation_group(self):
@@ -244,14 +243,18 @@ class PreprocessingWidget(UnfoldWidget):
         self.estimate_manually_button.setText("Enter manually")
         self.estimate_manually_button.setMinimumHeight(23)
         self.estimate_group_layout.addRow(self.estimate_manually_button)
-        self.estimate_manually_button.clicked.connect(self.engine.manually_estimate)
+        self.estimate_manually_button.clicked.connect(self.estimate_manually)
 
-        self.estimate_simple_stats_button.setText("Use simple set's params")
-        self.estimate_simple_stats_button.setMinimumHeight(23)
-        self.estimate_group_layout.addRow(self.estimate_simple_stats_button)
-        self.estimate_simple_stats_button.clicked.connect(self.engine.simple_stats_estimate)
+        self.estimate_automatically_button.setText("Mean/mode estimation")
+        self.estimate_automatically_button.setMinimumHeight(23)
+        self.estimate_group_layout.addRow(self.estimate_automatically_button)
+        self.estimate_automatically_button.clicked.connect(self.estimate_with_mean_and_mode)
 
-        self.estimate_complex_stats_button.setText("Use complex set's params")
-        self.estimate_complex_stats_button.setMinimumHeight(23)
-        self.estimate_group_layout.addRow(self.estimate_complex_stats_button)
-        self.estimate_complex_stats_button.clicked.connect(self.engine.complex_stats_estimate)
+    def estimate_manually(self):
+        self.preview_screen = DataPreviewScreen(self, title="Input missing values", reason=PreviewReason.ESTIMATION)
+        self.preview_screen.show()
+
+    def estimate_with_mean_and_mode(self):
+        self.engine.mean_and_mode_estimate()
+        self.preview_screen = DataPreviewScreen(self, title="Estimation results", reason=PreviewReason.PREVIEW)
+        self.preview_screen.show()
