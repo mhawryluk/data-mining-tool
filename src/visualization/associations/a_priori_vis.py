@@ -5,28 +5,8 @@ import pandas as pd
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
     QSpinBox, QPushButton, QLabel, QScrollArea, QSizePolicy, QTableView
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 from widgets import QtTable
-
-
-class APrioriCanvas(FigureCanvasQTAgg):
-    def __init__(self, fig, axes, animation):
-        self.axes = axes
-        self.animation = animation
-        super().__init__(fig)
-
-    def data_plot(self, vector_x, vector_y, name_x, name_y, min_x, max_x, min_y, max_y, drawing=True):
-        self.axes.cla()
-        self.axes.set_xlabel(name_x)
-        self.axes.set_ylabel(name_y)
-        self.axes.set_xlim(min_x, max_x)
-        self.axes.set_ylim(min_y, max_y)
-        self.axes.scatter(x=vector_x, y=vector_y)
-        if drawing:
-            self.draw()
-        if self.animation:
-            return self.axes.collections
 
 
 class APrioriStepsVisualization(QWidget):
@@ -36,20 +16,17 @@ class APrioriStepsVisualization(QWidget):
         self.is_animation = is_animation
         self.is_running = False
         self.animation = None
-
-        self.layout = QVBoxLayout(self)
-
         self.algorithms_steps = algorithms_steps
-
         self.data = data
-
         self.max_step = len(algorithms_steps) - 1
         self.current_step = 0
 
         self.setObjectName("a_priori_steps_visualization")
 
-        # left column layout
+        # layout
+        self.layout = QVBoxLayout(self)
         self.bottom_row_layout = QHBoxLayout()
+        self.bottom_row_layout.setSpacing(35)
 
         # visualization layout
         self.visualization_box = QGroupBox()
@@ -60,8 +37,18 @@ class APrioriStepsVisualization(QWidget):
         self.sets_table = QTableView()
         self.visualization_box_layout.addWidget(self.sets_table, 1)
 
+        # description
+        self.bottom_row_layout.addWidget(self._render_description(), 1)
+
+        # controls
+        self._render_control_ui()
+
+        self.layout.addWidget(self.visualization_box, 5)
+        self.layout.addLayout(self.bottom_row_layout, 1)
+        self.update_plot(0)
+
+    def _render_control_ui(self):
         if self.is_animation:
-            # animation
             self.animation_box = QGroupBox()
             self.animation_box.setTitle("Animation")
             self.animation_box.setFixedWidth(250)
@@ -82,8 +69,10 @@ class APrioriStepsVisualization(QWidget):
             self.animation_box_layout.addRow(self.run_button)
 
             self.bottom_row_layout.addWidget(self.animation_box, 0)
+            self.step_label = QLabel("STEP: {}".format(self.current_step))
+            self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
-        if not self.is_animation:
+        else:
             self.visualization_box_layout.addStretch()
 
             # control buttons
@@ -106,11 +95,8 @@ class APrioriStepsVisualization(QWidget):
             self.control_buttons_layout.addWidget(self.right_button)
 
             self.visualization_box_layout.addLayout(self.control_buttons_layout, 0)
-        else:
-            self.step_label = QLabel("STEP: {}".format(self.current_step))
-            self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
-        # description
+    def _render_description(self):
         description = "A-priori algorithm - steps visualization"
 
         self.description_label = QLabel(description)
@@ -133,13 +119,7 @@ class APrioriStepsVisualization(QWidget):
         self.description_group_box_layout.addWidget(self.scroll)
 
         self.scroll_box_layout.addWidget(self.description_label)
-        self.bottom_row_layout.addWidget(self.description_group_box, 1)
-
-        self.bottom_row_layout.setSpacing(35)
-
-        self.layout.addWidget(self.visualization_box, 5)
-        self.layout.addLayout(self.bottom_row_layout, 1)
-        self.update_plot()
+        return self.description_group_box
 
     def click_listener(self, button_type: str):
         match button_type:
@@ -158,18 +138,6 @@ class APrioriStepsVisualization(QWidget):
                 self.change_enabled_buttons(False)
                 self.interval_box.setEnabled(False)
                 self.restart_button.setEnabled(not self.is_running)
-                # if self.is_running:
-                #     if self.animation is None:
-                #         self.animation = FuncAnimation(self.fig, self.update_plot, frames=self.max_step + 1,
-                #                                        interval=self.interval_box.value(), blit=True,
-                #                                        cache_frame_data=False, repeat=False)
-                #         self.canvas.draw()
-                #     else:
-                #         self.animation.resume()
-                #     self.run_button.setText("Stop animation")
-                # else:
-                #     self.animation.pause()
-                #     self.run_button.setText("Start animation")
 
     def change_enabled_buttons(self, value):
         pass
@@ -183,15 +151,13 @@ class APrioriStepsVisualization(QWidget):
         self.update_plot(self.current_step)
         self.step_label.update()
 
-    def update_plot(self, step: int = -1):
+    def update_plot(self, step: int):
         if step == self.max_step:
             if self.is_animation:
                 self.run_button.setText("Start animation")
                 self.run_button.setEnabled(False)
                 self.is_running = False
                 self.change_enabled_buttons(True)
-        if step == -1:
-            step = self.current_step
-        else:
-            self.current_step = step
-        self.sets_table.setModel(QtTable(self.algorithms_steps[step]))
+
+        self.current_step = step
+        self.sets_table.setModel(QtTable(self.algorithms_steps[self.current_step]))
