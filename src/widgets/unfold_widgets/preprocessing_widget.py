@@ -238,7 +238,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.preview_screen.show()
 
     def render_estimation_group(self):
-        self.estimate_group.setTitle("Estimate missing values")
+        self.estimate_group.setTitle("Fill missing values")
 
         self.estimate_manually_button.setText("Enter manually")
         self.estimate_manually_button.setMinimumHeight(23)
@@ -248,13 +248,13 @@ class PreprocessingWidget(UnfoldWidget):
         self.estimate_automatically_button.setText("Mean/mode estimation")
         self.estimate_automatically_button.setMinimumHeight(23)
         self.estimate_group_layout.addRow(self.estimate_automatically_button)
-        self.estimate_automatically_button.clicked.connect(self.estimate_with_mean_and_mode)
+        self.estimate_automatically_button.clicked.connect(self.estimate_with_mean_or_mode)
 
     def estimate_manually(self):
         self.preview_screen = DataPreviewScreen(self, title="Input missing values", reason=PreviewReason.ESTIMATION)
         self.preview_screen.show()
 
-    def estimate_with_mean_and_mode(self):
-        self.engine.mean_and_mode_estimate()
+    def estimate_with_mean_or_mode(self):
+        self.engine.mean_or_mode_estimate()
         self.preview_screen = DataPreviewScreen(self, title="Estimation results", reason=PreviewReason.PREVIEW)
         self.preview_screen.show()

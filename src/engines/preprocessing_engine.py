@@ -61,11 +61,11 @@ class PreprocessingEngine:
         data = self.state.imported_data
         self.state.imported_data = data.rename(columns={data.columns[index]: newHeader})
 
-    def mean_and_mode_estimate(self):
+    def mean_or_mode_estimate(self):
         missing_data_columns = self.get_columns()[self.state.imported_data.isna().any()].to_list()
         for header in missing_data_columns:
             column = self.state.imported_data.loc[:, header]
             column_type = column.dtypes
-            newValue = column.mean() if is_numeric_dtype(column_type) else column.mode()[0]
-            if newValue is not None:
-                column.fillna(newValue, inplace=True)
+            new_value = column.mean() if is_numeric_dtype(column_type) else column.mode()[0]
+            if new_value is not None:
+                column.fillna(new_value, inplace=True)

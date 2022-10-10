@@ -16,7 +16,7 @@ def fallback():
 
 
 class DataPreviewScreen(QWidget):
-    def __init__(self, widget, title="Data preview", reason: PreviewReason=PreviewReason.PREVIEW):
+    def __init__(self, widget, title="Data preview", reason: PreviewReason = PreviewReason.PREVIEW):
         super().__init__()
         self.parent = widget
         self.engine = self.parent.engine
@@ -27,8 +27,8 @@ class DataPreviewScreen(QWidget):
 
         match reason:
             case PreviewReason.ESTIMATION:
-                self.render_instruction("Double click on a header to fill missing column manually")
-                self.render_instruction("Double click on a table field to fill missing value")
+                self.render_instruction("Double click on a cell to fill in a missing value or on a header to affect "
+                                        "the entire column")
                 self.render_data(self.estimation_header_click, self.estimation_cell_click)
             case PreviewReason.REDUCTION:
                 self.render_instruction("Double click on a header to change column name")
@@ -42,16 +42,16 @@ class DataPreviewScreen(QWidget):
         instruction_widget = QLabel(instruction)
         self.layout.addWidget(instruction_widget)
 
-    def render_data(self, handleHeaderClick, handleCellClick):
+    def render_data(self, handle_header_click, handle_cell_click):
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.data_table.setModel(QtTable(self.engine.state.imported_data))
-        self.data_table.horizontalHeader().sectionDoubleClicked.connect(handleHeaderClick)
-        self.data_table.doubleClicked.connect(handleCellClick)
+        self.data_table.horizontalHeader().sectionDoubleClicked.connect(handle_header_click)
+        self.data_table.doubleClicked.connect(handle_cell_click)
         self.layout.addWidget(self.data_table)
 
     def reduction_header_click(self, index):
         newHeader, ok = QInputDialog.getText(self,
-                                             'Change header label for column %d' % index,
+                                             f'Change header label for column {index}',
                                              'Header:',
                                              QLineEdit.Normal,
                                              "")
@@ -76,7 +76,7 @@ class DataPreviewScreen(QWidget):
         cell = self.data_table.selectionModel().selectedIndexes()[0]
         row, col = cell.row(), cell.column()
         newValue, ok = QInputDialog.getText(self,
-                                            'Default value for cell (%d, %d):'.format(row, col),
+                                            f'Default value for cell ({row}, {col}):',
                                             'Value:',
                                             QLineEdit.Normal,
                                             "")
@@ -91,9 +91,7 @@ class DataPreviewScreen(QWidget):
     def cast_input_type(data_type, value):
         try:
             match data_type:
-                case 'int32':
-                    return int(value)
-                case 'int64':
+                case 'int32' | 'int64':
                     return int(value)
                 case 'float64':
                     return float(value)
