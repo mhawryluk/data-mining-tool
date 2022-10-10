@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import joblib
 from algorithms import check_numeric
-from typing import Tuple, List, Callable
+from typing import Tuple, List, Callable, Optional
 from algorithms import get_threads_count
 
 metrics_types = ['gini', 'entropy']
@@ -50,8 +50,8 @@ class Node:
 
 class DecisionTree:
 
-    def __init__(self, data: pd.DataFrame, label_name: str, features_number: int, min_child_number: int, max_depth: int,
-                 min_metrics: float = 0, metrics_type: metrics_types = 'gini'):
+    def __init__(self, data: pd.DataFrame, label_name: str, features_number: int, min_child_number: int,
+                 max_depth: Optional[int], min_metrics: float = 0., metrics_type: metrics_types = 'gini'):
         self.data = data
         self.label_name = label_name
         self.features_number = features_number
@@ -82,7 +82,7 @@ class DecisionTree:
                     n = np.random.randint(1, len(values))
                     pivot = values.sample(n)
             result = self._split(mask, feature, pivot)
-            if isinstance(result, bool):
+            if result is None:
                 continue
             metrics, left, right = result
             if best_metrics is None or metrics > best_metrics:
@@ -104,15 +104,15 @@ class DecisionTree:
         return node
 
     def _can_be_split(self, mask: pd.Series, depth: int) -> bool:
-        if len(set(self.data[self.label_name][mask])) == 1: # pure node
+        if len(set(self.data[self.label_name][mask])) == 1:  # pure node
             return False
         if self.max_depth is not None and self.max_depth <= depth:
             return False
-        if np.sum(mask) < 2 * self.min_child_number: # or add parameter
+        if np.sum(mask) < 2 * self.min_child_number:
             return False
         return True
 
-    def _split(self, mask: pd.Series, label: str, pivot: any) -> bool | Tuple[float, pd.Series, pd.Series]:
+    def _split(self, mask: pd.Series, label: str, pivot: any) -> Optional[Tuple[float, pd.Series, pd.Series]]:
         def _set_label(row: pd.Series):
             if not mask[row.name]:
                 return 0
@@ -134,26 +134,26 @@ class DecisionTree:
         right_mask = division == 1
         left_mask = division == 2
         if np.sum(left_mask) < self.min_child_number or np.sum(right_mask) < self.min_child_number:
-            return False
+            return None
 
         metrics = self._calculate_metrics(mask, left_mask, right_mask)
 
         if metrics < self.min_metrics:
-            return False
+            return None
 
         return metrics, left_mask, right_mask
 
     def _calculate_metrics(self, mask: pd.Series, left_mask: pd.Series, right_mask: pd.Series) -> float:
-        if self.metrics_type == 'gini':
-            parent = self._calculate_gini(mask)
-            left = self._calculate_gini(left_mask)
-            right = self._calculate_gini(right_mask)
-        elif self.metrics_type == 'entropy':
-            parent = self._calculate_gini(mask)
-            left = self._calculate_gini(left_mask)
-            right = self._calculate_gini(right_mask)
-        else:
-            raise ValueError(f"'{self.metrics_type}' is not valid type of metrics")
+        match self.metrics_type:
+            case 'gini':
+                metrics_func = self._calculate_gini
+            case 'entropy':
+                metrics_func = self._calculate_entropy
+            case _:
+                raise ValueError(f"'{self.metrics_type}' is not valid type of metrics")
+        parent = metrics_func(mask)
+        left = metrics_func(left_mask)
+        right = metrics_func(right_mask)
         split = np.sum(left_mask) * left + np.sum(right_mask) * right
         decrease = (np.sum(mask) * parent - split) / len(mask)
         return decrease
@@ -175,7 +175,8 @@ class DecisionTree:
             node = self.next_node(record, node)
         return node.prediction
 
-    def next_node(self, record: pd.Series, node: Node) -> Node | Leaf:
+    @staticmethod
+    def next_node(record: pd.Series, node: Node) -> Node | Leaf:
         value = record[node.label]
         pivot = node.pivot
         if isinstance(pivot, bool) or isinstance(pivot, str):
@@ -213,9 +214,9 @@ class DecisionTree:
             if side is None:
                 rows.append(f"{num_from} -> {num_next} [width=3] ;")
             elif side:
-                rows.append(f"{num_from} -> {num_next} [color=lime, width=3, headlabel={str(side)}] ;")
+                rows.append(f"{num_from} -> {num_next} [color=deepskyblue, width=3, headlabel={str(side)}] ;")
             else:
-                rows.append(f"{num_from} -> {num_next} [color=red, width=3, headlabel={str(side)}] ;")
+                rows.append(f"{num_from} -> {num_next} [color=orange, width=3, headlabel={str(side)}] ;")
             if isinstance(node_next, Node):
                 make_next_row(num_next, node_next.left, False)
                 make_next_row(num_next, node_next.right, True)
@@ -229,7 +230,6 @@ class DecisionTree:
         dot_str = (
             "digraph Tree {\n"
             'node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;\n'
-            'edge [fontname="helvetica"] ;\n'
             f"{rows_str}\n"
             "}"
         )
@@ -238,18 +238,19 @@ class DecisionTree:
 
 class ExtraTrees:
 
-    def __init__(self, data: pd.DataFrame, forest_size: int, **kwargs):
+    def __init__(self, data: pd.DataFrame, forest_size: int, **tree_parameters):
         self.data = data
         self.forest_size = forest_size
         self.forest = None
-        self.kwargs = kwargs
+        self.tree_parameters = tree_parameters
         self.feature_importance = None
-        self.labels = np.array(list(set(self.data[kwargs['label_name']])))
+        self.labels = np.array(list(set(self.data[tree_parameters['label_name']])))
 
     def get_config(self):
-        return [(column, self.data[column].dtype) for column in self.data.columns if column != self.kwargs['label_name']]
+        return [(column, self.data[column].dtype) for column in self.data.columns.drop(self.tree_parameters['label_name'])]
 
-    def _split_int_to_array(self, num: int, div: int) -> List[int]:
+    @staticmethod
+    def _split_int_to_array(num: int, div: int) -> List[int]:
         greater = num % div
         lower = div - greater
         value = num // div
@@ -257,7 +258,7 @@ class ExtraTrees:
 
     def run(self, *args):
         def do_job(num):
-            forest = [DecisionTree(self.data, **self.kwargs) for _ in range(num)]
+            forest = [DecisionTree(self.data, **self.tree_parameters) for _ in range(num)]
             feature_importance = pd.DataFrame([tree.calculate_importance() for tree in forest])
             return forest, feature_importance
 
@@ -279,9 +280,6 @@ class ExtraTrees:
 
     def get_steps(self) -> list:
         return [tree.graphviz_str(self.get_color) for tree in self.forest]
-
-    def get_feature_importance(self) -> list:
-        return self.feature_importance
 
     def get_color(self, label: str) -> str:
         normalize = matplotlib.colors.Normalize(vmin=0, vmax=len(self.labels))

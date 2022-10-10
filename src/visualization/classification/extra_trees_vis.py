@@ -39,8 +39,8 @@ class ExtraTreesStepsVisualization(QWidget):
         self.left_button.clicked.connect(partial(self.click_listener, 'prev'))
         self.right_button = QPushButton("NEXT")
         self.right_button.clicked.connect(partial(self.click_listener, 'next'))
-        self.num_label = QLabel(f"Actual graph: {self.current_graph}")
-        self.description = QLabel("Red -> FALSE\nGreen -> TRUE")
+        self.num_label = QLabel(f"Tree {self.current_graph}")
+        self.description = QLabel("Orange -> FALSE\nBlue -> TRUE")
         self.random_button = QPushButton("Random graph")
         self.random_button.clicked.connect(partial(self.click_listener, 'random'))
         self.control_panel_layout.addWidget(self.description)
@@ -65,7 +65,7 @@ class ExtraTreesStepsVisualization(QWidget):
         if data is None:
             return {}
         res = {}
-        params = data.split(', ') if ', ' in data else data
+        params = data.split(', ')
         for param in params:
             key, value = param.split('=', 1)
             if key == 'fillcolor':
@@ -83,10 +83,10 @@ class ExtraTreesStepsVisualization(QWidget):
         lines = data.split('{', 1)[1].rsplit('}', 1)[0].split('\n')
         qgv = QGraphViz(auto_freeze=True, hilight_Nodes=True)
         qgv.setStyleSheet("background-color:white;")
-        qgv.new(Dot(Graph("graph", graph_type=GraphType.DirectedGraph), font=QFont("Arial", 12), margins=[10, 500]))
+        qgv.new(Dot(Graph("graph", graph_type=GraphType.DirectedGraph), font=QFont("Helvetica", 12), margins=[10, 500]))
         nodes = {}
         for line in lines:
-            if len(line) == 0:
+            if not line:
                 continue
             if line.startswith('node') or line.startswith('edge'):
                 continue
@@ -101,7 +101,7 @@ class ExtraTreesStepsVisualization(QWidget):
                 node = value_list[0]
                 param_dict = self.dict_of_param(param)
                 if 'label' in param_dict.keys():
-                    label_lines = param_dict["label"].split('\n') if '\n' in param_dict["label"] else [param_dict["label"]]
+                    label_lines = param_dict["label"].split('\n')
                     max_len = max(label_lines, key=len)
                     rect = qgv.engine.fm.boundingRect(max_len)
                     width = rect.width() + 20
@@ -128,20 +128,18 @@ class ExtraTreesStepsVisualization(QWidget):
                 if new_graph == self.current_graph:
                     return
                 self.current_graph = new_graph
-                self.update_graph()
             case 'prev':
                 new_graph = max(1, self.current_graph - 1)
                 if new_graph == self.current_graph:
                     return
                 self.current_graph = new_graph
-                self.update_graph()
             case 'random':
                 self.current_graph = randint(1, len(self.graphs))
-                self.update_graph()
+        self.update_graph()
 
     def update_graph(self):
         for i in reversed(range(self.graph_group_layout.count())):
             self.graph_group_layout.itemAt(i).widget().setParent(None)
         self.graph_group_layout.addWidget(self.graphs[self.current_graph - 1])
-        self.num_label.setText(f"Actual graph: {self.current_graph}")
+        self.num_label.setText(f"Tree {self.current_graph}")
         self.num_label.update()

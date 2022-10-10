@@ -61,6 +61,7 @@ class ExtraTreesResultsWidget(QWidget):
         self.prediction_layout.addRow(self.scroll)
 
         self.layout.addWidget(self.prediction_group)
+
     def click_listener(self, button_type: str):
         match button_type:
             case 'predict':
