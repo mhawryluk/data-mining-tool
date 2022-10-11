@@ -59,17 +59,31 @@ class PreprocessingWidget(UnfoldWidget):
         self.estimate_group_todo.setMinimumHeight(23)
         self.estimate_group_layout.addRow(self.estimate_group_todo)
 
+        # initialize reduction results screen
+        self.preview_screen = None
+
         # automatic reduction group
         self.auto_reduction_group = QGroupBox(self.frame)
         self.auto_reduction_group.setTitle("Reduce dimensions")
         self.auto_reduction_group_layout = QFormLayout(self.auto_reduction_group)
 
-        # initialize reduction results screen
-        self.preview_screen = None
-
         self.num_dimensions_spinbox = QSpinBox()
         self.manual_reduction = QPushButton(self.auto_reduction_group)
         self.auto_reduction = QPushButton(self.auto_reduction_group)
+
+        self.num_dimensions_spinbox.setMinimum(2)
+        self.num_dimensions_spinbox.setValue(2)
+        self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions"), self.num_dimensions_spinbox)
+
+        self.manual_reduction.setText("Reduce with fixed number")
+        self.manual_reduction.setMinimumHeight(23)
+        self.auto_reduction_group_layout.addRow(self.manual_reduction)
+        self.manual_reduction.clicked.connect(lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value()))
+
+        self.auto_reduction.setText("Reduce dynamically")
+        self.auto_reduction.setMinimumHeight(23)
+        self.auto_reduction_group_layout.addRow(self.auto_reduction)
+        self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions())
 
         # plot stats window
         self.plot_widget = QGroupBox(self.frame)
@@ -147,7 +161,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.engine.clean_data("cast")
 
         max_dimensions = self.engine.number_of_numeric_columns()
-        self.render_reduction_group(max_dimensions)
+        self.set_reduction_bounds(max_dimensions)
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
@@ -209,31 +223,13 @@ class PreprocessingWidget(UnfoldWidget):
         self.data_submitted = "OK" in button.text()
 
     def reduce_dimensions(self, dim_number=None):
-        self.manual_reduction.clicked.disconnect()
-        self.auto_reduction.clicked.disconnect()
         self.engine.reduce_dimensions(dim_number)
         self.get_data()
         self.show_reduction_results()
 
-    def render_reduction_group(self, max_dimensions):
-        for i in reversed(range(self.auto_reduction_group_layout.count())):
-            self.auto_reduction_group_layout.itemAt(i).widget().setParent(None)
-
-        self.num_dimensions_spinbox.setMinimum(2)
+    def set_reduction_bounds(self, max_dimensions):
         self.num_dimensions_spinbox.setMaximum(max_dimensions - 1)
-        self.num_dimensions_spinbox.setValue(2)
-        self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions"), self.num_dimensions_spinbox)
-
-        self.manual_reduction.setText("Reduce with fixed number")
-        self.manual_reduction.setMinimumHeight(23)
-        self.auto_reduction_group_layout.addRow(self.manual_reduction)
-        self.manual_reduction.clicked.connect(lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value()))
         self.manual_reduction.setDisabled(max_dimensions < 3)
-
-        self.auto_reduction.setText("Reduce dynamically")
-        self.auto_reduction.setMinimumHeight(23)
-        self.auto_reduction_group_layout.addRow(self.auto_reduction)
-        self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions())
         self.auto_reduction.setDisabled(max_dimensions < 3)
 
     def show_reduction_results(self):
