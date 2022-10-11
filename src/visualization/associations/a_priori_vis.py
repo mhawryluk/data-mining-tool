@@ -138,6 +138,11 @@ class APrioriStepsVisualization(QWidget):
                 self.change_enabled_buttons(False)
                 self.interval_box.setEnabled(False)
                 self.restart_button.setEnabled(not self.is_running)
+                self.restart_button.setEnabled(not self.is_running)
+                if self.is_running:
+                    self.run_button.setText("Stop animation")
+                else:
+                    self.run_button.setText("Start animation")
 
     def change_enabled_buttons(self, value):
         pass

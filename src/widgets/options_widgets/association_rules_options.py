@@ -33,4 +33,5 @@ class AssociationRulesOptions(Options):
         }
 
     def set_columns_options(self, columns: List[str]):
+        self.index_columns_combobox.clear()
         self.index_columns_combobox.addItems(columns)
