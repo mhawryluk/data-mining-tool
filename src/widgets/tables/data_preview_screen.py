@@ -60,31 +60,32 @@ class DataPreviewScreen(QWidget):
             self.data_table.setModel(QtTable(self.engine.state.imported_data))
 
     def estimation_header_click(self, index):
-        newValue, ok = QInputDialog.getText(self,
-                                            'Default value for column %d:' % index,
-                                            'Value:',
-                                            QLineEdit.Normal,
-                                            "")
+        print(self.engine.state.imported_data.dtypes)
+        new_value, ok = QInputDialog.getText(self,
+                                             f'Default value for column {index}:',
+                                             'Value:',
+                                             QLineEdit.Normal,
+                                             "")
         if ok:
             column = self.engine.state.imported_data.iloc[:, index]
-            newValue = self.cast_input_type(column.dtype, newValue)
-            if newValue is not None:
-                column.fillna(newValue, inplace=True)
+            new_value = self.cast_input_type(column.dtype, new_value)
+            if new_value is not None:
+                column.fillna(new_value, inplace=True)
             self.data_table.setModel(QtTable(self.engine.state.imported_data))
 
     def estimation_cell_click(self):
         cell = self.data_table.selectionModel().selectedIndexes()[0]
         row, col = cell.row(), cell.column()
-        newValue, ok = QInputDialog.getText(self,
-                                            f'Default value for cell ({row}, {col}):',
-                                            'Value:',
-                                            QLineEdit.Normal,
-                                            "")
+        new_value, ok = QInputDialog.getText(self,
+                                             f'Default value for cell ({row}, {col}):',
+                                             'Value:',
+                                             QLineEdit.Normal,
+                                             "")
         if ok:
             column = self.engine.state.imported_data.iloc[:, col]
-            newValue = self.cast_input_type(column.dtype, newValue)
-            if newValue is not None:
-                self.engine.state.imported_data.iloc[row, col] = newValue
+            new_value = self.cast_input_type(column.dtype, new_value)
+            if new_value is not None:
+                self.engine.state.imported_data.iloc[row, col] = new_value
             self.data_table.setModel(QtTable(self.engine.state.imported_data))
 
     @staticmethod
