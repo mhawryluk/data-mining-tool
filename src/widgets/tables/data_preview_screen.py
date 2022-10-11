@@ -60,7 +60,6 @@ class DataPreviewScreen(QWidget):
             self.data_table.setModel(QtTable(self.engine.state.imported_data))
 
     def estimation_header_click(self, index):
-        print(self.engine.state.imported_data.dtypes)
         new_value, ok = QInputDialog.getText(self,
                                              f'Default value for column {index}:',
                                              'Value:',
