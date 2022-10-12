@@ -46,8 +46,11 @@ class APriori:
         return self.saved_steps
 
     def _get_frequent_set_pd(self, frequent_sets: dict):
-        return pd.DataFrame.from_dict(
-            {", ".join(frequent_set): round(self.support(frequent_set), 3) for frequent_set, support in frequent_sets.items()},
+        return pd.DataFrame.from_dict({
+            ", ".join(frequent_set): round(self.support(frequent_set), 3)
+            for frequent_set, support
+            in frequent_sets.items()
+        },
             orient="index",
             columns=["support"]
         ).sort_values(by="support", ascending=False)
@@ -62,7 +65,7 @@ class APriori:
 
         new_item_sets = []
         for frequent_set_1, frequent_set_2 in combinations(frequent_sets, 2):
-            if not (frequent_set_1[:-1] == frequent_set_1[:-1] and frequent_set_1[-1] < frequent_set_2[-1]):
+            if not (frequent_set_1[:-1] == frequent_set_2[:-1] and frequent_set_1[-1] < frequent_set_2[-1]):
                 continue
 
             new_item_set = self.join(frequent_set_1, frequent_set_2)
@@ -90,7 +93,8 @@ class APriori:
         return count / len(self.transaction_sets)
 
     def confidence(self, item_set_a: tuple, item_set_b: tuple) -> float:  # a => b
-        return self.all_frequent_sets[tuple(sorted(set(item_set_a) | set(item_set_b)))] / self.all_frequent_sets[item_set_a]
+        return self.all_frequent_sets[tuple(sorted(set(item_set_a) | set(item_set_b)))] \
+               / self.all_frequent_sets[item_set_a]
 
     @staticmethod
     def get_all_subsets(item_set: tuple):
@@ -106,4 +110,6 @@ class APriori:
                 if (confidence := self.confidence(subset_a, subset_b)) > self.min_confidence:
                     rules[f"{', '.join(subset_a)} => {', '.join(subset_b)}"] = round(confidence, 3)
 
-        return pd.DataFrame.from_dict(rules, orient="index", columns=["confidence"])
+        return pd.DataFrame.from_dict(
+            rules, orient="index", columns=["confidence"]
+        ).sort_values(by="confidence", ascending=False)
