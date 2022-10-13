@@ -1,29 +1,158 @@
 from functools import partial
 from random import randint
 
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QGroupBox
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QGroupBox, QTableView, QFormLayout, \
+    QSpinBox
 import numpy as np
 import pandas as pd
 import pygraphviz as pgv
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 import QGraphViz
 from QGraphViz.Engines import Dot
 from QGraphViz.QGraphViz import QGraphViz
 from QGraphViz.DotParser import Graph, GraphType
 
+import graphviz
+
+from widgets import QtTable
+
+
+class StepWidget(QWidget):
+    def __init__(self, graph: QWidget, info: Optional[List] = None):
+        super().__init__()
+        self.graph = graph
+        self.info = info
+        self.layout = QHBoxLayout(self)
+
+        if self.info:
+            self.table_info = QTableView()
+            self.table_info.setModel(QtTable(pd.DataFrame(self.info)))
+            self.layout.addWidget(self.table_info)
+        self.layout.addWidget(self.graph)
+
+
+class TreeStepsVisualization(QWidget):
+    def __init__(self, widget: QWidget, node_info: Dict, dot_steps: List[str], is_animation: bool):
+        super().__init__()
+        self.parent = widget
+        self.node_info = node_info
+        self.dot_steps = dot_steps
+        self.max_steps = len(self.dot_steps)
+        self.is_animation = is_animation
+        self.current_step = 0
+
+        self.layout = QVBoxLayout(self)
+
+        self.step_group = QGroupBox()
+        self.step_group.setTitle("Step graph")
+        self.step_group_layout = QVBoxLayout(self.step_group)
+        self.step_group_layout.addWidget(self.create_step_graph(self.current_step))
+        self.layout.addWidget(self.step_group, 1)
+
+        if self.is_animation:
+            # animation
+            self.animation_box = QGroupBox()
+            self.animation_box.setTitle("Animation")
+            self.animation_box.setFixedWidth(250)
+            self.animation_box_layout = QFormLayout(self.animation_box)
+
+            self.restart_button = QPushButton("Restart")
+            self.restart_button.clicked.connect(partial(self.click_listener, 'restart'))
+            self.run_button = QPushButton("Start animation")
+            self.run_button.clicked.connect(partial(self.click_listener, 'run'))
+            self.interval_box = QSpinBox()
+            self.interval_box.setMinimum(20)
+            self.interval_box.setMaximum(2000)
+            self.interval_box.setValue(200)
+            self.interval_box.setSingleStep(20)
+
+            self.animation_box_layout.addRow(QLabel("Interval time [ms]:"), self.interval_box)
+            self.animation_box_layout.addRow(self.restart_button)
+            self.animation_box_layout.addRow(self.run_button)
+
+            self.layout.addWidget(self.animation_box, 0)
+
+        if not self.is_animation:
+            # control buttons
+            self.control_buttons_layout = QHBoxLayout()
+            self.left_box = QSpinBox()
+            self.left_box.setMinimum(1)
+            self.right_box = QSpinBox()
+            self.right_box.setMinimum(1)
+            self.left_button = QPushButton("PREV")
+            self.left_button.clicked.connect(partial(self.click_listener, 'prev'))
+            self.right_button = QPushButton("NEXT")
+            self.right_button.clicked.connect(partial(self.click_listener, 'next'))
+            self.step_label = QLabel("STEP: {}".format(self.current_step))
+            self.control_buttons_layout.addWidget(self.left_button)
+            self.control_buttons_layout.addWidget(self.left_box)
+            self.control_buttons_layout.addStretch()
+            self.control_buttons_layout.addWidget(self.step_label)
+            self.control_buttons_layout.addStretch()
+            self.control_buttons_layout.addWidget(self.right_box)
+            self.control_buttons_layout.addWidget(self.right_button)
+
+            self.layout.addLayout(self.control_buttons_layout, 0)
+        else:
+            self.step_label = QLabel("STEP: {}".format(self.current_step))
+            self.layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
+
+    def create_step_graph(self, step_num: int):
+        if step_num % 2 == 0:
+            info = self.node_info[step_num // 2]
+        else:
+            info = None
+        graph = graphviz.Source(self.dot_steps[step_num])
+        graph.render("tmp/graph", format="png")
+        label = QLabel()
+        pixmap = QPixmap("tmp/graph.png")
+        label.setPixmap(pixmap)
+        return StepWidget(label, info)
+
+    def update_step(self):
+        for i in reversed(range(self.step_group_layout.count())):
+            self.step_group_layout.itemAt(i).widget().setParent(None)
+        self.step_group_layout.addWidget(self.create_step_graph(self.current_step))
+
+        self.step_label.setText("STEP: {}".format(self.current_step))
+        self.step_label.update()
+
+    def click_listener(self, button_type: str):
+        match button_type:
+            case 'prev':
+                num = self.left_box.value()
+                self.change_step(-1 * num)
+            case 'next':
+                num = self.right_box.value()
+                self.change_step(num)
+            case 'restart':
+                pass
+            case 'run':
+                pass
+
+    def change_step(self, delta: int):
+        new_step = delta + self.current_step
+        new_step = max(0, min(new_step, self.max_steps - 1))
+        if new_step == self.current_step:
+            return
+        self.current_step = new_step
+        self.update_step()
+
 
 class ExtraTreesStepsVisualization(QWidget):
-    def __init__(self, data: pd.DataFrame, algorithms_steps: List[str], is_animation: bool):
+    def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[str, Dict, List[str]]], is_animation: bool):
         super().__init__()
 
+        self.steps_window = None
         self.data = data
         self.steps = algorithms_steps
         self.is_animation = is_animation
 
         self.layout = QVBoxLayout(self)
-        self.graphs = [self.make_graph(dot_string) for dot_string in self.steps]
+        self.graphs = [self.make_graph(dot_string) for dot_string, _, _ in self.steps]
         self.current_graph = 1
 
         # graph section
@@ -43,16 +172,20 @@ class ExtraTreesStepsVisualization(QWidget):
         self.description = QLabel("Orange -> FALSE\nBlue -> TRUE")
         self.random_button = QPushButton("Random graph")
         self.random_button.clicked.connect(partial(self.click_listener, 'random'))
+        self.steps_button = QPushButton("Creation steps")
+        self.steps_button.clicked.connect(partial(self.click_listener, 'steps'))
         self.control_panel_layout.addWidget(self.description)
         self.control_panel_layout.addStretch()
         self.control_panel_layout.addWidget(self.num_label)
         self.control_panel_layout.addStretch()
-        self.control_panel_layout.addWidget(self.left_button)
+        self.control_panel_layout.addWidget(self.steps_button)
         self.control_panel_layout.addWidget(self.random_button)
+        self.control_panel_layout.addWidget(self.left_button)
         self.control_panel_layout.addWidget(self.right_button)
         self.layout.addLayout(self.control_panel_layout, 0)
 
-    def postprocess_label(self, label: Optional[str]):
+    @staticmethod
+    def postprocess_label(label: Optional[str]):
         if label is None:
             return ''
         label = label[1:-1]
@@ -83,7 +216,7 @@ class ExtraTreesStepsVisualization(QWidget):
         lines = data.split('{', 1)[1].rsplit('}', 1)[0].split('\n')
         qgv = QGraphViz(auto_freeze=True, hilight_Nodes=True)
         qgv.setStyleSheet("background-color:white;")
-        qgv.new(Dot(Graph("graph", graph_type=GraphType.DirectedGraph), font=QFont("Helvetica", 12), margins=[10, 500]))
+        qgv.new(Dot(Graph("graph", graph_type=GraphType.DirectedGraph), font=QFont("Helvetica", 12), margins=[20, 20]))
         nodes = {}
         for line in lines:
             if not line:
@@ -123,6 +256,11 @@ class ExtraTreesStepsVisualization(QWidget):
 
     def click_listener(self, button_type: str):
         match button_type:
+            case 'steps':
+                data = self.steps[self.current_graph - 1]
+                self.steps_window = TreeStepsVisualization(self, data[1], data[2], self.is_animation)
+                self.steps_window.show()
+                return
             case 'next':
                 new_graph = min(len(self.graphs), self.current_graph + 1)
                 if new_graph == self.current_graph:

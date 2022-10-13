@@ -3,16 +3,18 @@ import numpy as np
 import pandas as pd
 import joblib
 from algorithms import check_numeric
-from typing import Tuple, List, Callable, Optional
+from typing import Tuple, List, Callable, Optional, Dict
 from algorithms import get_threads_count
+from collections import deque
 
 metrics_types = ['gini', 'entropy']
 
 
 class Leaf:
-    def __init__(self, data: pd.Series):
+    def __init__(self, data: pd.Series, info: Optional[List] = None):
         self.prediction = data.value_counts().index[0]
         self.samples = len(data)
+        self.info = info
 
     def graphviz_label(self, get_color: Callable) -> str:
         samples_str = f"samples = {self.samples}"
@@ -23,7 +25,7 @@ class Leaf:
 
 
 class Node:
-    def __init__(self, label: str, pivot: any):
+    def __init__(self, label: str, pivot: any, info: Optional[List] = None):
         self.label = label
         self.pivot = pivot
         self.importance = 0
@@ -31,6 +33,7 @@ class Node:
         self.largest_class = None
         self.left = None
         self.right = None
+        self.info = info
 
     def graphviz_label(self, get_color: Callable) -> str:
         if isinstance(self.pivot, bool) or isinstance(self.pivot, str):
@@ -47,12 +50,19 @@ class Node:
         label_str = f'[label=<{pivot_str}<br/>{samples_str}<br/>{class_str}>, fillcolor="{color_hex}", shape=box]'
         return label_str
 
+    def simple_graphviz_label(self, color: str) -> str:
+        samples_str = f"samples = {self.samples}"
+        class_str = f"class = {self.largest_class}"
+        label_str = f'[label=<{samples_str}<br/>{class_str}>, fillcolor="{color}", shape=box]'
+        return label_str
+
 
 class DecisionTree:
 
-    def __init__(self, data: pd.DataFrame, label_name: str, features_number: int, min_child_number: int,
+    def __init__(self, data: pd.DataFrame, with_steps: bool, label_name: str, features_number: int, min_child_number: int,
                  max_depth: Optional[int], min_metrics: float = 0., metrics_type: metrics_types = 'gini'):
         self.data = data
+        self.with_steps = with_steps
         self.label_name = label_name
         self.features_number = features_number
         self.min_child_number = min_child_number
@@ -71,6 +81,10 @@ class DecisionTree:
         right_mask = None
         best_feature = None
         best_pivot = None
+        if self.with_steps:
+            choose_info = []
+        else:
+            choose_info = None
         for feature in features:
             values = pd.Series(list(set(self.data[feature][mask])))
             if check_numeric(self.data[feature]):
@@ -83,8 +97,12 @@ class DecisionTree:
                     pivot = values.sample(n)
             result = self._split(mask, feature, pivot)
             if result is None:
+                if self.with_steps:
+                    choose_info.append([feature, pivot, None])
                 continue
             metrics, left, right = result
+            if self.with_steps:
+                choose_info.append([feature, pivot, metrics])
             if best_metrics is None or metrics > best_metrics:
                 best_metrics = metrics
                 left_mask = left
@@ -93,9 +111,9 @@ class DecisionTree:
                 best_pivot = pivot
 
         if best_metrics is None:
-            return Leaf(self.data[self.label_name][mask])
+            return Leaf(self.data[self.label_name][mask], choose_info)
 
-        node = Node(best_feature, best_pivot)
+        node = Node(best_feature, best_pivot, choose_info)
         node.importance = best_metrics
         node.left = self.create_node(left_mask, depth + 1)
         node.right = self.create_node(right_mask, depth + 1)
@@ -205,23 +223,24 @@ class DecisionTree:
         values = values / np.sum(values)
         return values
 
-    def graphviz_str(self, get_color: Callable) -> str:
+    def graphviz_str(self, get_color: Callable) -> Tuple[str, Dict, List]:
         def make_next_row(num_from, node_next, side=None):
-            # global idx
             idx[0] += 1
             num_next = idx[0]
             rows.append(f"{num_next} {node_next.graphviz_label(get_color)} ;")
+            creation_info[num_next] = node_next.info
             if side is None:
                 rows.append(f"{num_from} -> {num_next} [width=3] ;")
             elif side:
-                rows.append(f"{num_from} -> {num_next} [color=deepskyblue, width=3, headlabel={str(side)}] ;")
+                rows.append(f"{num_from} -> {num_next} [color=deepskyblue, width=3] ;")
             else:
-                rows.append(f"{num_from} -> {num_next} [color=orange, width=3, headlabel={str(side)}] ;")
+                rows.append(f"{num_from} -> {num_next} [color=orange, width=3] ;")
             if isinstance(node_next, Node):
                 make_next_row(num_next, node_next.left, False)
                 make_next_row(num_next, node_next.right, True)
 
         rows = [f"0 {self.root.graphviz_label(get_color)} ;"]
+        creation_info = {0: self.root.info}
         idx = [0]
         if isinstance(self.root, Node):
             make_next_row(0, self.root.left, False)
@@ -233,7 +252,55 @@ class DecisionTree:
             f"{rows_str}\n"
             "}"
         )
+        if len(rows) == 1:
+            creation_steps = [dot_str]
+        else:
+            creation_steps = self.creation_steps(get_color)
+        return dot_str, creation_info, creation_steps
+
+    @staticmethod
+    def make_string(rows: List, nodes: Dict) -> str:
+        rows_str = "\n".join(list(nodes.values()) + rows)
+        rows_str = rows_str.replace('shape=circle', 'shape=ellipse')
+        dot_str = (
+            "digraph Tree {\n"
+            'node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;\n'
+            f"{rows_str}\n"
+            "}"
+        )
         return dot_str
+
+    def creation_steps(self, get_color: Callable) -> List[str]:
+        steps = []
+        nodes = {}
+        rows = []
+        queue = deque()
+        idx = 0
+        queue.append((self.root, idx))
+        idx += 1
+        while len(queue):
+            node, i = queue.popleft()
+            nodes[i] = f"{i} {self.root.simple_graphviz_label('blue')} ;"
+            steps.append(self.make_string(rows, nodes))
+
+            nodes[i] = f"{i} {self.root.graphviz_label(get_color)} ;"
+            left = idx
+            right = idx + 1
+            idx += 2
+            rows.append(f"{i} -> {left} [color=orange, width=3] ;")
+            rows.append(f"{i} -> {right} [color=deepskyblue, width=3] ;")
+            if isinstance(node.left, Node):
+                nodes[left] = f"{left} {node.left.simple_graphviz_label('orange')} ;"
+                queue.append((node.left, left))
+            else:
+                nodes[left] = f"{left} {node.left.graphviz_label(get_color)} ;"
+            if isinstance(node.right, Node):
+                nodes[right] = f"{right} {node.right.simple_graphviz_label('orange')} ;"
+                queue.append((node.right, right))
+            else:
+                nodes[right] = f"{right} {node.right.graphviz_label(get_color)} ;"
+            steps.append(self.make_string(rows, nodes))
+        return steps
 
 
 class ExtraTrees:
@@ -256,9 +323,9 @@ class ExtraTrees:
         value = num // div
         return [value + 1] * greater + [value] * lower
 
-    def run(self, *args):
+    def run(self, with_steps: bool):
         def do_job(num):
-            forest = [DecisionTree(self.data, **self.tree_parameters) for _ in range(num)]
+            forest = [DecisionTree(self.data, with_steps=with_steps, **self.tree_parameters) for _ in range(num)]
             feature_importance = pd.DataFrame([tree.calculate_importance() for tree in forest])
             return forest, feature_importance
 
@@ -278,7 +345,7 @@ class ExtraTrees:
         result.sort_values(ascending=False, inplace=True)
         return result
 
-    def get_steps(self) -> list:
+    def get_steps(self) -> List:
         return [tree.graphviz_str(self.get_color) for tree in self.forest]
 
     def get_color(self, label: str) -> str:
