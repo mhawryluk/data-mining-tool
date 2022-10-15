@@ -5,9 +5,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFormLayout, QLabel, QSpinBox, QPushButton, \
     QComboBox, QScrollArea, QSizePolicy
 from algorithms import get_samples
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, transforms
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+
+from matplotlib.patches import Ellipse
 
 
 class GMMCanvas(FigureCanvasQTAgg):
@@ -28,8 +30,8 @@ class GMMCanvas(FigureCanvasQTAgg):
         if self.animation:
             return self.axes.collections
 
-    def clusters_plot(self, vector_x, vector_y, labels, max_label, name_x, name_y, min_x, max_x, min_y, max_y,
-                      drawing=True):
+    def clusters_plot(self, vector_x, vector_y, columns, mean, sigma, labels, max_label, name_x, name_y, min_x, max_x,
+                      min_y, max_y, drawing=True):
         self.axes.cla()
         label = [labels[i] for i in range(len(vector_x))]
         self.axes.set_xlabel(name_x)
@@ -37,6 +39,32 @@ class GMMCanvas(FigureCanvasQTAgg):
         self.axes.set_xlim(min_x, max_x)
         self.axes.set_ylim(min_y, max_y)
         self.axes.scatter(vector_x, vector_y, c=label, cmap='gist_rainbow', vmin=0, vmax=max_label)
+        x_index, y_index = [columns.index(name_x), columns.index(name_y)]
+        for i in range(len(mean)):
+            mean_i = [mean[i][x_index], mean[i][y_index]]
+            sigma_i = [
+                [sigma[i][x_index][x_index], sigma[i][x_index][y_index]],
+                [sigma[i][y_index][x_index], sigma[i][y_index][y_index]],
+            ]
+            self.axes.scatter(mean_i[0], mean_i[1], c=i, cmap='gist_rainbow', marker='s', vmin=0, vmax=max_label)
+
+            # ellipse drawing
+            n_std = 3.0
+            pearson = sigma_i[0][1] / np.sqrt(sigma_i[0][0] * sigma_i[1][1])
+            ell_radius_x = np.sqrt(1 + pearson)
+            ell_radius_y = np.sqrt(1 - pearson)
+            cmap = plt.get_cmap('gist_rainbow')
+            ellipse = Ellipse((0, 0), width=ell_radius_x * 2, height=ell_radius_y * 2,
+                              edgecolor=cmap(i/max_label), facecolor='none')
+            scale_x = np.sqrt(sigma_i[0][0]) * n_std
+            scale_y = np.sqrt(sigma_i[1][1]) * n_std
+            transf = transforms.Affine2D() \
+                .rotate_deg(45) \
+                .scale(scale_x, scale_y) \
+                .translate(mean_i[0], mean_i[1])
+            ellipse.set_transform(transf + self.axes.transData)
+            self.axes.add_patch(ellipse)
+
         if drawing:
             self.draw()
         if self.animation:
@@ -54,19 +82,19 @@ class GMMStepsVisualization(QWidget):
         self.is_running = False
         self.animation = None
 
-        columns = self.df.columns
+        self.columns = self.df.columns
 
         self.layout = QHBoxLayout(self)
 
-        self.num_cluster = np.amax(self.algorithm_steps[0]) + 1
+        self.num_cluster = np.amax(self.algorithm_steps[0][0]) + 1
 
         self.max_step = len(self.algorithm_steps) - 1
         self.current_step = 0
         self.num_samples = min(35, self.df.shape[0] // 2)
         self.samples = get_samples(self.df, self.num_samples)
 
-        self.ox = columns[0]
-        self.oy = columns[0] if len(columns) < 2 else columns[1]
+        self.ox = self.columns[0]
+        self.oy = self.columns[0] if len(self.columns) < 2 else self.columns[1]
 
         # left column layout
         self.left_column_layout = QVBoxLayout()
@@ -92,10 +120,10 @@ class GMMStepsVisualization(QWidget):
         self.settings_box_layout.addRow(QLabel("Set axis:"))
 
         self.ox_box = QComboBox()
-        self.ox_box.addItems(columns)
+        self.ox_box.addItems(self.columns)
         self.oy_box = QComboBox()
-        self.oy_box.addItems(columns)
-        if len(columns) > 1:
+        self.oy_box.addItems(self.columns)
+        if len(self.columns) > 1:
             self.oy_box.setCurrentIndex(1)
         self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
@@ -279,7 +307,8 @@ class GMMStepsVisualization(QWidget):
                                          not self.is_running)
 
         index = step - 1
-        step_labels = self.algorithm_steps[index]
+        step_labels, mean, sigma = self.algorithm_steps[index]
         labels = [step_labels[sample] for sample in self.samples]
-        return self.canvas.clusters_plot(x, y, labels, self.num_cluster, self.ox, self.oy, min_x - sep_x, max_x + sep_x,
-                                         min_y - sep_y, max_y + sep_y, not self.is_running)
+        return self.canvas.clusters_plot(x, y, list(self.columns), mean, sigma, labels, self.num_cluster, self.ox,
+                                         self.oy, min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
+                                         not self.is_running)

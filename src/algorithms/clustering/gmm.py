@@ -17,7 +17,7 @@ class GMM:
         self.prob_matrix = None
         self.eps = float(eps)
         self.max_iter = max_iterations or 99999999
-        self.scenes = [np.array(self.labels, dtype='int64')]
+        self.scenes = [(np.array(self.labels, dtype='int64'), self.mu_arr, self.sigma_arr)]
 
     def run(self, with_steps):
         try:
@@ -26,7 +26,7 @@ class GMM:
                 self.e_step()
                 self.m_step()
                 if with_steps:
-                    self.scenes.append(self.get_cluster_labels())
+                    self.scenes.append((self.get_cluster_labels(), self.mu_arr, self.sigma_arr))
                 new_ll = self.log_likelihood()
                 if abs(new_ll - prev_ll) < self.eps:
                     break
@@ -83,7 +83,7 @@ class GMM:
         for c in range(self.num_clusters):
             new_sigma_component = np.zeros((self.dim, self.dim))
             for i in range(self.rows):
-                data_row = np.array(self.df.iloc[i])
+                data_row = np.array(self.df.iloc[i])-self.mu_arr[c]
                 new_sigma_component += self.prob_matrix[i, c] * np.outer(data_row.T, data_row)
             self.sigma_arr[c] = new_sigma_component / (self.pi_arr[c] * self.rows)
 
