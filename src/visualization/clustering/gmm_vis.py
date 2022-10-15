@@ -28,6 +28,20 @@ class GMMCanvas(FigureCanvasQTAgg):
         if self.animation:
             return self.axes.collections
 
+    def clusters_plot(self, vector_x, vector_y, labels, max_label, name_x, name_y, min_x, max_x, min_y, max_y,
+                      drawing=True):
+        self.axes.cla()
+        label = [labels[i] for i in range(len(vector_x))]
+        self.axes.set_xlabel(name_x)
+        self.axes.set_ylabel(name_y)
+        self.axes.set_xlim(min_x, max_x)
+        self.axes.set_ylim(min_y, max_y)
+        self.axes.scatter(vector_x, vector_y, c=label, cmap='gist_rainbow', vmin=0, vmax=max_label)
+        if drawing:
+            self.draw()
+        if self.animation:
+            return self.axes.collections
+
 
 class GMMStepsVisualization(QWidget):
     def __init__(self, df, algorithm_steps, has_animation):
@@ -259,8 +273,13 @@ class GMMStepsVisualization(QWidget):
         sep_x = 0.1 * (max_x - min_x)
         sep_y = 0.1 * (max_y - min_y)
 
-        # canvasy odtad
+        if step == 0:
+            return self.canvas.data_plot(x, y, self.ox, self.oy,
+                                         min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
+                                         not self.is_running)
 
-        return self.canvas.data_plot(x, y, self.ox, self.oy,
-                                     min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                     not self.is_running)
+        index = step - 1
+        step_labels = self.algorithm_steps[index]
+        labels = [step_labels[sample] for sample in self.samples]
+        return self.canvas.clusters_plot(x, y, labels, self.num_cluster, self.ox, self.oy, min_x - sep_x, max_x + sep_x,
+                                         min_y - sep_y, max_y + sep_y, not self.is_running)
