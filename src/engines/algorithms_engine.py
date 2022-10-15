@@ -3,9 +3,9 @@ from algorithms.classification import ExtraTrees
 from algorithms.clustering import KMeans, GMM
 from state import State
 from visualization.associations import APrioriStepsVisualization
-from visualization.clustering import KMeansStepsVisualization
+from visualization.clustering import KMeansStepsVisualization, GMMStepsVisualization
 from visualization.classification import ExtraTreesStepsVisualization
-from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, APrioriResultsWidget
+from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, APrioriResultsWidget, KMeansResultsWidget
 
 
 class AlgorithmsEngine:
@@ -17,7 +17,7 @@ class AlgorithmsEngine:
                 'K-Means': (KMeans, KMeansStepsVisualization, KMeansResultsWidget),
                 'DBSCAN': None,
                 'Partition Around Medoids': None,
-                'Gaussian Mixture Models': (GMM, None, None),
+                'Gaussian Mixture Models': (GMM, GMMStepsVisualization, None),
                 'Agglomerative clustering': None,
                 'Divisive clustering': None
             },
@@ -55,7 +55,6 @@ class AlgorithmsEngine:
             self.state.algorithm_results_widgets[technique] = {}
         if not self.state.algorithm_results_widgets[technique].get(algorithm):
             self.state.algorithm_results_widgets[technique][algorithm] = []
-
         self.state.algorithm_results_widgets[technique][algorithm].append(
             chosen_alg[2](self.state.raw_data, *result, options=kwargs))
 

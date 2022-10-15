@@ -17,7 +17,7 @@ class GMM:
         self.prob_matrix = None
         self.eps = float(eps)
         self.max_iter = max_iterations or 99999999
-        self.scenes = []
+        self.scenes = [np.array(self.labels, dtype='int64')]
 
     def run(self, with_steps):
         try:
@@ -43,6 +43,9 @@ class GMM:
 
     def get_cluster_labels(self):
         return np.argmax(self.prob_matrix, axis=1)
+
+    def get_steps(self):
+        return self.scenes
 
     def initialize_mu(self):
         size = (self.num_clusters, self.dim)
