@@ -1,6 +1,6 @@
 from algorithms.associations import APriori
-from algorithms.clustering import KMeans
 from algorithms.classification import ExtraTrees
+from algorithms.clustering import KMeans, GMM
 from state import State
 from visualization.associations import APrioriStepsVisualization
 from visualization.clustering import KMeansStepsVisualization
@@ -17,7 +17,7 @@ class AlgorithmsEngine:
                 'K-Means': (KMeans, KMeansStepsVisualization, KMeansResultsWidget),
                 'DBSCAN': None,
                 'Partition Around Medoids': None,
-                'Gaussian Mixture Models': None,
+                'Gaussian Mixture Models': (GMM, None, None),
                 'Agglomerative clustering': None,
                 'Divisive clustering': None
             },
@@ -40,6 +40,9 @@ class AlgorithmsEngine:
         alg = chosen_alg[0](self.state.imported_data, **kwargs)
 
         result = alg.run(will_be_visualized)
+
+        if result is None:
+            return
 
         if will_be_visualized:
             steps = alg.get_steps()
