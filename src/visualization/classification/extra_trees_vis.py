@@ -1,11 +1,10 @@
 from functools import partial
 from random import randint
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtGui import QFont, QPixmap, QPainter, QPaintEvent
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QGroupBox, QTableView, QFormLayout, \
     QSpinBox
-import numpy as np
 import pandas as pd
 import pygraphviz as pgv
 from typing import List, Dict, Optional, Tuple
@@ -20,6 +19,29 @@ import graphviz
 from widgets import QtTable
 
 
+class QImage(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.p = QPixmap()
+
+    def setPixmap(self, p: QPixmap):
+        self.p = p
+        self.update()
+
+    def paintEvent(self, event: QPaintEvent) -> None:
+        if not self.p.isNull():
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.SmoothPixmapTransform)
+            _, _, w_widget, h_widget = self.rect().getRect()
+            x, y, w, h = self.p.rect().getRect()
+            if w > w_widget or h > h_widget:
+                alfa = min(w_widget/w, h_widget/h)
+                w = int(alfa * w)
+                h = int(alfa * h)
+            x = int(0.5 * (w_widget - w))
+            painter.drawPixmap(QRect(x, y, w, h), self.p)
+
+
 class StepWidget(QWidget):
     def __init__(self, graph: QWidget, info: Optional[List] = None):
         super().__init__()
@@ -27,16 +49,25 @@ class StepWidget(QWidget):
         self.info = info
         self.layout = QHBoxLayout(self)
 
+        self.info_group = QGroupBox("Description")
+        self.info_group.setFixedWidth(300)
+        self.info_group_layout = QVBoxLayout(self.info_group)
         if self.info:
             self.table_info = QTableView()
-            self.table_info.setModel(QtTable(pd.DataFrame(self.info)))
-            self.layout.addWidget(self.table_info)
+            self.table_info.setModel(QtTable(pd.DataFrame(self.info,
+                                                          columns=["Column name", "Pivot", "Metric changes"])))
+            self.info_group_layout.addWidget(self.table_info)
+        self.info_group_layout.addStretch(1)
+        self.info_group_layout.addWidget(QLabel("Some description\nNext line\nLast line"))
+        self.info_group_layout.addStretch(2)
+        self.layout.addWidget(self.info_group)
         self.layout.addWidget(self.graph)
 
 
 class TreeStepsVisualization(QWidget):
     def __init__(self, widget: QWidget, node_info: Dict, dot_steps: List[str], is_animation: bool):
         super().__init__()
+        self.setWindowTitle("Tree creation steps")
         self.parent = widget
         self.node_info = node_info
         self.dot_steps = dot_steps
@@ -47,7 +78,6 @@ class TreeStepsVisualization(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.step_group = QGroupBox()
-        self.step_group.setTitle("Step graph")
         self.step_group_layout = QVBoxLayout(self.step_group)
         self.step_group_layout.addWidget(self.create_step_graph(self.current_step))
         self.layout.addWidget(self.step_group, 1)
@@ -100,17 +130,19 @@ class TreeStepsVisualization(QWidget):
             self.step_label = QLabel("STEP: {}".format(self.current_step))
             self.layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
+        self.showMaximized()
+
     def create_step_graph(self, step_num: int):
         if step_num % 2 == 0:
-            info = self.node_info[step_num // 2]
+            info = self.node_info[step_num]
         else:
             info = None
         graph = graphviz.Source(self.dot_steps[step_num])
         graph.render("tmp/graph", format="png")
-        label = QLabel()
+        image = QImage()
         pixmap = QPixmap("tmp/graph.png")
-        label.setPixmap(pixmap)
-        return StepWidget(label, info)
+        image.setPixmap(pixmap)
+        return StepWidget(image, info)
 
     def update_step(self):
         for i in reversed(range(self.step_group_layout.count())):

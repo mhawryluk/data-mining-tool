@@ -102,7 +102,7 @@ class DecisionTree:
                 continue
             metrics, left, right = result
             if self.with_steps:
-                choose_info.append([feature, pivot, metrics])
+                choose_info.append([feature, pivot, round(metrics, 3)])
             if best_metrics is None or metrics > best_metrics:
                 best_metrics = metrics
                 left_mask = left
@@ -228,7 +228,6 @@ class DecisionTree:
             idx[0] += 1
             num_next = idx[0]
             rows.append(f"{num_next} {node_next.graphviz_label(get_color)} ;")
-            creation_info[num_next] = node_next.info
             if side is None:
                 rows.append(f"{num_from} -> {num_next} [width=3] ;")
             elif side:
@@ -240,7 +239,6 @@ class DecisionTree:
                 make_next_row(num_next, node_next.right, True)
 
         rows = [f"0 {self.root.graphviz_label(get_color)} ;"]
-        creation_info = {0: self.root.info}
         idx = [0]
         if isinstance(self.root, Node):
             make_next_row(0, self.root.left, False)
@@ -253,10 +251,10 @@ class DecisionTree:
             "}"
         )
         if len(rows) == 1:
-            creation_steps = [dot_str]
+            creation = ({0: self.root.info}, [dot_str])
         else:
-            creation_steps = self.creation_steps(get_color)
-        return dot_str, creation_info, creation_steps
+            creation = self.creation_steps(get_color)
+        return dot_str, creation[0], creation[1]
 
     @staticmethod
     def make_string(rows: List, nodes: Dict) -> str:
@@ -270,7 +268,7 @@ class DecisionTree:
         )
         return dot_str
 
-    def creation_steps(self, get_color: Callable) -> List[str]:
+    def creation_steps(self, get_color: Callable) -> Tuple[Dict, List[str]]:
         steps = []
         nodes = {}
         rows = []
@@ -278,12 +276,14 @@ class DecisionTree:
         idx = 0
         queue.append((self.root, idx))
         idx += 1
+        creation_info = {}
         while len(queue):
             node, i = queue.popleft()
-            nodes[i] = f"{i} {self.root.simple_graphviz_label('blue')} ;"
+            nodes[i] = f"{i} {node.simple_graphviz_label('blue')} ;"
             steps.append(self.make_string(rows, nodes))
+            creation_info[len(steps) - 1] = node.info
 
-            nodes[i] = f"{i} {self.root.graphviz_label(get_color)} ;"
+            nodes[i] = f"{i} {node.graphviz_label(get_color)} ;"
             left = idx
             right = idx + 1
             idx += 2
@@ -300,7 +300,7 @@ class DecisionTree:
             else:
                 nodes[right] = f"{right} {node.right.graphviz_label(get_color)} ;"
             steps.append(self.make_string(rows, nodes))
-        return steps
+        return creation_info, steps
 
 
 class ExtraTrees:
