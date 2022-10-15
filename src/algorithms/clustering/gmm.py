@@ -39,7 +39,7 @@ class GMM:
             error.setWindowTitle("Error")
             error.exec_()
             return
-        return self.get_cluster_labels()
+        return self.get_cluster_labels(), self.mu_arr, self.sigma_arr
 
     def get_cluster_labels(self):
         return np.argmax(self.prob_matrix, axis=1)
