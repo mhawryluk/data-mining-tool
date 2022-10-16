@@ -1,45 +1,22 @@
 from functools import partial
 from random import randint
 
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QFont, QPixmap, QPainter, QPaintEvent
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QGroupBox, QTableView, QFormLayout, \
     QSpinBox
 import pandas as pd
 import pygraphviz as pgv
 from typing import List, Dict, Optional, Tuple
 
-import QGraphViz
-from QGraphViz.Engines import Dot
 from QGraphViz.QGraphViz import QGraphViz
+from QGraphViz.Engines import Dot
 from QGraphViz.DotParser import Graph, GraphType
 
 import graphviz
 
 from widgets import QtTable
-
-
-class QImage(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.p = QPixmap()
-
-    def setPixmap(self, p: QPixmap):
-        self.p = p
-        self.update()
-
-    def paintEvent(self, event: QPaintEvent) -> None:
-        if not self.p.isNull():
-            painter = QPainter(self)
-            painter.setRenderHint(QPainter.SmoothPixmapTransform)
-            _, _, w_widget, h_widget = self.rect().getRect()
-            x, y, w, h = self.p.rect().getRect()
-            if w > w_widget or h > h_widget:
-                alfa = min(w_widget/w, h_widget/h)
-                w = int(alfa * w)
-                h = int(alfa * h)
-            x = int(0.5 * (w_widget - w))
-            painter.drawPixmap(QRect(x, y, w, h), self.p)
+from utils import QtImageViewer, AutomateSteps
 
 
 class StepWidget(QWidget):
@@ -83,10 +60,13 @@ class TreeStepsVisualization(QWidget):
         self.layout.addWidget(self.step_group, 1)
 
         if self.is_animation:
+            self.automat = AutomateSteps(lambda: self.change_step(1), lambda: self.change_step(-1 * self.current_step))
+            self.is_run = False
+
             # animation
             self.animation_box = QGroupBox()
-            self.animation_box.setTitle("Animation")
             self.animation_box.setFixedWidth(250)
+            self.animation_box.setTitle("Animation")
             self.animation_box_layout = QFormLayout(self.animation_box)
 
             self.restart_button = QPushButton("Restart")
@@ -139,9 +119,8 @@ class TreeStepsVisualization(QWidget):
             info = None
         graph = graphviz.Source(self.dot_steps[step_num])
         graph.render("tmp/graph", format="png")
-        image = QImage()
-        pixmap = QPixmap("tmp/graph.png")
-        image.setPixmap(pixmap)
+        image = QtImageViewer()
+        image.open("tmp/graph.png")
         return StepWidget(image, info)
 
     def update_step(self):
@@ -161,9 +140,18 @@ class TreeStepsVisualization(QWidget):
                 num = self.right_box.value()
                 self.change_step(num)
             case 'restart':
-                pass
+                self.is_run = False
+                self.automat.restart()
+                self.run_button.setText("Start animation")
             case 'run':
-                pass
+                self.is_run = not self.is_run
+                if self.is_run:
+                    self.automat.set_time(self.interval_box.value())
+                    self.automat.resume()
+                    self.run_button.setText("Stop animation")
+                else:
+                    self.automat.pause()
+                    self.run_button.setText("Start animation")
 
     def change_step(self, delta: int):
         new_step = delta + self.current_step
