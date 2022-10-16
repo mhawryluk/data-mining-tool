@@ -141,17 +141,22 @@ class TreeStepsVisualization(QWidget):
                 self.change_step(num)
             case 'restart':
                 self.is_run = False
+                self.interval_box.setEnabled(True)
+                self.run_button.setEnabled(True)
                 self.automat.restart()
                 self.run_button.setText("Start animation")
             case 'run':
                 self.is_run = not self.is_run
                 if self.is_run:
+                    self.restart_button.setEnabled(False)
+                    self.interval_box.setEnabled(False)
                     self.automat.set_time(self.interval_box.value())
                     self.automat.resume()
                     self.run_button.setText("Stop animation")
                 else:
                     self.automat.pause()
                     self.run_button.setText("Start animation")
+                    self.restart_button.setEnabled(True)
 
     def change_step(self, delta: int):
         new_step = delta + self.current_step
@@ -160,6 +165,11 @@ class TreeStepsVisualization(QWidget):
             return
         self.current_step = new_step
         self.update_step()
+        if self.current_step == self.max_steps - 1 and self.is_animation:
+            self.automat.pause()
+            self.run_button.setText("Start animation")
+            self.run_button.setEnabled(False)
+            self.restart_button.setEnabled(True)
 
 
 class ExtraTreesStepsVisualization(QWidget):
