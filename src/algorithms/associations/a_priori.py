@@ -16,7 +16,7 @@ class APriori:
         self.all_frequent_sets = {}
         self.saved_steps = []
 
-    def run(self, with_steps) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def run(self, with_steps) -> Tuple[pd.DataFrame, pd.DataFrame, List[set]]:
         frequent_sets = None
 
         for k in range(1, len(self.columns)):  # k as in k-item_sets - sets that contain k elements
@@ -40,7 +40,7 @@ class APriori:
         if with_steps:
             self.saved_steps.append(rules)
 
-        return self._get_frequent_set_pd(self.all_frequent_sets), rules
+        return self._get_frequent_set_pd(self.all_frequent_sets), rules, self.transaction_sets
 
     def get_steps(self) -> List[pd.DataFrame]:
         return self.saved_steps
