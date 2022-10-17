@@ -4,7 +4,7 @@ import pandas as pd
 from PyQt5.QtWidgets import QWidget, QGroupBox, QFormLayout, QLabel, QTableView, QVBoxLayout, QHBoxLayout
 import matplotlib.pyplot as plt
 
-from visualization.associations import APrioriCanvas
+from visualization.associations import APrioriCanvas, APrioriBarPlot
 from widgets import QtTable
 
 
@@ -44,6 +44,12 @@ class APrioriResultsWidget(QWidget):
 
         self.left_column.addWidget(self.transactions_group, 1)
 
+        # support/confidence bar plot
+        fig, axes = plt.subplots(1, 1)
+        self.support_bar_plot = APrioriBarPlot(fig, axes, options["min_support"], options["min_confidence"])
+        self.support_bar_plot.plot_support(0.3)
+        self.transactions_group_layout.addWidget(self.support_bar_plot)
+
         # frequent sets group
         self.frequent_sets_result_group = QGroupBox()
         self.frequent_sets_result_group_layout = QVBoxLayout(self.frequent_sets_result_group)
@@ -75,8 +81,10 @@ class APrioriResultsWidget(QWidget):
     def highlight_frequent_set(self):
         selected_set = self.frequent_sets_table.selectionModel().selectedIndexes()[0].row()
         self.transactions_canvas.plot_set(self.frequent_sets.index.values[selected_set].split(", "))
+        self.support_bar_plot.plot_support(self.frequent_sets.iloc[selected_set]["support"])
 
     def highlight_rule(self):
         selected_rule = self.association_rules_table.selectionModel().selectedIndexes()[0].row()
         set_a, set_b = self.association_rules.index.values[selected_rule].split(" => ")
         self.transactions_canvas.plot_rule(set_a.split(", "), set_b.split(", "))
+        self.support_bar_plot.plot_confidence(self.association_rules.iloc[selected_rule]["confidence"])
