@@ -49,12 +49,11 @@ class GMMCanvas(FigureCanvasQTAgg):
     def clusters_plot(self, vector_x, vector_y, columns, mean, sigma, labels, max_label, name_x, name_y, min_x, max_x,
                       min_y, max_y, drawing=True):
         self.axes.cla()
-        label = [labels[i] for i in range(len(vector_x))]
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
         self.axes.set_ylim(min_y, max_y)
-        self.axes.scatter(vector_x, vector_y, c=label, cmap='gist_rainbow', vmin=0, vmax=max_label)
+        self.axes.scatter(vector_x, vector_y, c=labels, cmap='gist_rainbow', vmin=0, vmax=max_label)
         x_index, y_index = [columns.index(name_x), columns.index(name_y)]
         for i in range(len(mean)):
             mean_i = [mean[i][x_index], mean[i][y_index]]

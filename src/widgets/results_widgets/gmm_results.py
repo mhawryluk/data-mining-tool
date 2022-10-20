@@ -72,8 +72,8 @@ class GMMResultsWidget(QWidget):
 
         # plot
         self.fig, axes = plt.subplots(1, 1)
-        self.clusters_canvas = GMMCanvas(self.fig, axes, False)
-        self.clustering_group_layout.addWidget(self.clusters_canvas, 1)
+        self.results_canvas = GMMCanvas(self.fig, axes, False)
+        self.clustering_group_layout.addWidget(self.results_canvas, 1)
 
         # cluster details
         self.clusters_details_group = QGroupBox()
@@ -129,7 +129,7 @@ class GMMResultsWidget(QWidget):
         sep_y = 0.1 * (max_y - min_y)
 
         labels = [self.labels[sample] for sample in self.samples]
-        self.clusters_canvas.clusters_plot(x, y, list(self.columns), self.mean.values, self.sigma, labels, self.max_label,
+        self.results_canvas.clusters_plot(x, y, list(self.columns), self.mean.values, self.sigma, labels, self.max_label,
                                            self.ox, self.oy, min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
 
     def update_cluster_plot(self):
