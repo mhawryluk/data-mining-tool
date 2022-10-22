@@ -8,7 +8,6 @@ from algorithms import get_samples
 from matplotlib import pyplot as plt, transforms
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-
 from matplotlib.patches import Ellipse
 
 
@@ -284,7 +283,7 @@ class GMMStepsVisualization(QWidget):
                 if self.is_running:
                     if self.animation is None:
                         self.animation = FuncAnimation(self.fig, self.update_plot, frames=self.max_step + 1,
-                                                       interval=self.interval_box.value(), blit=True,
+                                                       interval=self.interval_box.value(),
                                                        cache_frame_data=False, repeat=False)
                         self.canvas.draw()
                     else:

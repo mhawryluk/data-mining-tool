@@ -86,7 +86,7 @@ class GMM:
         for c in range(self.num_clusters):
             new_sigma_component = np.zeros((self.dim, self.dim))
             for i in range(self.rows):
-                data_row = np.array(self.df.iloc[i])-self.mu_arr[c]
+                data_row = np.array(self.df.iloc[i]) - self.mu_arr[c]
                 new_sigma_component += self.prob_matrix[i, c] * np.outer(data_row.T, data_row)
             self.sigma_arr[c] = new_sigma_component / (self.pi_arr[c] * self.rows)
 
