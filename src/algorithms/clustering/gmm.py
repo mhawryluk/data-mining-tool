@@ -2,10 +2,11 @@ import numpy as np
 from PyQt5.QtWidgets import QMessageBox
 from numpy.linalg import LinAlgError
 from scipy.stats import multivariate_normal
+from math import inf
 
 
 class GMM:
-    def __init__(self, df, num_clusters, eps=1e-6, max_iterations=1000):
+    def __init__(self, df, num_clusters, eps=1e-6, max_iterations=None):
         self.df = df.select_dtypes(include=['number'])
         self.num_clusters = num_clusters
         self.rows = self.df.shape[0]
@@ -16,13 +17,14 @@ class GMM:
         self.pi_arr = self.initialize_pi()
         self.prob_matrix = None
         self.eps = float(eps)
-        self.max_iter = max_iterations or 99999999
+        self.max_iter = max_iterations or inf
         self.scenes = [(np.array(self.labels, dtype='int64'), self.mu_arr, self.sigma_arr)]
 
     def run(self, with_steps):
         try:
             prev_ll = self.log_likelihood()
-            for i in range(self.max_iter):
+            i = 0
+            while i < self.max_iter:
                 self.e_step()
                 self.m_step()
                 if with_steps:
@@ -31,6 +33,7 @@ class GMM:
                 if abs(new_ll - prev_ll) < self.eps:
                     break
                 prev_ll = new_ll
+                i += 1
         except LinAlgError:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)

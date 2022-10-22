@@ -222,7 +222,9 @@ class GMMStepsVisualization(QWidget):
             self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
         # description
-        description = "Gaussian Mixture Methods algorithm - steps visualization."
+        description = "Gaussian Mixture Models algorithm - steps visualization.\n\n" \
+                      "Colors of points show division into clusters.\n\n" \
+                      "Square points represents means of each distribution and ellipses are showing variances."
         self.description_label = QLabel(description)
         self.description_label.setWordWrap(True)
 

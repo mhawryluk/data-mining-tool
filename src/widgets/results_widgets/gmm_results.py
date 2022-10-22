@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 
 from visualization.clustering import GMMCanvas
 
-from src.widgets import QtTable
+from widgets import QtTable
 
 
 class GMMResultsWidget(QWidget):
