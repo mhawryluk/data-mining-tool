@@ -22,7 +22,7 @@ class PreprocessingEngine:
         return self.state.imported_data.columns
 
     def set_state(self, columns):
-        self.state.imported_data = self.state.imported_data[columns].copy()
+        self.state.imported_data = self.state.imported_data[columns]
 
     def create_plot(self, column_name, plot_type):
         plotter = None
@@ -57,9 +57,9 @@ class PreprocessingEngine:
             return len(self.state.imported_data.select_dtypes(include=np.number).columns.to_list())
         return 0
 
-    def rename_column(self, index, newHeader):
+    def rename_column(self, index, new_header):
         data = self.state.imported_data
-        self.state.imported_data = data.rename(columns={data.columns[index]: newHeader})
+        self.state.imported_data = data.rename(columns={data.columns[index]: new_header})
 
     def mean_or_mode_estimate(self):
         missing_data_columns = self.get_columns()[self.state.imported_data.isna().any()].to_list()
