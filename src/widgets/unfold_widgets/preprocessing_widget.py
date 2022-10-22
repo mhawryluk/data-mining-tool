@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, 
     QSpinBox
 
 from widgets import UnfoldWidget
-from widgets.tables import DataPreviewScreen
+from widgets.tables import DataPreviewScreen, PreviewReason
 
 
 class PreprocessingWidget(UnfoldWidget):
@@ -51,13 +51,10 @@ class PreprocessingWidget(UnfoldWidget):
 
         # estimation group
         self.estimate_group = QGroupBox(self.frame)
-        self.estimate_group.setTitle("Estimate missing values")
         self.estimate_group_layout = QFormLayout(self.estimate_group)
-
-        self.estimate_group_todo = QPushButton(self.estimate_group)
-        self.estimate_group_todo.setText("Estimate")
-        self.estimate_group_todo.setMinimumHeight(23)
-        self.estimate_group_layout.addRow(self.estimate_group_todo)
+        self.estimate_manually_button = QPushButton(self.estimate_group)
+        self.estimate_automatically_button = QPushButton(self.estimate_group)
+        self.render_estimation_group()
 
         # initialize reduction results screen
         self.preview_screen = None
@@ -233,5 +230,27 @@ class PreprocessingWidget(UnfoldWidget):
         self.auto_reduction.setDisabled(max_dimensions < 3)
 
     def show_reduction_results(self):
-        self.preview_screen = DataPreviewScreen(self)
+        self.preview_screen = DataPreviewScreen(self, title="Reduction results", reason=PreviewReason.REDUCTION)
+        self.preview_screen.show()
+
+    def render_estimation_group(self):
+        self.estimate_group.setTitle("Fill missing values")
+
+        self.estimate_manually_button.setText("Enter manually")
+        self.estimate_manually_button.setMinimumHeight(23)
+        self.estimate_group_layout.addRow(self.estimate_manually_button)
+        self.estimate_manually_button.clicked.connect(self.estimate_manually)
+
+        self.estimate_automatically_button.setText("Mean/mode estimation")
+        self.estimate_automatically_button.setMinimumHeight(23)
+        self.estimate_group_layout.addRow(self.estimate_automatically_button)
+        self.estimate_automatically_button.clicked.connect(self.estimate_with_mean_or_mode)
+
+    def estimate_manually(self):
+        self.preview_screen = DataPreviewScreen(self, title="Input missing values", reason=PreviewReason.ESTIMATION)
+        self.preview_screen.show()
+
+    def estimate_with_mean_or_mode(self):
+        self.engine.mean_or_mode_estimate()
+        self.preview_screen = DataPreviewScreen(self, title="Estimation results", reason=PreviewReason.PREVIEW)
         self.preview_screen.show()
