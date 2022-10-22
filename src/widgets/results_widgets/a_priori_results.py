@@ -1,10 +1,10 @@
 from typing import List
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from PyQt5.QtWidgets import QWidget, QGroupBox, QFormLayout, QLabel, QTableView, QVBoxLayout, QHBoxLayout
-import matplotlib.pyplot as plt
 
-from visualization.associations import APrioriCanvas, APrioriBarPlot
+from visualization.associations import APrioriScatterPlot, APrioriGraphPlot, APrioriGauge
 from widgets import QtTable
 
 
@@ -15,6 +15,9 @@ class APrioriResultsWidget(QWidget):
         self.transaction_sets = transaction_sets
         self.frequent_sets = frequent_sets
         self.association_rules = association_rules
+        self.columns = data.columns.values
+        self.min_support = options["min_support"]
+        self.min_confidence = options["min_confidence"]
 
         self.layout = QHBoxLayout(self)
 
@@ -29,26 +32,13 @@ class APrioriResultsWidget(QWidget):
         for option, value in options.items():
             self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
 
-        self.left_column.addWidget(self.params_group, 0)
+        # sets plots and charts
+        self.gauge_chart = APrioriGauge()
+        self.graph_plot = APrioriGraphPlot()
 
-        # transactions group
-        self.transactions_group = QGroupBox()
-        self.transactions_group_layout = QVBoxLayout(self.transactions_group)
-        self.transactions_group.setTitle("Transactions")
-
-        # transactions scatter plot
         self.fig, axes = plt.subplots(1, 1)
-        self.transactions_canvas = APrioriCanvas(self.fig, axes, transaction_sets)
+        self.transactions_canvas = APrioriScatterPlot(self.fig, axes, transaction_sets)
         self.transactions_canvas.plot_set()
-        self.transactions_group_layout.addWidget(self.transactions_canvas)
-
-        self.left_column.addWidget(self.transactions_group, 1)
-
-        # support/confidence bar plot
-        fig, axes = plt.subplots(1, 1)
-        self.support_bar_plot = APrioriBarPlot(fig, axes, options["min_support"], options["min_confidence"])
-        self.support_bar_plot.plot_support(0.3)
-        self.transactions_group_layout.addWidget(self.support_bar_plot)
 
         # frequent sets group
         self.frequent_sets_result_group = QGroupBox()
@@ -72,6 +62,11 @@ class APrioriResultsWidget(QWidget):
         self.association_rules_group_layout.addWidget(self.association_rules_table)
         self.association_rules_table.clicked.connect(self.highlight_rule)
 
+        self.left_column.addWidget(self.graph_plot, 1)
+        self.left_column.addWidget(self.gauge_chart, 1)
+        self.left_column.addWidget(self.transactions_canvas, 1)
+
+        self.right_column.addWidget(self.params_group, 0)
         self.right_column.addWidget(self.frequent_sets_result_group, 1)
         self.right_column.addWidget(self.association_rules_group, 1)
 
@@ -80,11 +75,16 @@ class APrioriResultsWidget(QWidget):
 
     def highlight_frequent_set(self):
         selected_set = self.frequent_sets_table.selectionModel().selectedIndexes()[0].row()
-        self.transactions_canvas.plot_set(self.frequent_sets.index.values[selected_set].split(", "))
-        self.support_bar_plot.plot_support(self.frequent_sets.iloc[selected_set]["support"])
+        column_list = self.frequent_sets.index.values[selected_set].split(", ")
+        self.graph_plot.plot_set(column_list)
+        self.gauge_chart.plot_value(self.frequent_sets.iloc[selected_set]["support"], self.min_support, "support")
+        self.transactions_canvas.plot_set(column_list)
 
     def highlight_rule(self):
         selected_rule = self.association_rules_table.selectionModel().selectedIndexes()[0].row()
         set_a, set_b = self.association_rules.index.values[selected_rule].split(" => ")
-        self.transactions_canvas.plot_rule(set_a.split(", "), set_b.split(", "))
-        self.support_bar_plot.plot_confidence(self.association_rules.iloc[selected_rule]["confidence"])
+        set_a = set_a.split(', ')
+        set_b = set_b.split(', ')
+        self.graph_plot.plot_rule(set_a, set_b)
+        self.gauge_chart.plot_value(self.association_rules.iloc[selected_rule]["confidence"], self.min_confidence, "confidence")
+        self.transactions_canvas.plot_rule(set_a, set_b)
