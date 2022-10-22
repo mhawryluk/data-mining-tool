@@ -2,7 +2,7 @@ from functools import partial
 from random import randint
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QGroupBox, QTableView, QFormLayout, \
     QSpinBox
 import pandas as pd
@@ -16,7 +16,7 @@ from QGraphViz.DotParser import Graph, GraphType
 import graphviz
 
 from widgets import QtTable
-from utils import QtImageViewer, AutomateSteps
+from utils import QtImageViewer, AutomateSteps, QImage
 
 
 class StepWidget(QWidget):
@@ -119,8 +119,12 @@ class TreeStepsVisualization(QWidget):
             info = None
         graph = graphviz.Source(self.dot_steps[step_num])
         graph.render("tmp/graph", format="png")
-        image = QtImageViewer()
-        image.open("tmp/graph.png")
+        if self.is_animation:
+            image = QImage()
+            image.setPixmap(QPixmap("tmp/graph.png"))
+        else:
+            image = QtImageViewer()
+            image.open("tmp/graph.png")
         return StepWidget(image, info)
 
     def update_step(self):

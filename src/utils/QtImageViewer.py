@@ -117,8 +117,8 @@ class QtImageViewer(QGraphicsView):
         #   Qt.ScrollBarAlwaysOff: Never shows a scroll bar.
         #   Qt.ScrollBarAlwaysOn: Always shows a scroll bar.
         #   Qt.ScrollBarAsNeeded: Shows a scroll bar only when zoomed.
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
         # Interactions (set buttons to None to disable interactions)
         # !!! Events handled by interactions will NOT emit *MouseButton* signals.
@@ -240,8 +240,8 @@ class QtImageViewer(QGraphicsView):
             return
         if len(self.zoomStack):
             self.fitInView(self.zoomStack[-1], self.aspectRatioMode)  # Show zoomed rect.
-        else:
-            self.fitInView(self.sceneRect(), self.aspectRatioMode)  # Show entire image.
+        # else:
+        #     self.fitInView(self.sceneRect(), self.aspectRatioMode)  # Show entire image.
 
     def clearZoom(self):
         if len(self.zoomStack) > 0:
