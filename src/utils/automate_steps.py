@@ -36,7 +36,7 @@ class AutomateSteps:
 
     def pause(self):
         if self.thread:
-            self.thread.is_run = False
+            self.thread.is_running = False
             self.thread = None
 
     def restart(self):

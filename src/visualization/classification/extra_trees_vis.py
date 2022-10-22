@@ -35,7 +35,7 @@ class StepWidget(QWidget):
                                                           columns=["Column name", "Pivot", "Metric changes"])))
             self.info_group_layout.addWidget(self.table_info)
         self.info_group_layout.addStretch(1)
-        self.info_group_layout.addWidget(QLabel("Some description\nNext line\nLast line"))
+        self.info_group_layout.addWidget(QLabel("Extremely Randomized Trees algorithm - steps visualization."))
         self.info_group_layout.addStretch(2)
         self.layout.addWidget(self.info_group)
         self.layout.addWidget(self.graph)
@@ -61,7 +61,7 @@ class TreeStepsVisualization(QWidget):
 
         if self.is_animation:
             self.automat = AutomateSteps(lambda: self.change_step(1), lambda: self.change_step(-1 * self.current_step))
-            self.is_run = False
+            self.is_running = False
 
             # animation
             self.animation_box = QGroupBox()
@@ -74,9 +74,9 @@ class TreeStepsVisualization(QWidget):
             self.run_button = QPushButton("Start animation")
             self.run_button.clicked.connect(partial(self.click_listener, 'run'))
             self.interval_box = QSpinBox()
-            self.interval_box.setMinimum(20)
-            self.interval_box.setMaximum(2000)
-            self.interval_box.setValue(200)
+            self.interval_box.setMinimum(500)
+            self.interval_box.setMaximum(3000)
+            self.interval_box.setValue(1000)
             self.interval_box.setSingleStep(20)
 
             self.animation_box_layout.addRow(QLabel("Interval time [ms]:"), self.interval_box)
@@ -140,14 +140,14 @@ class TreeStepsVisualization(QWidget):
                 num = self.right_box.value()
                 self.change_step(num)
             case 'restart':
-                self.is_run = False
+                self.is_running = False
                 self.interval_box.setEnabled(True)
                 self.run_button.setEnabled(True)
                 self.automat.restart()
                 self.run_button.setText("Start animation")
             case 'run':
-                self.is_run = not self.is_run
-                if self.is_run:
+                self.is_running = not self.is_running
+                if self.is_running:
                     self.restart_button.setEnabled(False)
                     self.interval_box.setEnabled(False)
                     self.automat.set_time(self.interval_box.value())

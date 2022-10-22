@@ -350,7 +350,7 @@ class ExtraTrees:
 
     def get_color(self, label: str) -> str:
         normalize = matplotlib.colors.Normalize(vmin=0, vmax=len(self.labels))
-        colormap = matplotlib.cm.get_cmap('Spectral')
+        colormap = matplotlib.cm.get_cmap('gist_rainbow')
         index = np.argwhere(self.labels == label)[0]
         color = [min(1, 1.2 * c) for c in colormap(normalize(index))[0]]
         return matplotlib.colors.to_hex(color)
