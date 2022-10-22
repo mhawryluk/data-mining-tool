@@ -8,11 +8,11 @@ class Runner(QThread):
 
     def __init__(self):
         super().__init__()
-        self.is_run = False
+        self.is_running = False
         self.step_time = 10
 
     def run(self):
-        while self.is_run:
+        while self.is_running:
             self.signal.emit()
             sleep(self.step_time / 1000)
 
@@ -30,7 +30,7 @@ class AutomateSteps:
     def resume(self):
         self.thread = Runner()
         self.thread.signal.connect(self.to_execute)
-        self.thread.is_run = True
+        self.thread.is_running = True
         self.thread.step_time = self.step_time
         self.thread.start()
 
