@@ -1,1 +1,2 @@
 from .k_means_results import KMeansResultsWidget
+from .extra_trees_results import ExtraTreesResultsWidget
