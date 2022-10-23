@@ -6,8 +6,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
     QSpinBox, QPushButton, QLabel, QScrollArea, QSizePolicy, QTableView
 
+from utils import AutomateSteps, format_set
 from visualization.associations.a_priori_canvas import APrioriGauge, APrioriGraphPlot
 from widgets import QtTable
+from algorithms.associations import APrioriPartLabel
 
 
 class APrioriStepsVisualization(QWidget):
@@ -37,19 +39,21 @@ class APrioriStepsVisualization(QWidget):
         # visualization charts and plots
         self.sets_table = QTableView()
         self.gauge_chart = APrioriGauge()
+        self.gauge_chart.layout().setContentsMargins(0, 0, 0, 0)
         self.graph_plot = APrioriGraphPlot()
+        self.graph_plot.layout().setContentsMargins(0, 0, 0, 0)
         self.algorithm_part_label = QLabel()
 
         self.step_vis_layout = QHBoxLayout()
         self.step_charts_layout = QVBoxLayout()
 
-        self.step_charts_layout.addWidget(self.algorithm_part_label, 0)
         self.step_charts_layout.addWidget(self.graph_plot, 1)
         self.step_charts_layout.addWidget(self.gauge_chart, 1)
 
         self.step_vis_layout.addWidget(self.sets_table, 1)
         self.step_vis_layout.addLayout(self.step_charts_layout, 1)
 
+        self.visualization_box_layout.addWidget(self.algorithm_part_label, 0, alignment=Qt.AlignCenter)
         self.visualization_box_layout.addLayout(self.step_vis_layout, 3)
         self.visualization_box_layout.addWidget(self._render_description(), 2)
 
@@ -61,9 +65,13 @@ class APrioriStepsVisualization(QWidget):
 
     def _render_control_ui(self):
         if self.is_animation:
+            self.automat = AutomateSteps(lambda: self.change_step(1), lambda: self.change_step(-1 * self.current_step))
+            self.is_running = False
+
+            # animation
             self.animation_box = QGroupBox()
-            self.animation_box.setTitle("Animation")
             self.animation_box.setFixedWidth(250)
+            self.animation_box.setTitle("Animation")
             self.animation_box_layout = QFormLayout(self.animation_box)
 
             self.restart_button = QPushButton("Restart")
@@ -71,18 +79,19 @@ class APrioriStepsVisualization(QWidget):
             self.run_button = QPushButton("Start animation")
             self.run_button.clicked.connect(partial(self.click_listener, 'run'))
             self.interval_box = QSpinBox()
-            self.interval_box.setMinimum(20)
-            self.interval_box.setMaximum(2000)
-            self.interval_box.setValue(200)
+            self.interval_box.setMinimum(500)
+            self.interval_box.setMaximum(3000)
+            self.interval_box.setValue(1000)
             self.interval_box.setSingleStep(20)
 
             self.animation_box_layout.addRow(QLabel("Interval time [ms]:"), self.interval_box)
             self.animation_box_layout.addRow(self.restart_button)
             self.animation_box_layout.addRow(self.run_button)
 
-            self.bottom_row_layout.addWidget(self.animation_box, 0)
             self.step_label = QLabel("STEP: {}".format(self.current_step))
-            self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
+            self.animation_box_layout.addWidget(self.step_label)
+
+            self.description_group_box_layout.addWidget(self.animation_box, 0)
 
         else:
             self.visualization_box_layout.addStretch()
@@ -125,7 +134,7 @@ class APrioriStepsVisualization(QWidget):
 
         self.description_group_box = QGroupBox()
         self.description_group_box.setTitle("Description")
-        self.description_group_box_layout = QVBoxLayout(self.description_group_box)
+        self.description_group_box_layout = QHBoxLayout(self.description_group_box)
 
         self.scroll_box = QGroupBox()
         self.scroll_box_layout = QFormLayout(self.scroll_box)
@@ -148,39 +157,44 @@ class APrioriStepsVisualization(QWidget):
             case 'next':
                 self.change_step(self.right_box.value())
             case 'restart':
-                self.animation = None
-                self.change_step(-self.current_step)
-                self.change_enabled_buttons(True)
+                self.is_running = False
                 self.interval_box.setEnabled(True)
                 self.run_button.setEnabled(True)
+                self.automat.restart()
+                self.run_button.setText("Start animation")
             case 'run':
                 self.is_running = not self.is_running
-                self.change_enabled_buttons(False)
-                self.interval_box.setEnabled(False)
-                self.restart_button.setEnabled(not self.is_running)
                 if self.is_running:
+                    self.restart_button.setEnabled(False)
+                    self.interval_box.setEnabled(False)
+                    self.automat.set_time(self.interval_box.value())
+                    self.automat.resume()
                     self.run_button.setText("Stop animation")
                 else:
+                    self.automat.pause()
                     self.run_button.setText("Start animation")
+                    self.restart_button.setEnabled(True)
             case 'next part':
                 step_delta = 1
                 current_part = self.algorithms_steps[self.current_step]['part']
-                while self.current_step + step_delta <= self.max_step and self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
+                while self.current_step + step_delta <= self.max_step and \
+                        self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
                     step_delta += 1
 
                 self.change_step(step_delta)
             case 'prev part':
                 step_delta = -1
                 current_part = self.algorithms_steps[self.current_step]['part']
-                while self.current_step + step_delta >= 0 and self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
+                while self.current_step + step_delta >= 0 and \
+                        self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
                     step_delta -= 1
 
                 current_part = self.algorithms_steps[self.current_step + step_delta]['part']
-                while self.current_step + step_delta >= 0 and self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
+                while self.current_step + step_delta >= 0 and \
+                        self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
                     step_delta -= 1
 
                 step_delta += 1
-
                 self.change_step(step_delta)
 
     def change_enabled_buttons(self, value):
@@ -207,53 +221,49 @@ class APrioriStepsVisualization(QWidget):
         step_dict = self.algorithms_steps[self.current_step]
         df = step_dict['data_frame']
         self.sets_table.setModel(QtTable(df) if df is not None else None)
-        self.algorithm_part_label.setText(step_dict['part'])
+        self.algorithm_part_label.setText(step_dict['part'].value)
         self.gauge_chart.reset()
         self.graph_plot.reset()
 
+        description = ""
         match step_dict['part']:
-            case "Calculating support":
-                self.description_label.setText(
-                    "Checking whether set: {} is frequent.\nIts support equals {} \nIt is {}a frequent set."
-                    .format(step_dict['set'], step_dict['support'], 'not ' if step_dict['support'] < step_dict['min_support'] else '')
-                )
-                self.gauge_chart.plot_value(step_dict['support'], step_dict['min_support'], 'support')
+            case APrioriPartLabel.CALCULATE_SUPPORT:
+                description = "Checking whether set: {} is frequent.\nIts support equals {} \nIt is {}a frequent set." \
+                    .format(format_set(step_dict['set']), round(step_dict['support'], 3),
+                            'not ' if step_dict['support'] < step_dict['min_support'] else '')
+                self.gauge_chart.plot_value(round(step_dict['support'], 3), step_dict['min_support'], 'support')
                 self.graph_plot.plot_set(step_dict['set'])
-            case "Selecting frequent sets from generated and not already pruned":
-                self.description_label.setText(
-                    "We have found that the following sets are frequent:\n{}, whereas those are not:\n{}"
-                    .format('\n'.join(map(str, step_dict['frequent_sets'])), '\n'.join(map(str, step_dict['infrequent_sets'])))
-                )
-            case "Saving found k-frequent sets":
-                self.description_label.setText(
-                    "We have found all frequent sets for k={}".format(step_dict['k'])
-                )
-            case "Saving found association rules":
-                self.description_label.setText(
-                    "We have found all association rules for specified minimum confidence and support."
-                )
-            case "Joining sets and pruning ones with infrequent subsets":
-                description = "We are joining sets: {} and {}, then analyzing resulting set: {}. ".format(step_dict['set 1'], step_dict['set 2'], step_dict['new set'])
+            case APrioriPartLabel.FILTER_BY_SUPPORT:
+                description = "We have found that the following sets are frequent:\n{}, whereas those are not:\n{}".format(
+                    '\n'.join(map(format_set, step_dict['frequent_sets'])),
+                    '\n'.join(map(format_set, step_dict['infrequent_sets'])))
+            case APrioriPartLabel.SAVE_K_SETS:
+                description = "We have found all frequent sets for k={}".format(step_dict['k'])
+            case APrioriPartLabel.SAVE_RULES:
+                description = "We have found all association rules for specified minimum confidence and support."
+            case APrioriPartLabel.JOIN_AND_PRUNE:
+                description = "We are joining sets: {} and {}, then analyzing resulting set: {}. ".format(
+                    format_set(step_dict['set 1']), format_set(step_dict['set 2']), format_set(step_dict['new set']))
 
                 if step_dict['infrequent subset'] is None:
                     description += "This set does not contain any infrequent subsets.  It might be frequent itself."
                 else:
-                    description += "This set contains an infrequent subset: {}. Therefore it is not frequent itself.".format(step_dict['infrequent subset'])
-
-                self.description_label.setText(description)
+                    description += "This set contains an infrequent subset: {}. Therefore it is not frequent itself.".format(
+                        step_dict['infrequent subset'])
                 self.graph_plot.plot_set(step_dict['new set'])
 
-            case "Generating and verifying potential rules from frequent sets":
+            case APrioriPartLabel.GENERATE_RULES:
                 description = "We divide frequent set into A = {} and B = {}. The confidence of the rule A => B " \
-                              "equals {}\n\n".format(step_dict['set a'], step_dict['set b'], step_dict['confidence'])
+                              "equals {}\n\n".format(format_set(step_dict['set a']), format_set(step_dict['set b']),
+                                                     step_dict['confidence'])
 
                 if step_dict['confidence'] >= step_dict['min_confidence']:
                     description += "We have found a new association rule."
                 else:
                     description += "It is not enough to consider it a valid association rule for our data."
 
-                self.description_label.setText(
-                    description
-                )
                 self.graph_plot.plot_rule(step_dict['set a'], step_dict['set b'])
-                self.gauge_chart.plot_value(step_dict['confidence'], step_dict['min_confidence'], 'confidence')
+                self.gauge_chart.plot_value(round(step_dict['confidence'], 3), step_dict['min_confidence'],
+                                            'confidence')
+
+        self.description_label.setText(description)

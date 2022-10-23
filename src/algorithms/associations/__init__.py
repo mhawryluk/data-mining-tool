@@ -1,1 +1,1 @@
-from .a_priori import APriori
+from .a_priori import APriori, APrioriPartLabel

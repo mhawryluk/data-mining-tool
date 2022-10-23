@@ -34,7 +34,9 @@ class APrioriResultsWidget(QWidget):
 
         # sets plots and charts
         self.gauge_chart = APrioriGauge()
+        self.gauge_chart.layout().setContentsMargins(0, 0, 0, 0)
         self.graph_plot = APrioriGraphPlot()
+        self.graph_plot.layout().setContentsMargins(0, 0, 0, 0)
 
         self.fig, axes = plt.subplots(1, 1)
         self.transactions_canvas = APrioriScatterPlot(self.fig, axes, transaction_sets)
@@ -75,7 +77,7 @@ class APrioriResultsWidget(QWidget):
 
     def highlight_frequent_set(self):
         selected_set = self.frequent_sets_table.selectionModel().selectedIndexes()[0].row()
-        column_list = self.frequent_sets.index.values[selected_set].split(", ")
+        column_list = self.frequent_sets.index.values[selected_set][1:-1].split(",  ")
         self.graph_plot.plot_set(column_list)
         self.gauge_chart.plot_value(self.frequent_sets.iloc[selected_set]["support"], self.min_support, "support")
         self.transactions_canvas.plot_set(column_list)
@@ -83,8 +85,9 @@ class APrioriResultsWidget(QWidget):
     def highlight_rule(self):
         selected_rule = self.association_rules_table.selectionModel().selectedIndexes()[0].row()
         set_a, set_b = self.association_rules.index.values[selected_rule].split(" => ")
-        set_a = set_a.split(', ')
-        set_b = set_b.split(', ')
+        set_a = set_a[1:-1].split(',  ')
+        set_b = set_b[1:-1].split(',  ')
         self.graph_plot.plot_rule(set_a, set_b)
-        self.gauge_chart.plot_value(self.association_rules.iloc[selected_rule]["confidence"], self.min_confidence, "confidence")
+        self.gauge_chart.plot_value(self.association_rules.iloc[selected_rule]["confidence"], self.min_confidence,
+                                    "confidence")
         self.transactions_canvas.plot_rule(set_a, set_b)

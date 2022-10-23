@@ -1,5 +1,7 @@
 from itertools import combinations, chain
 from typing import List, Tuple, Optional
+from enum import Enum
+from utils import format_set
 
 import pandas as pd
 
@@ -31,7 +33,7 @@ class APriori:
                 if with_steps:
                     self.saved_steps.append(
                         {
-                            "part": "Calculating support",
+                            "part": APrioriPartLabel.CALCULATE_SUPPORT,
                             "set": item_set,
                             "support": item_set_support,
                             "min_support": self.min_support,
@@ -42,8 +44,8 @@ class APriori:
             if with_steps:
                 self.saved_steps.append(
                     {
-                        "part": "Selecting frequent sets from generated and not already pruned",
-                        "frequent_sets": list(map(lambda set_: f"{{{', '.join(set_)}}}", new_frequent_sets.keys())),
+                        "part": APrioriPartLabel.FILTER_BY_SUPPORT,
+                        "frequent_sets": list(new_frequent_sets.keys()),
                         "infrequent_sets": [set_ for set_ in generated_item_sets if set_ not in new_frequent_sets],
                         "data_frame": self.k_frequent_sets_df,
                     }
@@ -58,7 +60,7 @@ class APriori:
             if with_steps:
                 self.saved_steps.append(
                     {
-                        "part": "Saving found k-frequent sets",
+                        "part": APrioriPartLabel.SAVE_K_SETS,
                         "k": k,
                         "data_frame": self.k_frequent_sets_df,
                     }
@@ -70,7 +72,7 @@ class APriori:
         if with_steps:
             self.saved_steps.append(
                 {
-                    "part": "Saving found association rules",
+                    "part": APrioriPartLabel.SAVE_RULES,
                     "data_frame": rules,
                 }
             )
@@ -82,7 +84,7 @@ class APriori:
 
     def _get_frequent_set_pd(self, frequent_sets: dict):
         return pd.DataFrame.from_dict({
-            ", ".join(frequent_set): round(self.support(frequent_set), 3)
+            format_set(frequent_set): round(self.support(frequent_set), 3)
             for frequent_set, support
             in frequent_sets.items()
         },
@@ -108,7 +110,7 @@ class APriori:
             if with_steps:
                 self.saved_steps.append(
                     {
-                        "part": "Joining sets and pruning ones with infrequent subsets",
+                        "part": APrioriPartLabel.JOIN_AND_PRUNE,
                         "set 1": frequent_set_1,
                         "set 2": frequent_set_2,
                         "new set": new_item_set,
@@ -159,12 +161,12 @@ class APriori:
                 if not subset_a or not subset_b:
                     continue
                 if (confidence := self.confidence(subset_a, subset_b)) >= self.min_confidence:
-                    rules[f"{', '.join(subset_a)} => {', '.join(subset_b)}"] = round(confidence, 3)
+                    rules[f"{format_set(subset_a)} => {format_set(subset_b)}"] = round(confidence, 3)
 
                 if with_steps:
                     self.saved_steps.append(
                         {
-                            "part": "Generating and verifying potential rules from frequent sets",
+                            "part": APrioriPartLabel.GENERATE_RULES,
                             "set": frequent_set,
                             "set a": subset_a,
                             "set b": subset_b,
@@ -177,3 +179,12 @@ class APriori:
         return pd.DataFrame.from_dict(
             rules, orient="index", columns=["confidence"]
         ).sort_values(by="confidence", ascending=False)
+
+
+class APrioriPartLabel(Enum):
+    CALCULATE_SUPPORT = "Calculating support"
+    FILTER_BY_SUPPORT = "Selecting frequent sets from generated and not already pruned"
+    SAVE_K_SETS = "Saving found k-frequent sets"
+    SAVE_RULES = "Saving found association rules"
+    JOIN_AND_PRUNE = "Joining sets and pruning ones with infrequent subsets"
+    GENERATE_RULES = "Generating and verifying potential rules from frequent sets"
