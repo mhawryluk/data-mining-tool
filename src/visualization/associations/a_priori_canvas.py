@@ -163,6 +163,9 @@ class APrioriGauge(QWidget):
         fig.update_layout(margin=dict(t=40, b=20, l=0, r=0))
         self.browser.setHtml(fig.to_html(include_plotlyjs="cdn"))
 
+    def reset(self):
+        self.browser.setHtml("")
+
 
 class APrioriGraphPlot(QWidget):
     def __init__(self):
@@ -228,3 +231,6 @@ class APrioriGraphPlot(QWidget):
         )
 
         self.browser.setHtml(fig.to_html(include_plotlyjs="cdn"))
+
+    def reset(self):
+        self.browser.setHtml("")

@@ -6,11 +6,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
     QSpinBox, QPushButton, QLabel, QScrollArea, QSizePolicy, QTableView
 
+from visualization.associations.a_priori_canvas import APrioriGauge, APrioriGraphPlot
 from widgets import QtTable
 
 
 class APrioriStepsVisualization(QWidget):
-    def __init__(self, data: pd.DataFrame, algorithms_steps: List[pd.DataFrame], is_animation: bool):
+    def __init__(self, data: pd.DataFrame, algorithms_steps: List[dict], is_animation: bool):
         super().__init__()
 
         self.is_animation = is_animation
@@ -30,21 +31,32 @@ class APrioriStepsVisualization(QWidget):
 
         # visualization layout
         self.visualization_box = QGroupBox()
-        self.visualization_box.setTitle("Visualization")
+        self.visualization_box.setTitle("APriori step by step")
         self.visualization_box_layout = QVBoxLayout(self.visualization_box)
 
-        # sets table
+        # visualization charts and plots
         self.sets_table = QTableView()
-        self.visualization_box_layout.addWidget(self.sets_table, 1)
+        self.gauge_chart = APrioriGauge()
+        self.graph_plot = APrioriGraphPlot()
+        self.algorithm_part_label = QLabel()
 
-        # description
-        self.bottom_row_layout.addWidget(self._render_description(), 1)
+        self.step_vis_layout = QHBoxLayout()
+        self.step_charts_layout = QVBoxLayout()
+
+        self.step_charts_layout.addWidget(self.algorithm_part_label, 0)
+        self.step_charts_layout.addWidget(self.graph_plot, 1)
+        self.step_charts_layout.addWidget(self.gauge_chart, 1)
+
+        self.step_vis_layout.addWidget(self.sets_table, 1)
+        self.step_vis_layout.addLayout(self.step_charts_layout, 1)
+
+        self.visualization_box_layout.addLayout(self.step_vis_layout, 3)
+        self.visualization_box_layout.addWidget(self._render_description(), 2)
 
         # controls
         self._render_control_ui()
 
-        self.layout.addWidget(self.visualization_box, 5)
-        self.layout.addLayout(self.bottom_row_layout, 1)
+        self.layout.addWidget(self.visualization_box)
         self.update_plot(0)
 
     def _render_control_ui(self):
@@ -86,6 +98,13 @@ class APrioriStepsVisualization(QWidget):
             self.right_button = QPushButton("NEXT")
             self.right_button.clicked.connect(partial(self.click_listener, 'next'))
             self.step_label = QLabel("STEP: {}".format(self.current_step))
+
+            self.next_part_button = QPushButton("NEXT PART")
+            self.next_part_button.clicked.connect(partial(self.click_listener, 'next part'))
+            self.prev_part_button = QPushButton("PREV PART")
+            self.prev_part_button.clicked.connect(partial(self.click_listener, 'prev part'))
+
+            self.control_buttons_layout.addWidget(self.prev_part_button)
             self.control_buttons_layout.addWidget(self.left_button)
             self.control_buttons_layout.addWidget(self.left_box)
             self.control_buttons_layout.addStretch()
@@ -93,6 +112,7 @@ class APrioriStepsVisualization(QWidget):
             self.control_buttons_layout.addStretch()
             self.control_buttons_layout.addWidget(self.right_box)
             self.control_buttons_layout.addWidget(self.right_button)
+            self.control_buttons_layout.addWidget(self.next_part_button)
 
             self.visualization_box_layout.addLayout(self.control_buttons_layout, 0)
 
@@ -100,7 +120,7 @@ class APrioriStepsVisualization(QWidget):
         description = "A-priori algorithm - steps visualization"
 
         self.description_label = QLabel(description)
-        self.description_label.setWordWrap(False)
+        self.description_label.setWordWrap(True)
         self.description_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.description_group_box = QGroupBox()
@@ -142,6 +162,26 @@ class APrioriStepsVisualization(QWidget):
                     self.run_button.setText("Stop animation")
                 else:
                     self.run_button.setText("Start animation")
+            case 'next part':
+                step_delta = 1
+                current_part = self.algorithms_steps[self.current_step]['part']
+                while self.current_step + step_delta <= self.max_step and self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
+                    step_delta += 1
+
+                self.change_step(step_delta)
+            case 'prev part':
+                step_delta = -1
+                current_part = self.algorithms_steps[self.current_step]['part']
+                while self.current_step + step_delta >= 0 and self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
+                    step_delta -= 1
+
+                current_part = self.algorithms_steps[self.current_step + step_delta]['part']
+                while self.current_step + step_delta >= 0 and self.algorithms_steps[self.current_step + step_delta]['part'] == current_part:
+                    step_delta -= 1
+
+                step_delta += 1
+
+                self.change_step(step_delta)
 
     def change_enabled_buttons(self, value):
         pass
@@ -164,4 +204,56 @@ class APrioriStepsVisualization(QWidget):
                 self.change_enabled_buttons(True)
 
         self.current_step = step
-        self.sets_table.setModel(QtTable(self.algorithms_steps[self.current_step]))
+        step_dict = self.algorithms_steps[self.current_step]
+        df = step_dict['data_frame']
+        self.sets_table.setModel(QtTable(df) if df is not None else None)
+        self.algorithm_part_label.setText(step_dict['part'])
+        self.gauge_chart.reset()
+        self.graph_plot.reset()
+
+        match step_dict['part']:
+            case "Calculating support":
+                self.description_label.setText(
+                    "Checking whether set: {} is frequent.\nIts support equals {} \nIt is {}a frequent set."
+                    .format(step_dict['set'], step_dict['support'], 'not ' if step_dict['support'] < step_dict['min_support'] else '')
+                )
+                self.gauge_chart.plot_value(step_dict['support'], step_dict['min_support'], 'support')
+                self.graph_plot.plot_set(step_dict['set'])
+            case "Selecting frequent sets from generated and not already pruned":
+                self.description_label.setText(
+                    "We have found that the following sets are frequent:\n{}, whereas those are not:\n{}"
+                    .format('\n'.join(map(str, step_dict['frequent_sets'])), '\n'.join(map(str, step_dict['infrequent_sets'])))
+                )
+            case "Saving found k-frequent sets":
+                self.description_label.setText(
+                    "We have found all frequent sets for k={}".format(step_dict['k'])
+                )
+            case "Saving found association rules":
+                self.description_label.setText(
+                    "We have found all association rules for specified minimum confidence and support."
+                )
+            case "Joining sets and pruning ones with infrequent subsets":
+                description = "We are joining sets: {} and {}, then analyzing resulting set: {}. ".format(step_dict['set 1'], step_dict['set 2'], step_dict['new set'])
+
+                if step_dict['infrequent subset'] is None:
+                    description += "This set does not contain any infrequent subsets.  It might be frequent itself."
+                else:
+                    description += "This set contains an infrequent subset: {}. Therefore it is not frequent itself.".format(step_dict['infrequent subset'])
+
+                self.description_label.setText(description)
+                self.graph_plot.plot_set(step_dict['new set'])
+
+            case "Generating and verifying potential rules from frequent sets":
+                description = "We divide frequent set into A = {} and B = {}. The confidence of the rule A => B " \
+                              "equals {}\n\n".format(step_dict['set a'], step_dict['set b'], step_dict['confidence'])
+
+                if step_dict['confidence'] >= step_dict['min_confidence']:
+                    description += "We have found a new association rule."
+                else:
+                    description += "It is not enough to consider it a valid association rule for our data."
+
+                self.description_label.setText(
+                    description
+                )
+                self.graph_plot.plot_rule(step_dict['set a'], step_dict['set b'])
+                self.gauge_chart.plot_value(step_dict['confidence'], step_dict['min_confidence'], 'confidence')
