@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 from typing import List, Tuple, Union, Optional
+from algorithms import Algorithm
 
 init_types = ['random', 'kmeans++']
 
 
-class KMeans:
+class KMeans(Algorithm):
     def __init__(self, data: pd.DataFrame, num_clusters: int, metrics: int = 1, iterations: Optional[int] = None, repeats: int = 1, init_type: init_types = 'random'):
         self.num_clusters = num_clusters
         self.metrics = metrics

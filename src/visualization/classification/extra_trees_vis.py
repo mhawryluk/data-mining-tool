@@ -3,8 +3,8 @@ from random import randint
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QPixmap
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QGroupBox, QTableView, QFormLayout, \
-    QSpinBox
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QGroupBox, QTableView, \
+    QFormLayout, QSpinBox
 import pandas as pd
 import pygraphviz as pgv
 from typing import List, Dict, Optional, Tuple
@@ -16,6 +16,7 @@ from QGraphViz.DotParser import Graph, GraphType
 import graphviz
 
 from widgets import QtTable
+from visualization import AlgorithmStepsVisualization
 from utils import QtImageViewer, AutomateSteps, QImage
 
 
@@ -176,17 +177,13 @@ class TreeStepsVisualization(QWidget):
             self.restart_button.setEnabled(True)
 
 
-class ExtraTreesStepsVisualization(QWidget):
+class ExtraTreesStepsVisualization(AlgorithmStepsVisualization):
     def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[str, Dict, List[str]]], is_animation: bool):
-        super().__init__()
+        super().__init__(data, algorithms_steps, is_animation)
 
         self.steps_window = None
-        self.data = data
-        self.steps = algorithms_steps
-        self.is_animation = is_animation
-
         self.layout = QVBoxLayout(self)
-        self.graphs = [self.make_graph(dot_string) for dot_string, _, _ in self.steps]
+        self.graphs = [self.make_graph(dot_string) for dot_string, _, _ in self.algorithm_steps]
         self.current_graph = 1
 
         # graph section
@@ -291,7 +288,7 @@ class ExtraTreesStepsVisualization(QWidget):
     def click_listener(self, button_type: str):
         match button_type:
             case 'steps':
-                data = self.steps[self.current_graph - 1]
+                data = self.algorithm_steps[self.current_graph - 1]
                 self.steps_window = TreeStepsVisualization(self, data[1], data[2], self.is_animation)
                 self.steps_window.show()
                 return

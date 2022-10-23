@@ -2,7 +2,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 import joblib
-from algorithms import check_numeric
+from algorithms import check_numeric, Algorithm
 from typing import Tuple, List, Callable, Optional, Dict
 from algorithms import get_threads_count
 from collections import deque
@@ -303,7 +303,7 @@ class DecisionTree:
         return creation_info, steps
 
 
-class ExtraTrees:
+class ExtraTrees(Algorithm):
 
     def __init__(self, data: pd.DataFrame, forest_size: int, **tree_parameters):
         self.data = data

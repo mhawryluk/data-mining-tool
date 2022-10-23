@@ -2,15 +2,15 @@ from functools import partial
 
 import pandas as pd
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGroupBox, QFormLayout, QLabel, QLineEdit, QPushButton, QMessageBox, \
-    QScrollArea, QSizePolicy
+from PyQt5.QtWidgets import QHBoxLayout, QGroupBox, QFormLayout, QLabel, QLineEdit, QPushButton, QMessageBox, \
+    QScrollArea
+from widgets.results_widgets import AlgorithmResultsWidget
 
 
-class ExtraTreesResultsWidget(QWidget):
+class ExtraTreesResultsWidget(AlgorithmResultsWidget):
     def __init__(self, data, predict, configs, feature_importance, options):
-        super().__init__()
+        super().__init__(data, options)
 
-        self.data = data
         self.predict = predict
         self.configs = configs
         self.feature_importance = feature_importance
@@ -23,7 +23,7 @@ class ExtraTreesResultsWidget(QWidget):
         self.params_group.setTitle("Parameters")
         self.params_layout = QFormLayout(self.params_group)
 
-        for option, value in options.items():
+        for option, value in self.options.items():
             self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
 
         self.layout.addWidget(self.params_group)

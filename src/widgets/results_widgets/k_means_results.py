@@ -9,12 +9,13 @@ from matplotlib import pyplot as plt
 from algorithms import check_numeric, get_samples
 from visualization.clustering import KMeansCanvas
 from widgets import QtTable
+from widgets.results_widgets import AlgorithmResultsWidget
 
 
-class KMeansResultsWidget(QWidget):
+class KMeansResultsWidget(AlgorithmResultsWidget):
     def __init__(self, data, labels, centroids, options):
-        super().__init__()
-        self.data = data
+        super().__init__(data, options)
+
         self.labels = labels
         self.centroids = centroids
         self.selected_cluster = None
@@ -36,7 +37,7 @@ class KMeansResultsWidget(QWidget):
         self.params_group.setTitle("Parameters")
         self.params_layout = QFormLayout(self.params_group)
 
-        for option, value in options.items():
+        for option, value in self.options.items():
             self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
 
         self.layout.addWidget(self.params_group)

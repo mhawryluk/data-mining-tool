@@ -2,7 +2,7 @@ from functools import partial
 
 import numpy as np
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QGroupBox, \
     QSpinBox, QPushButton, QComboBox, QLabel, QScrollArea, QSizePolicy
 import pandas as pd
 from typing import List, Tuple
@@ -11,6 +11,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
 from algorithms import get_samples, check_numeric
+from visualization import AlgorithmStepsVisualization
 
 
 class KMeansCanvas(FigureCanvasQTAgg):
@@ -85,20 +86,15 @@ class KMeansCanvas(FigureCanvasQTAgg):
             return self.axes.collections
 
 
-class KMeansStepsVisualization(QWidget):
+class KMeansStepsVisualization(AlgorithmStepsVisualization):
     def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[np.ndarray, pd.DataFrame]], is_animation: bool):
-        super().__init__()
+        super().__init__(data, algorithms_steps, is_animation)
 
-        self.is_animation = is_animation
         self.is_running = False
         self.animation = None
-
         self.layout = QHBoxLayout(self)
 
-        self.algorithms_steps = algorithms_steps
         self.num_cluster = algorithms_steps[0][1].shape[0]
-
-        self.data = data
         columns = [col for col in self.data.columns if check_numeric(self.data[col])]
         for column in columns:
             self.data[column] = pd.to_numeric(self.data[column])
