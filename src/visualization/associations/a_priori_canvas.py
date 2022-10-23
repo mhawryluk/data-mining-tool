@@ -53,7 +53,7 @@ class APrioriScatterPlot(FigureCanvasQTAgg):
             color=self.REGULAR_COLOR, s=10, zorder=1, label="not containing"
         )
 
-        self.axes.legend(fontsize=5)
+        self.axes.legend()
         self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
         self.draw()
 
@@ -82,7 +82,7 @@ class APrioriScatterPlot(FigureCanvasQTAgg):
             color=self.REGULAR_COLOR, s=10, zorder=1, label="~(A or B)",
         )
 
-        self.axes.legend(fontsize=5)
+        self.axes.legend()
         self.draw()
 
     def _assign_random_positions(self):
@@ -129,6 +129,10 @@ class APrioriScatterPlot(FigureCanvasQTAgg):
                 if vis:
                     self.annot.set_visible(False)
                     self.fig.canvas.draw_idle()
+
+    def reset(self):
+        self.axes.cla()
+        self.axes.axis("off")
 
 
 class APrioriGauge(QWidget):
@@ -234,3 +238,9 @@ class APrioriGraphPlot(QWidget):
 
     def reset(self):
         self.browser.setHtml("")
+
+    def show_placeholder(self):
+        self.browser.setHtml(
+            '<span style="color: grey">Click on a frequent set or an association rule in one of the tables to see '
+            'visualization</span> '
+        )

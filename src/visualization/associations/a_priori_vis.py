@@ -197,9 +197,6 @@ class APrioriStepsVisualization(QWidget):
                 step_delta += 1
                 self.change_step(step_delta)
 
-    def change_enabled_buttons(self, value):
-        pass
-
     def change_step(self, change: int):
         new_step = max(0, min(self.max_step, self.current_step + change))
         if new_step == self.current_step:
@@ -220,6 +217,13 @@ class APrioriStepsVisualization(QWidget):
         self.current_step = step
         step_dict = self.algorithms_steps[self.current_step]
         df = step_dict['data_frame']
+        if df is not None:
+            df = df.reset_index()
+            if "confidence" in df:
+                df.rename(columns={'index': 'association rules'}, inplace=True)
+            else:
+                df.rename(columns={'index': 'frequent sets'}, inplace=True)
+
         self.sets_table.setModel(QtTable(df) if df is not None else None)
         self.algorithm_part_label.setText(step_dict['part'].value)
         self.gauge_chart.reset()
@@ -243,26 +247,26 @@ class APrioriStepsVisualization(QWidget):
                 description = "We have found all association rules for specified minimum confidence and support."
             case APrioriPartLabel.JOIN_AND_PRUNE:
                 description = "We are joining sets: {} and {}, then analyzing resulting set: {}. ".format(
-                    format_set(step_dict['set 1']), format_set(step_dict['set 2']), format_set(step_dict['new set']))
+                    format_set(step_dict['set_1']), format_set(step_dict['set_2']), format_set(step_dict['new_set']))
 
-                if step_dict['infrequent subset'] is None:
+                if step_dict['infrequent_subset'] is None:
                     description += "This set does not contain any infrequent subsets.  It might be frequent itself."
                 else:
                     description += "This set contains an infrequent subset: {}. Therefore it is not frequent itself.".format(
-                        step_dict['infrequent subset'])
-                self.graph_plot.plot_set(step_dict['new set'])
+                        step_dict['infrequent_subset'])
+                self.graph_plot.plot_set(step_dict['new_set'])
 
             case APrioriPartLabel.GENERATE_RULES:
                 description = "We divide frequent set into A = {} and B = {}. The confidence of the rule A => B " \
-                              "equals {}\n\n".format(format_set(step_dict['set a']), format_set(step_dict['set b']),
-                                                     step_dict['confidence'])
+                              "equals {}\n\n".format(format_set(step_dict['set_a']), format_set(step_dict['set_b']),
+                                                     round(step_dict['confidence'], 3))
 
                 if step_dict['confidence'] >= step_dict['min_confidence']:
                     description += "We have found a new association rule."
                 else:
                     description += "It is not enough to consider it a valid association rule for our data."
 
-                self.graph_plot.plot_rule(step_dict['set a'], step_dict['set b'])
+                self.graph_plot.plot_rule(step_dict['set_a'], step_dict['set_b'])
                 self.gauge_chart.plot_value(round(step_dict['confidence'], 3), step_dict['min_confidence'],
                                             'confidence')
 

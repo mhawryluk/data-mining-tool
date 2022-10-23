@@ -18,7 +18,7 @@ def main():
         'results': ResultsEngine(state)
     }
     app = QApplication(sys.argv)
-    plt.rcParams.update({"font.size": 5})
+    plt.rcParams.update({"font.size": 7})
     window = MainWindow(engines)
     sys.exit(app.exec_())
 

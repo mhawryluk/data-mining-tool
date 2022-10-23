@@ -111,9 +111,9 @@ class APriori:
                 self.saved_steps.append(
                     {
                         "part": APrioriPartLabel.JOIN_AND_PRUNE,
-                        "set 1": frequent_set_1,
-                        "set 2": frequent_set_2,
-                        "new set": new_item_set,
+                        "set_1": frequent_set_1,
+                        "set_2": frequent_set_2,
+                        "new_set": new_item_set,
                         "data_frame": self.k_frequent_sets_df,
                     }
                 )
@@ -131,11 +131,11 @@ class APriori:
         for subset in combinations(new_frequent_set, len(prev_frequent_sets)):
             if subset not in prev_frequent_sets:
                 if with_steps:
-                    self.saved_steps[-1]["infrequent subset"] = subset
+                    self.saved_steps[-1]["infrequent_subset"] = subset
                 return True
 
         if with_steps:
-            self.saved_steps[-1]["infrequent subset"] = None
+            self.saved_steps[-1]["infrequent_subset"] = None
         return False
 
     def support(self, item_set: tuple) -> float:
@@ -168,8 +168,8 @@ class APriori:
                         {
                             "part": APrioriPartLabel.GENERATE_RULES,
                             "set": frequent_set,
-                            "set a": subset_a,
-                            "set b": subset_b,
+                            "set_a": subset_a,
+                            "set_b": subset_b,
                             "confidence": confidence,
                             "min_confidence": self.min_confidence,
                             "data_frame": self.k_frequent_sets_df,
