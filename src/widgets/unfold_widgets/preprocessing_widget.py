@@ -12,6 +12,7 @@ class PreprocessingWidget(UnfoldWidget):
         super().__init__(parent, engine, 'preprocessing_widget', 'PREPROCESSING')
 
         self.data_submitted = False
+        self.reduced_columns = []
         self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
 
@@ -147,7 +148,8 @@ class PreprocessingWidget(UnfoldWidget):
         loading_screen = QSplashScreen()
         size = QDesktopWidget().screenGeometry(-1)
         loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
-        loading_screen.setGeometry(QRect(size.width()//2-125, size.height()//2-50, 250, 100)) # hardcoded alignment
+        loading_screen.setGeometry(
+            QRect(size.width() // 2 - 125, size.height() // 2 - 50, 250, 100))  # hardcoded alignment
         loading_screen.show()
         QApplication.processEvents()
 
@@ -157,7 +159,8 @@ class PreprocessingWidget(UnfoldWidget):
         self.add_columns_to_layout()
         self.engine.clean_data("cast")
 
-        max_dimensions = self.engine.number_of_numeric_columns()
+        max_dimensions = self.engine.number_of_numeric_columns() - \
+                         len([column for column in self.reduced_columns if column in self.engine.state.imported_data])
         self.set_reduction_bounds(max_dimensions)
         loading_screen.close()
 
@@ -172,7 +175,7 @@ class PreprocessingWidget(UnfoldWidget):
 
     def add_columns_to_layout(self):
         self.clear_column_layout()
-        columns = self.engine.get_columns()
+        columns = self.engine.get_raw_columns()
         selected_columns = self.engine.get_columns()
         for column in columns:
             checkbox = QCheckBox(column)
@@ -220,7 +223,9 @@ class PreprocessingWidget(UnfoldWidget):
         self.data_submitted = "OK" in button.text()
 
     def reduce_dimensions(self, dim_number=None):
-        self.engine.reduce_dimensions(dim_number)
+        self.engine.state.imported_data.drop(self.reduced_columns, axis=1, inplace=True, errors='ignore')
+        self.engine.state.raw_data.drop(self.reduced_columns, axis=1, inplace=True)
+        self.reduced_columns = self.engine.reduce_dimensions(dim_number)
         self.get_data()
         self.show_reduction_results()
 

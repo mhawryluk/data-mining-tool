@@ -18,7 +18,9 @@ class PCAReducer:
         reduce_matrix = self._pca(covariance_matrix, dim_number)
         override = np.dot(data, reduce_matrix)
         columns = ["{}".format(self.format_column_name(reduce_matrix[:, i])) for i in range(dim_number or override.shape[1])]
-        self.state.imported_data = pd.DataFrame(override, columns=columns)
+        self.state.imported_data = pd.concat([self.state.imported_data, pd.DataFrame(override, columns=columns)], axis=1)
+        self.state.raw_data = pd.concat([self.state.raw_data, pd.DataFrame(override, columns=columns)], axis=1)
+        return columns
 
     def _pca(self, matrix, dim_number=None):
         reducer, weights = self._svd(matrix, k=dim_number)
