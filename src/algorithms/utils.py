@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import numpy as np
@@ -14,5 +15,9 @@ def check_numeric(element: any) -> bool:
     try:
         pd.to_numeric(element)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False
+
+
+def get_threads_count():
+    return os.cpu_count() - 2

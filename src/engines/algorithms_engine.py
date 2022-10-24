@@ -1,9 +1,11 @@
 from algorithms.associations import APriori
 from algorithms.clustering import KMeans
+from algorithms.classification import ExtraTrees
 from state import State
 from visualization.associations import APrioriStepsVisualization
 from visualization.clustering import KMeansStepsVisualization
-from widgets.results_widgets import KMeansResultsWidget, APrioriResultsWidget
+from visualization.classification import ExtraTreesStepsVisualization
+from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, APrioriResultsWidget
 
 
 class AlgorithmsEngine:
@@ -26,7 +28,7 @@ class AlgorithmsEngine:
             },
             'classification': {
                 'KNN': None,
-                'Decision Tree': None,
+                'Extra Trees': (ExtraTrees, ExtraTreesStepsVisualization, ExtraTreesResultsWidget),
                 'SVM': None
             }
         }
@@ -58,3 +60,6 @@ class AlgorithmsEngine:
         if self.state.imported_data is None:
             return 100
         return self.state.imported_data.shape[0]
+
+    def get_columns(self) -> list:
+        return list(self.state.imported_data.columns)
