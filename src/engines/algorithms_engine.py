@@ -1,9 +1,11 @@
-from state import State
+from algorithms.associations import APriori
 from algorithms.clustering import KMeans
 from algorithms.classification import ExtraTrees
+from state import State
+from visualization.associations import APrioriStepsVisualization
 from visualization.clustering import KMeansStepsVisualization
 from visualization.classification import ExtraTreesStepsVisualization
-from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget
+from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, APrioriResultsWidget
 
 
 class AlgorithmsEngine:
@@ -20,7 +22,7 @@ class AlgorithmsEngine:
                 'Divisive clustering': None
             },
             'associations': {
-                'A-priori': None,
+                'A-priori': (APriori, APrioriStepsVisualization, APrioriResultsWidget),
                 'A-prioriTID': None,
                 'FP-Growth': None
             },
@@ -50,7 +52,9 @@ class AlgorithmsEngine:
             self.state.algorithm_results_widgets[technique] = {}
         if not self.state.algorithm_results_widgets[technique].get(algorithm):
             self.state.algorithm_results_widgets[technique][algorithm] = []
-        self.state.algorithm_results_widgets[technique][algorithm].append(chosen_alg[2](self.state.raw_data, *result, options=kwargs))
+
+        self.state.algorithm_results_widgets[technique][algorithm].append(
+            chosen_alg[2](self.state.raw_data, *result, options=kwargs))
 
     def get_maximum_clusters(self) -> int:
         if self.state.imported_data is None:
