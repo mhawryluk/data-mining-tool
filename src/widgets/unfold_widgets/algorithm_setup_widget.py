@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QGroupBox, QLabel, QComboBox, QPushButton, QVBoxLayo
     QFormLayout, QMessageBox
 
 from widgets import UnfoldWidget, LoadingWidget
-from widgets.options_widgets import KMeansOptions, Algorithm, AssociationRulesOptions, ExtraTreesOptions
+from widgets.options_widgets import KMeansOptions, Algorithm, AssociationRulesOptions, ExtraTreesOptions, GMMOptions
 
 
 class AlgorithmSetupWidget(UnfoldWidget):
@@ -20,9 +20,9 @@ class AlgorithmSetupWidget(UnfoldWidget):
                 'K-Means': KMeansOptions(),
                 'DBSCAN': Algorithm(),
                 'Partition Around Medoids': Algorithm(),
-                'Gaussian Mixture Models': Algorithm(),
+                'Gaussian Mixture Models': GMMOptions(),
                 'Agglomerative clustering': Algorithm(),
-                'Divisive clustering': Algorithm()
+                'Divisive clustering': Algorithm(),
             },
             'associations': {
                 'A-priori': AssociationRulesOptions(),
@@ -132,7 +132,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.parent().unfold(self)
 
     def enable_button(self):
-        done = ['K-Means', 'Extra Trees', 'A-priori']
+        done = ['K-Means', 'Extra Trees', 'A-priori', 'Gaussian Mixture Models']
         if self.algorithm_box.currentText() in done:
             self.run_button.setEnabled(True)
         else:
@@ -161,6 +161,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         columns = self.engine.get_columns()
         self.algorithms_options["associations"]["A-priori"].set_columns_options(columns)
         self.algorithms_options["classification"]["Extra Trees"].set_values(columns)
+        self.algorithms_options["clustering"]["Gaussian Mixture Models"].set_max_clusters(clusters)
 
     def run_handle(self):
         technique = self.technique_box.currentText()
