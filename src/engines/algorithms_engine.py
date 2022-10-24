@@ -5,7 +5,7 @@ from state import State
 from visualization.associations import APrioriStepsVisualization
 from visualization.clustering import KMeansStepsVisualization, GMMStepsVisualization
 from visualization.classification import ExtraTreesStepsVisualization
-from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, APrioriResultsWidget, KMeansResultsWidget, GMMResultsWidget
+from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, APrioriResultsWidget, GMMResultsWidget
 
 
 class AlgorithmsEngine:
