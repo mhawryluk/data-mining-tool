@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QGroupBox, QLabel, QComboBox, QPushButton, QVBoxLayo
     QFormLayout, QMessageBox
 
 from widgets import UnfoldWidget, LoadingWidget
-from widgets.options_widgets import KMeansOptions, Algorithm, AssociationRulesOptions, ExtraTreesOptions, GMMOptions
 
 
 class AlgorithmSetupWidget(UnfoldWidget):
@@ -14,27 +13,6 @@ class AlgorithmSetupWidget(UnfoldWidget):
 
         self.button.disconnect()
         self.button.clicked.connect(self.load_widget)
-
-        self.algorithms_options = {
-            'clustering': {
-                'K-Means': KMeansOptions(),
-                'DBSCAN': Algorithm(),
-                'Partition Around Medoids': Algorithm(),
-                'Gaussian Mixture Models': GMMOptions(),
-                'Agglomerative clustering': Algorithm(),
-                'Divisive clustering': Algorithm(),
-            },
-            'associations': {
-                'A-priori': AssociationRulesOptions(),
-                'A-prioriTID': AssociationRulesOptions(),
-                'FP-Growth': AssociationRulesOptions()
-            },
-            'classification': {
-                'KNN': Algorithm(),
-                'Extra Trees': ExtraTreesOptions(),
-                'SVM': Algorithm()
-            }
-        }
 
         # layout
         self.layout = QVBoxLayout(self.frame)
@@ -53,7 +31,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.technique_group_layout.setFormAlignment(Qt.AlignVCenter)
 
         self.technique_box = QComboBox()
-        self.technique_box.addItems(self.algorithms_options.keys())
+        self.technique_box.addItems(self.engine.get_all_techniques())
         self.technique_box.currentTextChanged.connect(partial(self.click_listener, 'technique'))
         self.technique_group_layout.addRow(self.technique_box)
 
@@ -65,7 +43,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.algorithm_selection_group_layout.setFormAlignment(Qt.AlignVCenter)
 
         self.algorithm_box = QComboBox()
-        self.algorithm_box.addItems(self.algorithms_options[self.technique_box.currentText()].keys())
+        self.algorithm_box.addItems(self.engine.get_algorithms_for_techniques(self.technique_box.currentText()))
         self.algorithm_box.currentTextChanged.connect(partial(self.click_listener, 'algorithm'))
         self.algorithm_selection_group_layout.addRow(self.algorithm_box)
 
@@ -81,7 +59,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.options_group_layout = QVBoxLayout(self.options_group)
 
         self.options_group_layout.addWidget(
-            self.algorithms_options[self.technique_box.currentText()][self.algorithm_box.currentText()])
+            self.engine.get_option_widget(self.technique_box.currentText(), self.algorithm_box.currentText()))
 
         self.second_column.addWidget(self.options_group)
         self.second_column.addStretch()
@@ -128,7 +106,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
             error.exec_()
             return
 
-        self.update_options()
+        self.state.update_options()
         self.parent().unfold(self)
 
     def enable_button(self):
@@ -144,29 +122,22 @@ class AlgorithmSetupWidget(UnfoldWidget):
         match button_type:
             case 'technique':
                 self.algorithm_box.clear()
-                self.algorithm_box.addItems(self.algorithms_options[technique].keys())
+                self.algorithm_box.addItems(self.engine.get_algorithms_for_techniques(self.technique_box.currentText()))
             case 'algorithm':
                 for i in reversed(range(self.options_group_layout.count())):
                     self.options_group_layout.itemAt(i).widget().setParent(None)
                 if algorithm:
-                    self.options_group_layout.addWidget(self.algorithms_options[technique][algorithm])
+                    self.options_group_layout.addWidget(self.engine.get_option_widget(self.technique_box.currentText(),
+                                                                                      self.algorithm_box.currentText()))
                     self.enable_button()
             case 'run':
                 loading = LoadingWidget(self.run_handle)
                 loading.execute()
 
-    def update_options(self):
-        clusters = min(self.engine.get_maximum_clusters(), 100)
-        self.algorithms_options["clustering"]["K-Means"].set_max_clusters(clusters)
-        columns = self.engine.get_columns()
-        self.algorithms_options["associations"]["A-priori"].set_columns_options(columns)
-        self.algorithms_options["classification"]["Extra Trees"].set_values(columns)
-        self.algorithms_options["clustering"]["Gaussian Mixture Models"].set_max_clusters(clusters)
-
     def run_handle(self):
         technique = self.technique_box.currentText()
         algorithm = self.algorithm_box.currentText()
-        data = self.algorithms_options[technique][algorithm].get_data()
+        data = self.engine.get_option_widget(technique, algorithm).get_data()
         type_visualization = self.animation_type.currentText()
         will_be_visualized = type_visualization != 'No visualization'
         is_animation = type_visualization == 'Animation'
