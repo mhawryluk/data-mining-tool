@@ -1,15 +1,19 @@
-from PyQt5.QtWidgets import QSpinBox, QLabel, QComboBox
+from abc import abstractmethod
+from PyQt5.QtWidgets import QWidget, QFormLayout
 
-from .options import Options
 
+class AlgorithmOptions(QWidget):
+    """
+        Widget, which allows to set parameters of algorithm
+    """
 
-class Algorithm(Options):
     def __init__(self):
         super().__init__()
+        self.layout = QFormLayout(self)
 
-        self.layout.addRow(QLabel("Future"))
-        self.layout.addRow(QLabel("Some ComboBox"), QComboBox())
-        self.layout.addRow(QLabel("Some SpinBox"), QSpinBox())
-
+    @abstractmethod
     def get_data(self) -> dict:
-        return {}
+        """
+            Return dict with parameters
+        """
+        pass

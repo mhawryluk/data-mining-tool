@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QSpinBox, QLabel, QComboBox, QDoubleSpinBox
 
-from .options import Options
+from widgets.options_widgets import AlgorithmOptions
 
 
-class ExtraTreesOptions(Options):
+class ExtraTreesOptions(AlgorithmOptions):
     def __init__(self):
         super().__init__()
 
