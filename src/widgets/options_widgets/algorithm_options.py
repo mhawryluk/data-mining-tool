@@ -4,7 +4,7 @@ from .options import Options
 
 
 class Algorithm(Options):
-    def __init__(self, engine):
+    def __init__(self):
         super().__init__()
 
         self.layout.addRow(QLabel("Future"))

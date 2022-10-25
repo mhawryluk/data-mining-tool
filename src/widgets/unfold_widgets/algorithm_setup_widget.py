@@ -1,12 +1,11 @@
 from functools import partial
 
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QLabel, QComboBox, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFormLayout, QMessageBox, QSplashScreen, QDesktopWidget, QApplication
+    QFormLayout, QMessageBox
 
 from widgets import UnfoldWidget, LoadingWidget
-
-from widgets.options_widgets import KMeansOptions, Algorithm
+from widgets.options_widgets import KMeansOptions, Algorithm, AssociationRulesOptions, ExtraTreesOptions, GMMOptions
 
 
 class AlgorithmSetupWidget(UnfoldWidget):
@@ -19,21 +18,21 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.algorithms_options = {
             'clustering': {
                 'K-Means': KMeansOptions(),
-                'DBSCAN': Algorithm(engine),
-                'Partition Around Medoids': Algorithm(engine),
-                'Gaussian Mixture Models': Algorithm(engine),
-                'Agglomerative clustering': Algorithm(engine),
-                'Divisive clustering': Algorithm(engine)
+                'DBSCAN': Algorithm(),
+                'Partition Around Medoids': Algorithm(),
+                'Gaussian Mixture Models': GMMOptions(),
+                'Agglomerative clustering': Algorithm(),
+                'Divisive clustering': Algorithm(),
             },
             'associations': {
-                'A-priori': Algorithm(engine),
-                'A-prioriTID': Algorithm(engine),
-                'FP-Growth': Algorithm(engine)
+                'A-priori': AssociationRulesOptions(),
+                'A-prioriTID': AssociationRulesOptions(),
+                'FP-Growth': AssociationRulesOptions()
             },
             'classification': {
-                'KNN': Algorithm(engine),
-                'Decision Tree': Algorithm(engine),
-                'SVM': Algorithm(engine)
+                'KNN': Algorithm(),
+                'Extra Trees': ExtraTreesOptions(),
+                'SVM': Algorithm()
             }
         }
 
@@ -81,7 +80,8 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.options_group.setMinimumSize(220, 200)
         self.options_group_layout = QVBoxLayout(self.options_group)
 
-        self.options_group_layout.addWidget(self.algorithms_options[self.technique_box.currentText()][self.algorithm_box.currentText()])
+        self.options_group_layout.addWidget(
+            self.algorithms_options[self.technique_box.currentText()][self.algorithm_box.currentText()])
 
         self.second_column.addWidget(self.options_group)
         self.second_column.addStretch()
@@ -128,11 +128,11 @@ class AlgorithmSetupWidget(UnfoldWidget):
             error.exec_()
             return
 
-        self.update_clusters_bound()
+        self.update_options()
         self.parent().unfold(self)
 
     def enable_button(self):
-        done = ['K-Means']
+        done = ['K-Means', 'Extra Trees', 'A-priori', 'Gaussian Mixture Models']
         if self.algorithm_box.currentText() in done:
             self.run_button.setEnabled(True)
         else:
@@ -155,9 +155,13 @@ class AlgorithmSetupWidget(UnfoldWidget):
                 loading = LoadingWidget(self.run_handle)
                 loading.execute()
 
-    def update_clusters_bound(self):
+    def update_options(self):
         clusters = min(self.engine.get_maximum_clusters(), 100)
         self.algorithms_options["clustering"]["K-Means"].set_max_clusters(clusters)
+        columns = self.engine.get_columns()
+        self.algorithms_options["associations"]["A-priori"].set_columns_options(columns)
+        self.algorithms_options["classification"]["Extra Trees"].set_values(columns)
+        self.algorithms_options["clustering"]["Gaussian Mixture Models"].set_max_clusters(clusters)
 
     def run_handle(self):
         technique = self.technique_box.currentText()
