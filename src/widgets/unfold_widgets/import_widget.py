@@ -14,40 +14,37 @@ class ImportWidget(UnfoldWidget):
         # load data group
         self.load_data_group = QGroupBox(self.frame)
         self.load_data_group_layout = QFormLayout(self.load_data_group)
+        self.load_data_group_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         self.load_data_group.setTitle("Load data")
 
         self.filepath_label = QLabel(self.load_data_group)
         self.filepath_label.setText("Load data from file:")
-        self.filepath_label.setMinimumHeight(16)
+
         self.filepath_line = QLineEdit(self.load_data_group)
-        self.filepath_line.setMinimumHeight(23)
         self.filepath_line.setReadOnly(True)
+        self.filepath_line.setFixedWidth(150)
+
         self.load_data_group_layout.addRow(self.filepath_label)
 
         self.file_button = QPushButton(self.load_data_group)
-        self.file_button.setText("SELECT FILE")
+        self.file_button.setText("Select file")
         self.file_button.clicked.connect(partial(self.click_listener, 'load_file'))
-        self.file_button.setMinimumHeight(23)
 
         self.load_data_group_layout.addRow(self.filepath_line, self.file_button)
 
         self.database_label = QLabel(self.load_data_group)
         self.database_label.setText("Choose data from database:")
-        self.database_label.setMinimumHeight(16)
         self.load_data_group_layout.addRow(self.database_label)
 
         self.database_box = QComboBox(self.load_data_group)
         self.set_available_tables()
-        self.database_box.setMinimumHeight(23)
         self.database_button = QPushButton(self.load_data_group)
-        self.database_button.setText("LOAD")
+        self.database_button.setText("Load")
         self.database_button.clicked.connect(partial(self.click_listener, 'load_database'))
-        self.database_button.setMinimumHeight(23)
 
         self.load_data_group_layout.addRow(self.database_box, self.database_button)
 
         self.import_state_label = QLabel(self.load_data_group)
-        self.import_state_label.setMinimumHeight(16)
         self.load_data_group_layout.addRow(self.import_state_label)
 
         # options group
@@ -58,14 +55,12 @@ class ImportWidget(UnfoldWidget):
         self.reject_button = QPushButton(self.options_group)
         self.reject_button.setText("Reject this data")
         self.reject_button.clicked.connect(partial(self.click_listener, 'reject_data'))
-        self.reject_button.setMinimumHeight(23)
         self.options_layout.addWidget(self.reject_button, 1)
 
         self.save_button = QPushButton(self.options_group)
         self.save_button.setText("Save to database")
         self.save_button.clicked.connect(partial(self.click_listener, 'save_data'))
         self.save_button.setEnabled(False)
-        self.save_button.setMinimumHeight(23)
         self.options_layout.addWidget(self.save_button, 1)
 
         # columns group
@@ -79,10 +74,8 @@ class ImportWidget(UnfoldWidget):
         self.scroll = QScrollArea()
         self.scroll.setWidget(self.scroll_box)
         self.scroll.setWidgetResizable(True)
-        self.scroll.setMinimumHeight(26)
 
         self.columns_button = QPushButton("Select columns")
-        self.columns_button.setMaximumWidth(150)
         self.columns_button.setEnabled(False)
         self.columns_button.clicked.connect(partial(self.click_listener, 'columns'))
 
@@ -93,7 +86,6 @@ class ImportWidget(UnfoldWidget):
 
         # data table
         self.data_table = QTableView(self.frame)
-        self.data_table.setMinimumHeight(300)
 
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
