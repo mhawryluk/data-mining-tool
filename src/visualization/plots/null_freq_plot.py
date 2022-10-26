@@ -1,6 +1,5 @@
-import numpy as np
 from PyQt5.QtWidgets import QMessageBox
-from widgets.plots import Plot
+from visualization.plots import Plot
 
 
 class NullFrequencyPlot(Plot):

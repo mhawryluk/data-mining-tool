@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGroupBox, QFormLayout, QLabel
 from algorithms import get_samples
 from matplotlib import pyplot as plt
 
-from widgets.steps_widgets import GMMCanvas
+from visualization import GMMCanvas
 
 from widgets import QtTable
 from widgets.results_widgets import AlgorithmResultsWidget

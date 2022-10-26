@@ -9,4 +9,3 @@ from .unfold_widgets.preprocessing_widget import PreprocessingWidget
 from .unfold_widgets.results_widget import ResultsWidget
 from .main_widget import MainWidget
 from .main_window import MainWindow
-from .plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot

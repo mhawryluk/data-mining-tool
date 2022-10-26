@@ -1,4 +1,4 @@
-from widgets.plots import Plot
+from visualization.plots import Plot
 
 
 class FallbackPlot(Plot):

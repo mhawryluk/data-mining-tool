@@ -1,6 +1,6 @@
 import numpy as np
 from state import State
-from widgets.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
+from visualization.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
 from preprocess import DataCleaner
 
 

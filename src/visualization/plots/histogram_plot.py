@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMessageBox
-from widgets.plots import Plot
+from visualization.plots import Plot
 
 
 class HistogramPlot(Plot):
