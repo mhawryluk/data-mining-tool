@@ -25,30 +25,30 @@ class AlgorithmTechniques(Enum):
 
 
 @dataclass
-class AlgorithmClasses:
+class AlgorithmConfig:
     algorithm: Algorithm.__class__
     options: AlgorithmOptions.__class__
     steps_visualization: AlgorithmStepsVisualization.__class__
     result_widget: AlgorithmResultsWidget.__class__
 
 
-ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmClasses]] = {
+ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmConfig]] = {
     AlgorithmTechniques.CLUSTERING.value: {
-        'K-Means': AlgorithmClasses(algorithm=KMeans, options=KMeansOptions,
-                                    steps_visualization=KMeansStepsVisualization,
-                                    result_widget=KMeansResultsWidget),
-        'Gaussian Mixture Models': AlgorithmClasses(algorithm=GMM, options=GMMOptions,
-                                                    steps_visualization=GMMStepsVisualization,
-                                                    result_widget=GMMResultsWidget)
+        'K-Means': AlgorithmConfig(algorithm=KMeans, options=KMeansOptions,
+                                   steps_visualization=KMeansStepsVisualization,
+                                   result_widget=KMeansResultsWidget),
+        'Gaussian Mixture Models': AlgorithmConfig(algorithm=GMM, options=GMMOptions,
+                                                   steps_visualization=GMMStepsVisualization,
+                                                   result_widget=GMMResultsWidget)
     },
     AlgorithmTechniques.ASSOCIATIONS.value: {
-        'A-priori': AlgorithmClasses(algorithm=APriori, options=AssociationRulesOptions,
-                                     steps_visualization=APrioriStepsVisualization,
-                                     result_widget=APrioriResultsWidget)
+        'Apriori': AlgorithmConfig(algorithm=APriori, options=AssociationRulesOptions,
+                                   steps_visualization=APrioriStepsVisualization,
+                                   result_widget=APrioriResultsWidget)
     },
     AlgorithmTechniques.CLASSIFICATION.value: {
-        'Extra Trees': AlgorithmClasses(algorithm=ExtraTrees, options=ExtraTreesOptions,
-                                        steps_visualization=ExtraTreesStepsVisualization,
-                                        result_widget=ExtraTreesResultsWidget)
+        'Extra Trees': AlgorithmConfig(algorithm=ExtraTrees, options=ExtraTreesOptions,
+                                       steps_visualization=ExtraTreesStepsVisualization,
+                                       result_widget=ExtraTreesResultsWidget)
     }
 }
