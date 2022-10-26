@@ -183,7 +183,7 @@ class ExtraTreesStepsVisualization(AlgorithmStepsVisualization):
 
         self.steps_window = None
         self.layout = QVBoxLayout(self)
-        self.graphs = [self.make_graph(dot_string) for dot_string, _, _ in self.algorithm_steps]
+        self.graphs = [self.make_graph(dot_string) for dot_string, _, _ in self.algorithms_steps]
         self.current_graph = 1
 
         # graph section
@@ -288,7 +288,7 @@ class ExtraTreesStepsVisualization(AlgorithmStepsVisualization):
     def click_listener(self, button_type: str):
         match button_type:
             case 'steps':
-                data = self.algorithm_steps[self.current_graph - 1]
+                data = self.algorithms_steps[self.current_graph - 1]
                 self.steps_window = TreeStepsVisualization(self, data[1], data[2], self.is_animation)
                 self.steps_window.show()
                 return

@@ -1,6 +1,6 @@
 from typing import Dict, List
 from enum import Enum
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 from algorithms import Algorithm
 from algorithms.clustering import KMeans, GMM
@@ -26,27 +26,28 @@ class AlgorithmTechniques(Enum):
         return list(map(lambda e: e.value, cls))
 
 
-class AlgorithmClasses(BaseModel):
-    algorithm: Algorithm
-    options: AlgorithmOptions
-    steps_visualization: AlgorithmStepsVisualization
-    result_widget: AlgorithmResultsWidget
+@dataclass
+class AlgorithmClasses:
+    algorithm: Algorithm.__class__
+    options: AlgorithmOptions.__class__
+    steps_visualization: AlgorithmStepsVisualization.__class__
+    result_widget: AlgorithmResultsWidget.__class__
 
 
-ALGORITHMS_INFO: Dict[AlgorithmTechniques.list(), Dict[str, AlgorithmClasses]] = {
+ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmClasses]] = {
     AlgorithmTechniques.CLUSTERING.value: {
-        'K-Means': AlgorithmClasses(algorithm=KMeans, options=KMeansOptions(),
+        'K-Means': AlgorithmClasses(algorithm=KMeans, options=KMeansOptions,
                                     steps_visualization=KMeansStepsVisualization, result_widget=KMeansResultsWidget),
-        'Gaussian Mixture Models': AlgorithmClasses(algorithm=GMM, options=GMMOptions(),
+        'Gaussian Mixture Models': AlgorithmClasses(algorithm=GMM, options=GMMOptions,
                                                     steps_visualization=GMMStepsVisualization,
                                                     result_widget=GMMResultsWidget)
     },
     AlgorithmTechniques.ASSOCIATIONS.value: {
-        'A-priori': AlgorithmClasses(algorithm=APriori, options=AssociationRulesOptions(),
+        'A-priori': AlgorithmClasses(algorithm=APriori, options=AssociationRulesOptions,
                                      steps_visualization=APrioriStepsVisualization, result_widget=APrioriResultsWidget)
     },
     AlgorithmTechniques.CLASSIFICATION.value: {
-        'Extra Trees': AlgorithmClasses(algorithm=ExtraTrees, options=ExtraTreesOptions(),
+        'Extra Trees': AlgorithmClasses(algorithm=ExtraTrees, options=ExtraTreesOptions,
                                         steps_visualization=ExtraTreesStepsVisualization,
                                         result_widget=ExtraTreesResultsWidget)
     }

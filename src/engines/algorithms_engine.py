@@ -8,6 +8,11 @@ class AlgorithmsEngine:
     def __init__(self, state: State):
         self.state = state
 
+        # init options widgets
+        self.options = {}
+        for technique, info in ALGORITHMS_INFO.items():
+            self.options[technique] = {algorithm: classes.options() for algorithm, classes in info.items()}
+
     def run(self, technique, algorithm, will_be_visualized, is_animation, **kwargs):
         chosen_alg = ALGORITHMS_INFO[technique][algorithm]
 
@@ -50,15 +55,13 @@ class AlgorithmsEngine:
     def get_algorithms_for_techniques(technique: AlgorithmTechniques.list()) -> List:
         return list(ALGORITHMS_INFO[technique].keys())
 
-    @staticmethod
-    def get_option_widget(technique: AlgorithmTechniques.list(), algorithm: str) -> AlgorithmOptions:
-        return ALGORITHMS_INFO[technique][algorithm].options
+    def get_option_widget(self, technique: AlgorithmTechniques.list(), algorithm: str) -> AlgorithmOptions:
+        return self.options[technique][algorithm]
 
     def update_options(self):
         clusters = min(self.get_maximum_clusters(), 100)
-        ALGORITHMS_INFO[AlgorithmTechniques.CLUSTERING.value]["K-Means"].options.set_max_clusters(clusters)
+        self.options[AlgorithmTechniques.CLUSTERING.value]["K-Means"].set_max_clusters(clusters)
         columns = self.get_columns()
-        ALGORITHMS_INFO[AlgorithmTechniques.ASSOCIATIONS.value]["A-priori"].options.set_columns_options(columns)
-        ALGORITHMS_INFO[AlgorithmTechniques.CLASSIFICATION.value]["Extra Trees"].options.set_values(columns)
-        ALGORITHMS_INFO[AlgorithmTechniques.CLUSTERING.value]["Gaussian Mixture Models"].options\
-            .set_max_clusters(clusters)
+        self.options[AlgorithmTechniques.ASSOCIATIONS.value]["A-priori"].set_columns_options(columns)
+        self.options[AlgorithmTechniques.CLASSIFICATION.value]["Extra Trees"].set_values(columns)
+        self.options[AlgorithmTechniques.CLUSTERING.value]["Gaussian Mixture Models"].set_max_clusters(clusters)

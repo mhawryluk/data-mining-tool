@@ -7,9 +7,6 @@ class Algorithm:
         Abstract class of algorithm
     """
 
-    def __init__(self):
-        pass
-
     @abstractmethod
     def run(self, with_steps: bool):
         """

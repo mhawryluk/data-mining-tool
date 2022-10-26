@@ -3,9 +3,10 @@ from PyQt5.QtWidgets import QMessageBox
 from numpy.linalg import LinAlgError
 from scipy.stats import multivariate_normal
 from math import inf
+from algorithms import Algorithm
 
 
-class GMM:
+class GMM(Algorithm):
     def __init__(self, df, num_clusters, eps=1e-6, max_iterations=None):
         self.df = df.select_dtypes(include=['number'])
         self.num_clusters = num_clusters

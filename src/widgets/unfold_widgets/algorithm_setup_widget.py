@@ -106,7 +106,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
             error.exec_()
             return
 
-        self.state.update_options()
+        self.engine.update_options()
         self.parent().unfold(self)
 
     def enable_button(self):

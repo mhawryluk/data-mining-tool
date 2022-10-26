@@ -10,17 +10,15 @@ from utils import AutomateSteps, format_set
 from visualization.associations.a_priori_canvas import APrioriGauge, APrioriGraphPlot
 from widgets import QtTable
 from algorithms.associations import APrioriPartLabel
+from visualization import AlgorithmStepsVisualization
 
 
-class APrioriStepsVisualization(QWidget):
+class APrioriStepsVisualization(AlgorithmStepsVisualization):
     def __init__(self, data: pd.DataFrame, algorithms_steps: List[dict], is_animation: bool):
-        super().__init__()
+        super().__init__(data, algorithms_steps, is_animation)
 
-        self.is_animation = is_animation
         self.is_running = False
         self.animation = None
-        self.algorithms_steps = algorithms_steps
-        self.data = data
         self.max_step = len(algorithms_steps) - 1
         self.current_step = 0
 

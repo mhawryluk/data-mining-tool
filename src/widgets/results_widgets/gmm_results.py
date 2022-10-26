@@ -11,13 +11,14 @@ from matplotlib import pyplot as plt
 from visualization.clustering import GMMCanvas
 
 from widgets import QtTable
+from widgets.results_widgets import AlgorithmResultsWidget
 
 
-class GMMResultsWidget(QWidget):
+class GMMResultsWidget(AlgorithmResultsWidget):
     def __init__(self, df, labels, mean, sigma, options):
-        super().__init__()
-        self.df = df.select_dtypes(include=['number'])
-        self.columns = self.df.columns
+        super().__init__(df.select_dtypes(include=['number']), options)
+
+        self.columns = self.data.columns
         self.labels = labels
         self.max_label = np.amax(self.labels) + 1
         self.mean = pd.DataFrame(mean, columns=self.columns)
@@ -25,8 +26,8 @@ class GMMResultsWidget(QWidget):
         self.selected_cluster = None
         self.layout = QHBoxLayout(self)
 
-        self.num_samples = min(35, self.df.shape[0] // 2)
-        self.samples = get_samples(self.df, self.num_samples)
+        self.num_samples = min(35, self.data.shape[0] // 2)
+        self.samples = get_samples(self.data, self.num_samples)
         self.ox = self.columns[0]
         self.oy = self.columns[0] if len(self.columns) < 2 else self.columns[1]
 
@@ -34,7 +35,7 @@ class GMMResultsWidget(QWidget):
         self.params_group = QGroupBox()
         self.params_group.setTitle("Parameters")
         self.params_layout = QFormLayout(self.params_group)
-        for option, value in options.items():
+        for option, value in self.options.items():
             self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
 
         self.layout.addWidget(self.params_group)
@@ -50,7 +51,7 @@ class GMMResultsWidget(QWidget):
         self.settings_box_layout.addRow(QLabel("Set samples:"))
         self.sample_box = QSpinBox()
         self.sample_box.setMinimum(1)
-        self.sample_box.setMaximum(min(self.df.shape[0], 10000))
+        self.sample_box.setMaximum(min(self.data.shape[0], 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
         self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
@@ -88,7 +89,7 @@ class GMMResultsWidget(QWidget):
         self.clusters_table_header_layout = QHBoxLayout()
         self.clusters_table_instruction = QLabel("Double click on any field to preview a cluster")
         self.save_all_button = QPushButton("SAVE RESULTS")
-        self.save_all_button.clicked.connect(partial(self.on_save_button_click, self.df.assign(cluster=self.labels)))
+        self.save_all_button.clicked.connect(partial(self.on_save_button_click, self.data.assign(cluster=self.labels)))
         self.save_all_button.setFixedWidth(120)
         self.clusters_table_header_layout.addWidget(self.clusters_table_instruction)
         self.clusters_table_header_layout.addWidget(self.save_all_button)
@@ -108,7 +109,7 @@ class GMMResultsWidget(QWidget):
             case 'new_samples':
                 num = self.sample_box.value()
                 self.num_samples = num
-                self.samples = get_samples(self.df, self.num_samples)
+                self.samples = get_samples(self.data, self.num_samples)
                 self.update_plot()
                 self.update_cluster_plot()
             case 'set_axis':
@@ -118,13 +119,13 @@ class GMMResultsWidget(QWidget):
                 self.update_cluster_plot()
 
     def update_plot(self):
-        samples_data = self.df.iloc[self.samples]
+        samples_data = self.data.iloc[self.samples]
         x = samples_data[self.ox]
         y = samples_data[self.oy]
-        min_x = self.df[self.ox].min()
-        max_x = self.df[self.ox].max()
-        min_y = self.df[self.oy].min()
-        max_y = self.df[self.oy].max()
+        min_x = self.data[self.ox].min()
+        max_x = self.data[self.ox].max()
+        min_y = self.data[self.oy].min()
+        max_y = self.data[self.oy].max()
         sep_x = 0.1 * (max_x - min_x)
         sep_y = 0.1 * (max_y - min_y)
 
@@ -135,8 +136,8 @@ class GMMResultsWidget(QWidget):
     def update_cluster_plot(self):
         if self.selected_cluster is not None:
             indexes = [i for i in range(len(self.labels)) if self.labels[i] == self.selected_cluster]
-            x = self.df.iloc[indexes][self.ox]
-            y = self.df.iloc[indexes][self.oy]
+            x = self.data.iloc[indexes][self.ox]
+            y = self.data.iloc[indexes][self.oy]
             min_x = x.min()
             max_x = x.max()
             min_y = y.min()
@@ -157,8 +158,8 @@ class GMMResultsWidget(QWidget):
                                                      len(x_means), self.ox, self.oy, min_x - sep_x, max_x + sep_x,
                                                      min_y - sep_y, max_y + sep_y)
         else:
-            x = self.df[self.ox]
-            y = self.df[self.oy]
+            x = self.data[self.ox]
+            y = self.data[self.oy]
             min_x = x.min()
             max_x = x.max()
             min_y = y.min()
@@ -183,7 +184,7 @@ class GMMResultsWidget(QWidget):
     def show_cluster(self):
         self.selected_cluster = self.clusters_table.selectionModel().selectedIndexes()[0].row()
         rows = [i for i in range(len(self.labels)) if self.labels[i] == self.selected_cluster]
-        elements = self.df.iloc[rows]
+        elements = self.data.iloc[rows]
         self.clusters_table.setModel(QtTable(elements))
         buttons_widget = QWidget()
         buttons_layout = QHBoxLayout()

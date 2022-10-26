@@ -6,20 +6,22 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QFormLayout, QLabel, QTableView,
 
 from visualization.associations import APrioriScatterPlot, APrioriGraphPlot, APrioriGauge
 from widgets import QtTable
+from widgets.results_widgets import AlgorithmResultsWidget
 
 
-class APrioriResultsWidget(QWidget):
+class APrioriResultsWidget(AlgorithmResultsWidget):
     def __init__(self, data: pd.DataFrame, frequent_sets: pd.DataFrame, association_rules: pd.DataFrame,
                  transaction_sets: List[set], options):
-        super().__init__()
+        super().__init__(data, options)
+
         self.transaction_sets = transaction_sets
         self.frequent_sets = frequent_sets.reset_index()
         self.frequent_sets.rename(columns={'index': 'frequent sets'}, inplace=True)
         self.association_rules = association_rules.reset_index()
         self.association_rules.rename(columns={'index': 'association rules'}, inplace=True)
-        self.columns = data.columns.values
-        self.min_support = options["min_support"]
-        self.min_confidence = options["min_confidence"]
+        self.columns = self.data.columns.values
+        self.min_support = self.options["min_support"]
+        self.min_confidence = self.options["min_confidence"]
 
         self.layout = QHBoxLayout(self)
 
@@ -31,7 +33,7 @@ class APrioriResultsWidget(QWidget):
         self.params_group.setTitle("Parameters")
         self.params_layout = QFormLayout(self.params_group)
 
-        for option, value in options.items():
+        for option, value in self.options.items():
             self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
 
         # sets plots and charts

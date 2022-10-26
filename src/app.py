@@ -1,13 +1,13 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from engines import ImportDataEngine, PreprocessingEngine, AlgorithmsEngine, ResultsEngine
 from state import State
 import matplotlib as plt
-
+from engines import AlgorithmsEngine, ImportDataEngine, PreprocessingEngine, ResultsEngine
 from widgets import MainWindow
 
 
 def main():
+    app = QApplication(sys.argv)
     state = State()
     algorithm_engine = AlgorithmsEngine(state)
     engines = {
@@ -17,7 +17,6 @@ def main():
         'algorithm_run': algorithm_engine,
         'results': ResultsEngine(state)
     }
-    app = QApplication(sys.argv)
     plt.rcParams.update({"font.size": 7})
     window = MainWindow(engines)
     sys.exit(app.exec_())

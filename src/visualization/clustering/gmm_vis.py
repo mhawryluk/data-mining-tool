@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QGroupBox, QFormLayout, QLabel, QSpinBox, QPushButton, \
     QComboBox, QScrollArea, QSizePolicy
 from algorithms import get_samples
+from visualization import AlgorithmStepsVisualization
 from matplotlib import pyplot as plt, transforms
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
@@ -99,27 +100,23 @@ class GMMCanvas(FigureCanvasQTAgg):
             self.draw()
 
 
-class GMMStepsVisualization(QWidget):
-    def __init__(self, df, algorithm_steps, has_animation):
-        super().__init__()
+class GMMStepsVisualization(AlgorithmStepsVisualization):
+    def __init__(self, df, algorithms_steps, is_animation):
+        super().__init__(df.select_dtypes(include=['number']), algorithms_steps, is_animation)
 
-        self.df = df.select_dtypes(include=['number'])
-        self.algorithm_steps = algorithm_steps
-
-        self.has_animation = has_animation
         self.is_running = False
         self.animation = None
 
-        self.columns = self.df.columns
+        self.columns = self.data.columns
 
         self.layout = QHBoxLayout(self)
 
-        self.num_cluster = np.amax(self.algorithm_steps[0][0]) + 1
+        self.num_cluster = np.amax(self.algorithms_steps[0][0]) + 1
 
-        self.max_step = len(self.algorithm_steps) - 1
+        self.max_step = len(self.algorithms_steps) - 1
         self.current_step = 0
-        self.num_samples = min(35, self.df.shape[0] // 2)
-        self.samples = get_samples(self.df, self.num_samples)
+        self.num_samples = min(35, self.data.shape[0] // 2)
+        self.samples = get_samples(self.data, self.num_samples)
 
         self.ox = self.columns[0]
         self.oy = self.columns[0] if len(self.columns) < 2 else self.columns[1]
@@ -138,7 +135,7 @@ class GMMStepsVisualization(QWidget):
 
         self.sample_box = QSpinBox()
         self.sample_box.setMinimum(1)
-        self.sample_box.setMaximum(min(self.df.shape[0], 10000))
+        self.sample_box.setMaximum(min(self.data.shape[0], 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
         self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
@@ -165,7 +162,7 @@ class GMMStepsVisualization(QWidget):
         self.visualization_box.setTitle("Visualization")
         self.visualization_box_layout = QVBoxLayout(self.visualization_box)
 
-        if self.has_animation:
+        if self.is_animation:
             # animation
             self.animation_box = QGroupBox()
             self.animation_box.setTitle("Animation")
@@ -189,11 +186,11 @@ class GMMStepsVisualization(QWidget):
             self.left_column_layout.addWidget(self.animation_box, 0)
 
         self.fig, axes = plt.subplots()
-        self.canvas = GMMCanvas(self.fig, axes, self.has_animation)
+        self.canvas = GMMCanvas(self.fig, axes, self.is_animation)
         self.visualization_box_layout.addWidget(self.canvas, 1)
         self.update_plot()
 
-        if not self.has_animation:
+        if not self.is_animation:
             self.visualization_box_layout.addStretch()
 
             # control buttons
@@ -257,7 +254,7 @@ class GMMStepsVisualization(QWidget):
             case 'new_samples':
                 num = self.sample_box.value()
                 self.num_samples = num
-                self.samples = get_samples(self.df, self.num_samples)
+                self.samples = get_samples(self.data, self.num_samples)
                 self.update_plot()
             case 'set_axis':
                 self.ox = self.ox_box.currentText()
@@ -321,13 +318,13 @@ class GMMStepsVisualization(QWidget):
             self.current_step = step
             self.step_label.setText("STEP: {}".format(self.current_step))
 
-        samples_data = self.df.iloc[self.samples]
+        samples_data = self.data.iloc[self.samples]
         x = samples_data[self.ox]
         y = samples_data[self.oy]
-        min_x = self.df[self.ox].min()
-        max_x = self.df[self.ox].max()
-        min_y = self.df[self.oy].min()
-        max_y = self.df[self.oy].max()
+        min_x = self.data[self.ox].min()
+        max_x = self.data[self.ox].max()
+        min_y = self.data[self.oy].min()
+        max_y = self.data[self.oy].max()
         sep_x = 0.1 * (max_x - min_x)
         sep_y = 0.1 * (max_y - min_y)
 
@@ -337,7 +334,7 @@ class GMMStepsVisualization(QWidget):
                                          not self.is_running)
 
         index = step - 1
-        step_labels, mean, sigma = self.algorithm_steps[index]
+        step_labels, mean, sigma = self.algorithms_steps[index]
         labels = [step_labels[sample] for sample in self.samples]
         return self.canvas.clusters_plot(x, y, list(self.columns), mean, sigma, labels, self.num_cluster, self.ox,
                                          self.oy, min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,

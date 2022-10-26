@@ -2,11 +2,12 @@ from itertools import combinations, chain
 from typing import List, Tuple, Optional
 from enum import Enum
 from utils import format_set
+from algorithms import Algorithm
 
 import pandas as pd
 
 
-class APriori:
+class APriori(Algorithm):
     def __init__(self, data: pd.DataFrame, index_column: str, min_support: float, min_confidence: float):
         self.min_support = min_support
         self.min_confidence = min_confidence

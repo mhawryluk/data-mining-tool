@@ -2,10 +2,10 @@ from typing import List
 
 from PyQt5.QtWidgets import QLabel, QDoubleSpinBox, QComboBox
 
-from .options import Options
+from widgets.options_widgets import AlgorithmOptions
 
 
-class AssociationRulesOptions(Options):
+class AssociationRulesOptions(AlgorithmOptions):
     def __init__(self):
         super().__init__()
 
