@@ -16,7 +16,7 @@ from QGraphViz.DotParser import Graph, GraphType
 import graphviz
 
 from widgets import QtTable
-from visualization import AlgorithmStepsVisualization
+from widgets.steps_widgets import AlgorithmStepsVisualization
 from utils import QtImageViewer, AutomateSteps, QImage
 
 

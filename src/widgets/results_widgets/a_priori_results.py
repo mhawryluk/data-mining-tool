@@ -2,9 +2,9 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from PyQt5.QtWidgets import QWidget, QGroupBox, QFormLayout, QLabel, QTableView, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QGroupBox, QFormLayout, QLabel, QTableView, QVBoxLayout, QHBoxLayout
 
-from visualization.associations import APrioriScatterPlot, APrioriGraphPlot, APrioriGauge
+from visualization import APrioriScatterPlot, APrioriGraphPlot, APrioriGauge
 from widgets import QtTable
 from widgets.results_widgets import AlgorithmResultsWidget
 

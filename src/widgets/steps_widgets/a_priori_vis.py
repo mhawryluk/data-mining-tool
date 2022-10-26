@@ -3,14 +3,14 @@ from typing import List
 
 import pandas as pd
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QWidget, QGroupBox, \
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QGroupBox, \
     QSpinBox, QPushButton, QLabel, QScrollArea, QSizePolicy, QTableView
 
 from utils import AutomateSteps, format_set
-from visualization.associations.a_priori_canvas import APrioriGauge, APrioriGraphPlot
+from visualization import APrioriGauge, APrioriGraphPlot
 from widgets import QtTable
 from algorithms.associations import APrioriPartLabel
-from visualization import AlgorithmStepsVisualization
+from widgets.steps_widgets import AlgorithmStepsVisualization
 
 
 class APrioriStepsVisualization(AlgorithmStepsVisualization):

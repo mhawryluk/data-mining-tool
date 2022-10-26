@@ -1,1 +1,1 @@
-from .algorithm_vis import AlgorithmStepsVisualization
+from .a_priori_canvas import APrioriGauge, APrioriGraphPlot, APrioriScatterPlot

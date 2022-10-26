@@ -2,19 +2,17 @@ from functools import partial
 
 import numpy as np
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QGroupBox, \
-    QSpinBox, QPushButton, QComboBox, QLabel, QScrollArea, QSizePolicy
-import pandas as pd
-from typing import List, Tuple
-
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QGroupBox, QFormLayout, QLabel, QSpinBox, QPushButton, \
+    QComboBox, QScrollArea, QSizePolicy
+from algorithms import get_samples
+from widgets.steps_widgets import AlgorithmStepsVisualization
+from matplotlib import pyplot as plt, transforms
 from matplotlib.animation import FuncAnimation
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-import matplotlib.pyplot as plt
-from algorithms import get_samples, check_numeric
-from visualization import AlgorithmStepsVisualization
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.patches import Ellipse
 
 
-class KMeansCanvas(FigureCanvasQTAgg):
+class GMMCanvas(FigureCanvasQTAgg):
     def __init__(self, fig, axes, animation):
         self.axes = axes
         self.animation = animation
@@ -32,82 +30,96 @@ class KMeansCanvas(FigureCanvasQTAgg):
         if self.animation:
             return self.axes.collections
 
-    def all_plot(self, vector_x, vector_y, vector_x_centroids, vector_y_centroids,
-                 labels, name_x, name_y, min_x, max_x, min_y, max_y, drawing=True):
+    def _draw_variance(self, mean, sigma, label, max_label, n_std=2.0):
+        pearson = sigma[0][1] / np.sqrt(sigma[0][0] * sigma[1][1])
+        ell_radius_x = np.sqrt(1 + pearson)
+        ell_radius_y = np.sqrt(1 - pearson)
+        cmap = plt.get_cmap('gist_rainbow')
+        ellipse = Ellipse((0, 0), width=ell_radius_x * 2, height=ell_radius_y * 2,
+                          edgecolor=cmap(label / max_label), facecolor='none')
+        scale_x = np.sqrt(sigma[0][0]) * n_std
+        scale_y = np.sqrt(sigma[1][1]) * n_std
+        transf = transforms.Affine2D() \
+            .rotate_deg(45) \
+            .scale(scale_x, scale_y) \
+            .translate(mean[0], mean[1])
+        ellipse.set_transform(transf + self.axes.transData)
+        self.axes.add_patch(ellipse)
+
+    def clusters_plot(self, vector_x, vector_y, columns, mean, sigma, labels, max_label, name_x, name_y, min_x, max_x,
+                      min_y, max_y, drawing=True):
         self.axes.cla()
-        label = [labels[i] for i in range(len(vector_x))]
-        max_label = len(vector_x_centroids)
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
         self.axes.set_ylim(min_y, max_y)
-        self.axes.scatter(vector_x, vector_y, c=label, cmap='gist_rainbow', vmin=0, vmax=max_label)
-        self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label),
-                          marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
+        self.axes.scatter(vector_x, vector_y, c=labels, cmap='gist_rainbow', vmin=0, vmax=max_label)
+        x_index, y_index = [columns.index(name_x), columns.index(name_y)]
+        for i in range(len(mean)):
+            mean_i = [mean[i][x_index], mean[i][y_index]]
+            sigma_i = [
+                [sigma[i][x_index][x_index], sigma[i][x_index][y_index]],
+                [sigma[i][y_index][x_index], sigma[i][y_index][y_index]],
+            ]
+            self.axes.scatter(mean_i[0], mean_i[1], c=i, cmap='gist_rainbow', marker='s', vmin=0, vmax=max_label)
+            self._draw_variance(mean_i, sigma_i, i, max_label)
+
         if drawing:
             self.draw()
         if self.animation:
             return self.axes.collections
 
-    def new_centroids_plot(self, old_vector_x_centroids, old_vector_y_centroids, vector_x_centroids, vector_y_centroids,
-                           name_x, name_y, min_x, max_x, min_y, max_y, drawing=True):
-        self.axes.cla()
-        max_label = len(vector_x_centroids)
-        self.axes.set_xlabel(name_x)
-        self.axes.set_ylabel(name_y)
-        self.axes.set_xlim(min_x, max_x)
-        self.axes.set_ylim(min_y, max_y)
-        if old_vector_x_centroids is not None:
-            self.axes.scatter(old_vector_x_centroids, old_vector_y_centroids, c=np.arange(max_label),
-                              marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, alpha=0.3)
-        self.axes.scatter(vector_x_centroids, vector_y_centroids, c=np.arange(max_label),
-                          marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
-        if drawing:
-            self.draw()
-        if self.animation:
-            return self.axes.collections
-
-    def chosen_centroid_plot(self, vector_x, vector_y, other_x, other_y, old_x_centroid, old_y_centroid, x_centroid,
-                             y_centroid, label, max_label, name_x, name_y, min_x, max_x, min_y, max_y, drawing=True):
+    def chosen_cluster_plot(self, vector_x, vector_y, mean, sigma, label, max_label, name_x, name_y, min_x, max_x,
+                            min_y, max_y, drawing=True):
         self.axes.cla()
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
         self.axes.set_ylim(min_y, max_y)
-        self.axes.scatter(other_x, other_y, c='white', edgecolor='grey')
         self.axes.scatter(vector_x, vector_y, c=[label] * len(vector_x), cmap='gist_rainbow',
                           vmin=0, vmax=max_label, alpha=0.9)
-        self.axes.scatter([old_x_centroid], [old_y_centroid], c='black', marker='s', alpha=0.3, s=40)
-        self.axes.scatter([x_centroid], [y_centroid], c=[label], cmap='gist_rainbow', vmin=0, vmax=max_label,
+        self.axes.scatter([mean[0]], [mean[1]], c=[label], cmap='gist_rainbow', vmin=0, vmax=max_label,
                           edgecolor='black', linewidths=1, marker='s', alpha=0.7, s=50)
+        self._draw_variance(mean, sigma, label, max_label, n_std=1.0)
         if drawing:
             self.draw()
-        if self.animation:
-            return self.axes.collections
+
+    def clusters_means_plot(self, means, sigmas, name_x, name_y, min_x, max_x, min_y, max_y, drawing=True):
+        self.axes.cla()
+        x_means, y_means = means
+        max_label = len(x_means)
+        self.axes.set_xlabel(name_x)
+        self.axes.set_ylabel(name_y)
+        self.axes.set_xlim(min_x, max_x)
+        self.axes.set_ylim(min_y, max_y)
+        self.axes.scatter(x_means, y_means, c=np.arange(max_label),
+                          marker='s', cmap='gist_rainbow', vmin=0, vmax=max_label, edgecolor='black', linewidths=1)
+        for i in range(len(x_means)):
+            self._draw_variance([x_means[i], y_means[i]], sigmas[i], i, max_label, n_std=1.0)
+        if drawing:
+            self.draw()
 
 
-class KMeansStepsVisualization(AlgorithmStepsVisualization):
-    def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[np.ndarray, pd.DataFrame]], is_animation: bool):
-        super().__init__(data, algorithms_steps, is_animation)
+class GMMStepsVisualization(AlgorithmStepsVisualization):
+    def __init__(self, df, algorithms_steps, is_animation):
+        super().__init__(df.select_dtypes(include=['number']), algorithms_steps, is_animation)
 
         self.is_running = False
         self.animation = None
+
+        self.columns = self.data.columns
+
         self.layout = QHBoxLayout(self)
 
-        self.num_cluster = algorithms_steps[0][1].shape[0]
-        columns = [col for col in self.data.columns if check_numeric(self.data[col])]
-        for column in columns:
-            self.data[column] = pd.to_numeric(self.data[column])
+        self.num_cluster = np.amax(self.algorithms_steps[0][0]) + 1
 
-        self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
+        self.max_step = len(self.algorithms_steps) - 1
         self.current_step = 0
         self.num_samples = min(35, self.data.shape[0] // 2)
         self.samples = get_samples(self.data, self.num_samples)
 
-        self.ox = columns[0]
-        self.oy = columns[0] if len(columns) < 2 else columns[1]
-
-        self.setObjectName("k_means_steps_visualization")
+        self.ox = self.columns[0]
+        self.oy = self.columns[0] if len(self.columns) < 2 else self.columns[1]
 
         # left column layout
         self.left_column_layout = QVBoxLayout()
@@ -133,22 +145,22 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
         self.settings_box_layout.addRow(QLabel("Set axis:"))
 
         self.ox_box = QComboBox()
-        self.ox_box.addItems(columns)
+        self.ox_box.addItems(self.columns)
         self.oy_box = QComboBox()
-        self.oy_box.addItems(columns)
-        if len(columns) > 1:
+        self.oy_box.addItems(self.columns)
+        if len(self.columns) > 1:
             self.oy_box.setCurrentIndex(1)
         self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
         self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
 
+        self.left_column_layout.addWidget(self.settings_box, 0)
+
         # visualization layout
         self.visualization_box = QGroupBox()
         self.visualization_box.setTitle("Visualization")
         self.visualization_box_layout = QVBoxLayout(self.visualization_box)
-
-        self.left_column_layout.addWidget(self.settings_box, 0)
 
         if self.is_animation:
             # animation
@@ -173,9 +185,8 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
 
             self.left_column_layout.addWidget(self.animation_box, 0)
 
-        # plot
         self.fig, axes = plt.subplots()
-        self.canvas = KMeansCanvas(self.fig, axes, self.is_animation)
+        self.canvas = GMMCanvas(self.fig, axes, self.is_animation)
         self.visualization_box_layout.addWidget(self.canvas, 1)
         self.update_plot()
 
@@ -207,8 +218,9 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
             self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
         # description
-        description = "K-Means algorithm - steps visualization.\n\nEach color represents one cluster.\n\n" \
-                      "Circles are the points of the data set.\nSquares are centroids of the clusters."
+        description = "Gaussian Mixture Models algorithm - steps visualization.\n\n" \
+                      "Colors of points show division into clusters.\n\n" \
+                      "Square points represents means of each distribution and ellipses are showing variances."
         self.description_label = QLabel(description)
         self.description_label.setWordWrap(True)
 
@@ -268,7 +280,7 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
                 if self.is_running:
                     if self.animation is None:
                         self.animation = FuncAnimation(self.fig, self.update_plot, frames=self.max_step + 1,
-                                                       interval=self.interval_box.value(), blit=True,
+                                                       interval=self.interval_box.value(),
                                                        cache_frame_data=False, repeat=False)
                         self.canvas.draw()
                     else:
@@ -321,49 +333,9 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
                                          min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
                                          not self.is_running)
 
-        step_labels, step_centroids = self.algorithms_steps[0]
+        index = step - 1
+        step_labels, mean, sigma = self.algorithms_steps[index]
         labels = [step_labels[sample] for sample in self.samples]
-        x_centroids = step_centroids[self.ox]
-        y_centroids = step_centroids[self.oy]
-
-        if step == 1:
-            return self.canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
-                                                  min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                                  not self.is_running)
-
-        if step == 2:
-            return self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
-                                        min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y, not self.is_running)
-
-        index = (step - 3) // (self.num_cluster + 2) + 1
-        mode = (step - 3) % (self.num_cluster + 2)
-
-        step_labels, step_centroids = self.algorithms_steps[index]
-        labels = [step_labels[sample] for sample in self.samples]
-        x_centroids = step_centroids[self.ox]
-        y_centroids = step_centroids[self.oy]
-
-        old_step_labels, old_step_centroids = self.algorithms_steps[index - 1]
-        old_x_centroids = old_step_centroids[self.ox]
-        old_y_centroids = old_step_centroids[self.oy]
-
-        if mode < self.num_cluster:
-            old_labels = np.array([old_step_labels[sample] for sample in self.samples])
-            vector_x = x.loc[old_labels == mode]
-            vector_y = y.loc[old_labels == mode]
-            other_x = x.loc[old_labels != mode]
-            other_y = y.loc[old_labels != mode]
-            return self.canvas.chosen_centroid_plot(vector_x, vector_y, other_x, other_y, old_x_centroids.iloc[mode],
-                                                    old_y_centroids.iloc[mode], x_centroids.iloc[mode],
-                                                    y_centroids.iloc[mode],
-                                                    mode, len(x_centroids), self.ox, self.oy,
-                                                    min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                                    not self.is_running)
-        elif mode == self.num_cluster:
-            return self.canvas.new_centroids_plot(old_x_centroids, old_y_centroids, x_centroids, y_centroids, self.ox,
-                                                  self.oy,
-                                                  min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                                  not self.is_running)
-        else:
-            return self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
-                                        min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y, not self.is_running)
+        return self.canvas.clusters_plot(x, y, list(self.columns), mean, sigma, labels, self.num_cluster, self.ox,
+                                         self.oy, min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
+                                         not self.is_running)

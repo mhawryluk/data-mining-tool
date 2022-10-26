@@ -6,10 +6,8 @@ from algorithms import Algorithm
 from algorithms.clustering import KMeans, GMM
 from algorithms.associations import APriori
 from algorithms.classification import ExtraTrees
-from visualization import AlgorithmStepsVisualization
-from visualization.clustering import KMeansStepsVisualization, GMMStepsVisualization
-from visualization.associations import APrioriStepsVisualization
-from visualization.classification import ExtraTreesStepsVisualization
+from widgets.steps_widgets import AlgorithmStepsVisualization, APrioriStepsVisualization, KMeansStepsVisualization, \
+    ExtraTreesStepsVisualization, GMMStepsVisualization
 from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, AlgorithmResultsWidget, \
     APrioriResultsWidget, GMMResultsWidget
 from widgets.options_widgets import KMeansOptions, ExtraTreesOptions, AlgorithmOptions, AssociationRulesOptions, \
@@ -37,14 +35,16 @@ class AlgorithmClasses:
 ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmClasses]] = {
     AlgorithmTechniques.CLUSTERING.value: {
         'K-Means': AlgorithmClasses(algorithm=KMeans, options=KMeansOptions,
-                                    steps_visualization=KMeansStepsVisualization, result_widget=KMeansResultsWidget),
+                                    steps_visualization=KMeansStepsVisualization,
+                                    result_widget=KMeansResultsWidget),
         'Gaussian Mixture Models': AlgorithmClasses(algorithm=GMM, options=GMMOptions,
                                                     steps_visualization=GMMStepsVisualization,
                                                     result_widget=GMMResultsWidget)
     },
     AlgorithmTechniques.ASSOCIATIONS.value: {
         'A-priori': AlgorithmClasses(algorithm=APriori, options=AssociationRulesOptions,
-                                     steps_visualization=APrioriStepsVisualization, result_widget=APrioriResultsWidget)
+                                     steps_visualization=APrioriStepsVisualization,
+                                     result_widget=APrioriResultsWidget)
     },
     AlgorithmTechniques.CLASSIFICATION.value: {
         'Extra Trees': AlgorithmClasses(algorithm=ExtraTrees, options=ExtraTreesOptions,
