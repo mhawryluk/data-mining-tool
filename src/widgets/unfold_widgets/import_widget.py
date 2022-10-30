@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
     QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox, QFileDialog
 from widgets import UnfoldWidget, QtTable, LoadingWidget
+from widgets.data_generator_widget import DataGeneratorWidget
 
 
 class ImportWidget(UnfoldWidget):
@@ -43,6 +44,17 @@ class ImportWidget(UnfoldWidget):
         self.database_button.clicked.connect(partial(self.click_listener, 'load_database'))
 
         self.load_data_group_layout.addRow(self.database_box, self.database_button)
+
+        self.generate_data_label = QLabel(self.load_data_group)
+        self.generate_data_label.setText("Generate data for a specific algorithm:")
+        self.load_data_group_layout.addRow(self.generate_data_label)
+
+        self.generate_button = QPushButton(self.load_data_group)
+        self.generate_button.setText("Generate")
+        self.generate_button.clicked.connect(partial(self.click_listener, 'generate'))
+        self.load_data_group_layout.addRow(self.generate_button)
+
+        self.generate_window = DataGeneratorWidget()
 
         self.import_state_label = QLabel(self.load_data_group)
         self.load_data_group_layout.addRow(self.import_state_label)
@@ -86,7 +98,6 @@ class ImportWidget(UnfoldWidget):
 
         # data table
         self.data_table = QTableView(self.frame)
-
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # layouts for sections
@@ -174,6 +185,9 @@ class ImportWidget(UnfoldWidget):
                 loading.execute()
             case 'columns':
                 self.display_data()
+            case 'generate':
+                self.generate_window.show()
+                print(self.generate_window.parent())
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
