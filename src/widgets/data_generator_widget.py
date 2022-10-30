@@ -10,6 +10,10 @@ class DataGeneratorWidget(QWidget):
         super().__init__()
         self.setWindowTitle("Data Generator")
         self.setGeometry(QRect(400, 400, 800, 400))
+        self.setObjectName("data_generator_widget")
+
+        with open('../static/css/styles.css') as stylesheet:
+            self.setStyleSheet(stylesheet.read())
 
         self.layout = QHBoxLayout()
         self._render_algorithm_selection()

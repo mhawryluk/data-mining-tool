@@ -187,7 +187,6 @@ class ImportWidget(UnfoldWidget):
                 self.display_data()
             case 'generate':
                 self.generate_window.show()
-                print(self.generate_window.parent())
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
