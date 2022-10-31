@@ -1,4 +1,6 @@
 from .config import UNFOLD_BUTTON_WIDTH
+from .table_model import QtTable
+from .tables import MergingSetsScreen
 from .loading_widget import LoadingWidget
 from .table_model import QtTable
 from .unfold_widgets.unfold_widget import UnfoldWidget

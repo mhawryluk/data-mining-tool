@@ -22,13 +22,19 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+<<<<<<< HEAD
 from widgets import LoadingWidget, QtTable, UnfoldWidget
 from widgets.data_generator_widget import DataGeneratorWidget
+=======
+from widgets import UnfoldWidget, QtTable, LoadingWidget, MergingSetsScreen
+>>>>>>> b68fd02 (feat: Introduce merge screen layout)
 
 
 class ImportWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
         super().__init__(parent, engine, "import_widget", "IMPORT DATA")
+
+        self.new_window = None
 
         # load data group
         self.load_data_group = QGroupBox(self.frame)
@@ -99,6 +105,13 @@ class ImportWidget(UnfoldWidget):
         self.save_button.setEnabled(False)
         self.options_layout.addWidget(self.save_button, 1)
 
+        self.merge_button = QPushButton(self.options_group)
+        self.merge_button.setText("Merge another dataset")
+        self.merge_button.clicked.connect(partial(self.click_listener, "merge_data"))
+        self.merge_button.setEnabled(False)
+        self.merge_button.setMinimumHeight(23)
+        self.options_layout.addWidget(self.merge_button, 1)
+
         # columns group
         self.columns_group = QGroupBox(self.frame)
         self.columns_group.setTitle("Limit data")
@@ -161,6 +174,7 @@ class ImportWidget(UnfoldWidget):
     def set_options(self):
         """enable buttons after load data"""
         self.save_button.setEnabled(True)
+        self.merge_button.setEnabled(True)
         self.columns_button.setEnabled(True)
         self.limit_button.setEnabled(True)
         self.limit_type_box.setEnabled(True)
@@ -175,6 +189,7 @@ class ImportWidget(UnfoldWidget):
     def clear_widgets(self):
         """clear import widget from loaded data"""
         self.save_button.setEnabled(False)
+        self.merge_button.setEnabled(False)
         self.columns_button.setEnabled(False)
         self.limit_button.setEnabled(False)
         self.limit_type_box.setEnabled(False)
@@ -258,6 +273,9 @@ class ImportWidget(UnfoldWidget):
                 self.display_data()
             case "generate":
                 self.generate_window.show()
+            case "merge_data":
+                self.new_window = MergingSetsScreen(self)
+                self.new_window.show()
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
