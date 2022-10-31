@@ -1,8 +1,7 @@
 from functools import partial
-
 import pandas as pd
 from PyQt5.QtCore import Qt, QMimeData
-from PyQt5.QtGui import QDrag
+from PyQt5.QtGui import QDrag, QPixmap
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTableView, QLabel, QVBoxLayout, QGroupBox, QFormLayout, QLineEdit, \
     QPushButton, QComboBox, QMessageBox, QFileDialog
 from widgets import QtTable, LoadingWidget
@@ -16,6 +15,9 @@ class DragButton(QPushButton):
             drag = QDrag(self)
             mime = QMimeData()
             drag.setMimeData(mime)
+            pixmap = QPixmap(self.size())
+            self.render(pixmap)
+            drag.setPixmap(pixmap)
             drag.exec_(Qt.MoveAction)
 
 
@@ -27,6 +29,7 @@ class MergingSetsScreen(QWidget):
         self.new_data = None
         self.setWindowTitle("Datasets concatenation")
         self._load_styles()
+        self.drag_init_pos = None
 
         # init all components to have a ref
         self.layout = QHBoxLayout()
@@ -203,6 +206,41 @@ class MergingSetsScreen(QWidget):
             event.ignore()
 
     def dragEnterEvent(self, e):
+        self.drag_init_pos = e.pos()
+        e.accept()
+
+    def dropEvent(self, e):
+        pos = e.pos()
+        widget = e.source()
+
+        widget_helper = self.columns_left_layout.itemAt(0).widget()
+        should_insert = False
+        if pos.x() < widget_helper.mapToGlobal(widget_helper.rect().topLeft()).x() - self.pos().x() + \
+                widget_helper.size().width():
+            for n in range(self.columns_left_layout.count()):
+                w = self.columns_left_layout.itemAt(n).widget()
+                if w == widget:
+                    should_insert = True
+                    break
+            if should_insert:
+                for n in range(self.columns_left_layout.count()):
+                    w = self.columns_left_layout.itemAt(n).widget()
+                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y() + w.size().height() // 2:
+                        self.columns_left_layout.insertWidget(n, widget)
+                        break
+        elif self.new_data is not None:
+            for n in range(self.columns_right_layout.count()):
+                w = self.columns_right_layout.itemAt(n).widget()
+                if w == widget:
+                    should_insert = True
+                    break
+            if should_insert:
+                for n in range(self.columns_right_layout.count()):
+                    w = self.columns_right_layout.itemAt(n).widget()
+                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y() + w.size().height() // 2:
+                        self.columns_right_layout.insertWidget(n, widget)
+                        break
+
         e.accept()
 
 
