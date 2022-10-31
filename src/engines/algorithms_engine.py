@@ -51,6 +51,7 @@ class AlgorithmsEngine:
             self.state.steps_visualization = None
 
         # create a widget for the results
+        self.state.last_algorithm = (technique, algorithm)
         if not self.state.algorithm_results_widgets.get(technique):
             self.state.algorithm_results_widgets[technique] = {}
         if not self.state.algorithm_results_widgets[technique].get(algorithm):

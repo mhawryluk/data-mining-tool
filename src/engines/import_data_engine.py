@@ -54,6 +54,7 @@ class ImportDataEngine:
         self.state.raw_data = None
         self.state.steps_visualization = None
         self.state.algorithm_results_widgets = {}
+        self.state.last_algorithm = None
 
     def read_data(self, columns: Optional[List[str]] = None):
         self.imported_data = self.reader_data.read(columns)
@@ -61,6 +62,7 @@ class ImportDataEngine:
         self.state.raw_data = self.imported_data.copy()
         self.state.steps_visualization = None
         self.state.algorithm_results_widgets = {}
+        self.state.last_algorithm = None
 
     def save_to_database(self, title: str) -> str:
         writer = Writer(DB_NAME, title)
