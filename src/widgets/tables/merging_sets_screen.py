@@ -145,4 +145,9 @@ class MergingSetsScreen(QWidget):
         self.render_table(self.new_data_view, False)
 
     def closeEvent(self, event):
-        print("Close")
+        close = QMessageBox.question(self, "QUIT", "Are you sure want to exit process? All changes will be discarded.",
+                                     QMessageBox.Yes | QMessageBox.No)
+        if close == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
