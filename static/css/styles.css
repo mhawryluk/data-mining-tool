@@ -45,3 +45,13 @@ QScrollArea QWidget { background: transparent; }
 #results_widget QTabWidget QTabWidget QGroupBox QGroupBox {
     border-radius: 10px;
 }
+
+MergingSetsScreen QGroupBox:title{
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    background-color: #054a91;
+    color: white;
+    border: none;
+}
