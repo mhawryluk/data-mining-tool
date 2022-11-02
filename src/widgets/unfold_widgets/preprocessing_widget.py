@@ -71,7 +71,7 @@ class PreprocessingWidget(UnfoldWidget):
 
         self.num_dimensions_spinbox.setMinimum(2)
         self.num_dimensions_spinbox.setValue(2)
-        self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions"), self.num_dimensions_spinbox)
+        self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions:"), self.num_dimensions_spinbox)
 
         self.manual_reduction.setText("Reduce with fixed number")
         self.manual_reduction.setMinimumHeight(23)
