@@ -15,21 +15,22 @@ class ImportDataEngine:
         self.from_file = False
         self.database_manager = DatabaseObjectManager()
 
-    def load_data_from_file(self, filepath: str) -> str:
-        if '.' not in filepath:
-            return "Supported file format: .csv, .json."
-        extension = filepath.split('.')[-1]
+    def load_data_from_file(self, file_path: str) -> None:
+        if not file_path:
+            raise ValueError("")
+        if '.' not in file_path:
+            raise ValueError("Supported file format: .csv, .json.")
+        extension = file_path.split('.')[-1]
         if extension == 'csv':
-            self.reader_data = CSVReader(filepath)
+            self.reader_data = CSVReader(file_path)
         elif extension == 'json':
-            self.reader_data = JSONReader(filepath)
+            self.reader_data = JSONReader(file_path)
         else:
-            return "Supported file format: .csv, .json."
+            raise ValueError("Supported file format: .csv, .json.")
         if error := self.reader_data.get_error():
             self.reader_data = None
-            return error
+            raise ValueError(error)
         self.from_file = True
-        return ''
 
     def load_data_from_database(self, document_name: str) -> str:
         self.reader_data = DatabaseReader(DB_NAME, document_name)

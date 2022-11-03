@@ -1,9 +1,10 @@
 from functools import partial
+from os.path import basename
 from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
-    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox
+    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox, QFileDialog
 
 from widgets import UnfoldWidget, QtTable, LoadingWidget
 
@@ -15,39 +16,37 @@ class ImportWidget(UnfoldWidget):
         # load data group
         self.load_data_group = QGroupBox(self.frame)
         self.load_data_group_layout = QFormLayout(self.load_data_group)
+        self.load_data_group_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         self.load_data_group.setTitle("Load data")
 
         self.filepath_label = QLabel(self.load_data_group)
-        self.filepath_label.setText("Set path to file:")
-        self.filepath_label.setMinimumHeight(16)
+        self.filepath_label.setText("Load data from file:")
+
         self.filepath_line = QLineEdit(self.load_data_group)
-        self.filepath_line.setMinimumHeight(23)
+        self.filepath_line.setReadOnly(True)
+        self.filepath_line.setFixedWidth(150)
+
         self.load_data_group_layout.addRow(self.filepath_label)
 
         self.file_button = QPushButton(self.load_data_group)
-        self.file_button.setText("LOAD")
+        self.file_button.setText("Select file")
         self.file_button.clicked.connect(partial(self.click_listener, 'load_file'))
-        self.file_button.setMinimumHeight(23)
 
         self.load_data_group_layout.addRow(self.filepath_line, self.file_button)
 
         self.database_label = QLabel(self.load_data_group)
         self.database_label.setText("Choose data from database:")
-        self.database_label.setMinimumHeight(16)
         self.load_data_group_layout.addRow(self.database_label)
 
         self.database_box = QComboBox(self.load_data_group)
         self.set_available_tables()
-        self.database_box.setMinimumHeight(23)
         self.database_button = QPushButton(self.load_data_group)
-        self.database_button.setText("LOAD")
+        self.database_button.setText("Load")
         self.database_button.clicked.connect(partial(self.click_listener, 'load_database'))
-        self.database_button.setMinimumHeight(23)
 
         self.load_data_group_layout.addRow(self.database_box, self.database_button)
 
         self.import_state_label = QLabel(self.load_data_group)
-        self.import_state_label.setMinimumHeight(16)
         self.load_data_group_layout.addRow(self.import_state_label)
 
         # options group
@@ -58,14 +57,12 @@ class ImportWidget(UnfoldWidget):
         self.reject_button = QPushButton(self.options_group)
         self.reject_button.setText("Reject this data")
         self.reject_button.clicked.connect(partial(self.click_listener, 'reject_data'))
-        self.reject_button.setMinimumHeight(23)
         self.options_layout.addWidget(self.reject_button, 1)
 
         self.save_button = QPushButton(self.options_group)
         self.save_button.setText("Save to database")
         self.save_button.clicked.connect(partial(self.click_listener, 'save_data'))
         self.save_button.setEnabled(False)
-        self.save_button.setMinimumHeight(23)
         self.options_layout.addWidget(self.save_button, 1)
 
         # columns group
@@ -79,10 +76,8 @@ class ImportWidget(UnfoldWidget):
         self.scroll = QScrollArea()
         self.scroll.setWidget(self.scroll_box)
         self.scroll.setWidgetResizable(True)
-        self.scroll.setMinimumHeight(26)
 
         self.columns_button = QPushButton("Select columns")
-        self.columns_button.setMaximumWidth(150)
         self.columns_button.setEnabled(False)
         self.columns_button.clicked.connect(partial(self.click_listener, 'columns'))
 
@@ -93,7 +88,6 @@ class ImportWidget(UnfoldWidget):
 
         # data table
         self.data_table = QTableView(self.frame)
-        self.data_table.setMinimumHeight(300)
 
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -135,6 +129,7 @@ class ImportWidget(UnfoldWidget):
         self.save_button.setEnabled(False)
         self.columns_button.setEnabled(False)
         self.import_state_label.clear()
+        self.filepath_line.clear()
         for i in reversed(range(self.columns_group_form_layout.count())):
             self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
@@ -185,15 +180,17 @@ class ImportWidget(UnfoldWidget):
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
-        filepath = self.filepath_line.text()
-        result = self.engine.load_data_from_file(filepath)
-        if result:
-            self.import_state_label.setText(result)
-            return
-        self.clear_widgets()
-        self.set_options()
-        self.set_columns_grid()
-        self.display_data()
+        file_path: str = QFileDialog.getOpenFileName(self, 'Choose file', '.', "*.csv *.json")[0]
+        try:
+            self.engine.load_data_from_file(file_path)
+        except ValueError as e:
+            self.import_state_label.setText(str(e))
+        else:
+            self.clear_widgets()
+            self.filepath_line.setText(basename(file_path))
+            self.set_options()
+            self.set_columns_grid()
+            self.display_data()
 
     def load_from_database_handle(self):
         self.import_state_label.setText("Loading ...")
