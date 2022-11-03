@@ -1,9 +1,11 @@
 from functools import partial
+from os.path import basename
 from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
     QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox, QFileDialog
+
 from widgets import UnfoldWidget, QtTable, LoadingWidget
 
 
@@ -127,6 +129,7 @@ class ImportWidget(UnfoldWidget):
         self.save_button.setEnabled(False)
         self.columns_button.setEnabled(False)
         self.import_state_label.clear()
+        self.filepath_line.clear()
         for i in reversed(range(self.columns_group_form_layout.count())):
             self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
@@ -183,8 +186,8 @@ class ImportWidget(UnfoldWidget):
         except ValueError as e:
             self.import_state_label.setText(str(e))
         else:
-            self.filepath_line.setText(file_path)
             self.clear_widgets()
+            self.filepath_line.setText(basename(file_path))
             self.set_options()
             self.set_columns_grid()
             self.display_data()
