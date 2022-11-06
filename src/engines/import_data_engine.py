@@ -15,21 +15,22 @@ class ImportDataEngine:
         self.from_file = False
         self.database_manager = DatabaseObjectManager()
 
-    def load_data_from_file(self, filepath: str) -> str:
-        if '.' not in filepath:
-            return "Supported file format: .csv, .json."
-        extension = filepath.split('.')[-1]
+    def load_data_from_file(self, file_path: str) -> None:
+        if not file_path:
+            raise ValueError("")
+        if '.' not in file_path:
+            raise ValueError("Supported file format: .csv, .json.")
+        extension = file_path.split('.')[-1]
         if extension == 'csv':
-            self.reader_data = CSVReader(filepath)
+            self.reader_data = CSVReader(file_path)
         elif extension == 'json':
-            self.reader_data = JSONReader(filepath)
+            self.reader_data = JSONReader(file_path)
         else:
-            return "Supported file format: .csv, .json."
+            raise ValueError("Supported file format: .csv, .json.")
         if error := self.reader_data.get_error():
             self.reader_data = None
-            return error
+            raise ValueError(error)
         self.from_file = True
-        return ''
 
     def load_data_from_database(self, document_name: str) -> str:
         self.reader_data = DatabaseReader(DB_NAME, document_name)
@@ -55,6 +56,7 @@ class ImportDataEngine:
         self.state.reduced_columns = []
         self.state.steps_visualization = None
         self.state.algorithm_results_widgets = {}
+        self.state.last_algorithm = None
 
     def read_data(self, columns: Optional[List[str]] = None):
         self.imported_data = self.reader_data.read(columns)
@@ -63,6 +65,7 @@ class ImportDataEngine:
         self.state.reduced_columns = []
         self.state.steps_visualization = None
         self.state.algorithm_results_widgets = {}
+        self.state.last_algorithm = None
 
     def save_to_database(self, title: str) -> str:
         writer = Writer(DB_NAME, title)
