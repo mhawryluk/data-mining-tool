@@ -27,7 +27,7 @@ class PCAReducer:
         if dim_number is None:
             total = sum(weights)
             ratios = [weight/total for weight in weights]
-            columns_num = len(list(filter(lambda x: x > self.acceptable_ratio, ratios)))
+            columns_num = max(len(list(filter(lambda x: x > self.acceptable_ratio, ratios))), 2)
             return reducer[:, :columns_num]
         return reducer
 
