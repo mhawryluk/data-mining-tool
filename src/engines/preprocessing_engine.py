@@ -58,8 +58,15 @@ class PreprocessingEngine:
         return 0
 
     def rename_column(self, index, new_header):
-        data = self.state.imported_data
-        self.state.imported_data = data.rename(columns={data.columns[index]: new_header})
+        column = self.state.imported_data.columns[index]
+        self.state.imported_data.rename(columns={column: new_header}, inplace=True)
+        self.state.raw_data.rename(columns={column: new_header}, inplace=True)
+        try:
+            # omit on change not reduced column name
+            reduced_arr_idx = self.state.reduced_columns.index(column)
+            self.state.reduced_columns[reduced_arr_idx] = new_header
+        except ValueError:
+            pass
 
     def mean_or_mode_estimate(self):
         missing_data_columns = self.get_columns()[self.state.imported_data.isna().any()].to_list()

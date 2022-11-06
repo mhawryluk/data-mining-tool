@@ -50,13 +50,13 @@ class DataPreviewScreen(QWidget):
         self.layout.addWidget(self.data_table)
 
     def reduction_header_click(self, index):
-        newHeader, ok = QInputDialog.getText(self,
+        new_header, ok = QInputDialog.getText(self,
                                              f'Change header label for column {index}',
                                              'Header:',
-                                             QLineEdit.Normal,
+                                              QLineEdit.Normal,
                                              "")
         if ok:
-            self.engine.rename_column(index, newHeader)
+            self.engine.rename_column(index, new_header)
             self.data_table.setModel(QtTable(self.engine.state.imported_data))
 
     def estimation_header_click(self, index):

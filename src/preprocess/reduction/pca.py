@@ -10,7 +10,7 @@ class PCAReducer:
         self.acceptable_ratio = acceptable_ratio
         self.initial_columns = []
 
-    def reduce(self, dim_number: Optional[int]) -> None:
+    def reduce(self, dim_number: Optional[int]) -> list[str]:
         data = self.state.imported_data.select_dtypes(include=np.number)
         data = data - data.mean()
         self.initial_columns = list(data.columns)
