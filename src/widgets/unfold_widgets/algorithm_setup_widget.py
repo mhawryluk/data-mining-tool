@@ -110,7 +110,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.parent().unfold(self)
 
     def enable_button(self):
-        done = ['K-Means', 'Extra Trees', 'A-priori', 'Gaussian Mixture Models']
+        done = ['K-Means', 'Extra Trees', 'Apriori', 'Gaussian Mixture Models']
         if self.algorithm_box.currentText() in done:
             self.run_button.setEnabled(True)
         else:

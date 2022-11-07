@@ -13,11 +13,11 @@ class Algorithm:
             Run algorithm and return result for class AlgorithmResultsWidget
             If with_steps is true, saves steps of algorithm creation
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def get_steps(self) -> List:
         """
             Return list of steps for visualization by AlgorithmStepsVisualization
         """
-        pass
+        raise NotImplementedError

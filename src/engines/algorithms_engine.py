@@ -62,6 +62,6 @@ class AlgorithmsEngine:
         clusters = min(self.get_maximum_clusters(), 100)
         self.options[AlgorithmTechniques.CLUSTERING.value]["K-Means"].set_max_clusters(clusters)
         columns = self.get_columns()
-        self.options[AlgorithmTechniques.ASSOCIATIONS.value]["A-priori"].set_columns_options(columns)
+        self.options[AlgorithmTechniques.ASSOCIATIONS.value]["Apriori"].set_columns_options(columns)
         self.options[AlgorithmTechniques.CLASSIFICATION.value]["Extra Trees"].set_values(columns)
         self.options[AlgorithmTechniques.CLUSTERING.value]["Gaussian Mixture Models"].set_max_clusters(clusters)

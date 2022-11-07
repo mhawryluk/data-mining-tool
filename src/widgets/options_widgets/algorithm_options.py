@@ -16,4 +16,4 @@ class AlgorithmOptions(QWidget):
         """
             Return dict with parameters
         """
-        pass
+        raise NotImplementedError

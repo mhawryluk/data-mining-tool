@@ -124,7 +124,7 @@ class APrioriStepsVisualization(AlgorithmStepsVisualization):
             self.visualization_box_layout.addLayout(self.control_buttons_layout, 0)
 
     def _render_description(self):
-        description = "A-priori algorithm - steps visualization"
+        description = "Apriori algorithm - steps visualization"
 
         self.description_label = QLabel(description)
         self.description_label.setWordWrap(True)
