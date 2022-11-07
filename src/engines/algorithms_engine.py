@@ -1,7 +1,9 @@
-from state import State
-from .algorithms_config import ALGORITHMS_INFO, AlgorithmTechniques
 from typing import List
+
+from state import State
 from widgets.options_widgets import AlgorithmOptions
+
+from .algorithms_config import ALGORITHMS_INFO, AlgorithmTechniques
 
 
 class AlgorithmsEngine:
@@ -11,7 +13,9 @@ class AlgorithmsEngine:
         # init options widgets
         self.options = {}
         for technique, info in ALGORITHMS_INFO.items():
-            self.options[technique] = {algorithm: classes.options() for algorithm, classes in info.items()}
+            self.options[technique] = {
+                algorithm: classes.options() for algorithm, classes in info.items()
+            }
 
     def run(self, technique, algorithm, will_be_visualized, is_animation, **kwargs):
         chosen_alg = ALGORITHMS_INFO[technique][algorithm]
@@ -25,8 +29,9 @@ class AlgorithmsEngine:
 
         if will_be_visualized:
             steps = alg.get_steps()
-            self.state.steps_visualization = chosen_alg.steps_visualization(self.state.imported_data, steps,
-                                                                            is_animation)
+            self.state.steps_visualization = chosen_alg.steps_visualization(
+                self.state.imported_data, steps, is_animation
+            )
         else:
             self.state.steps_visualization = None
 
@@ -35,9 +40,9 @@ class AlgorithmsEngine:
             self.state.algorithm_results_widgets[technique] = {}
         if not self.state.algorithm_results_widgets[technique].get(algorithm):
             self.state.algorithm_results_widgets[technique][algorithm] = []
-        self.state.algorithm_results_widgets[technique][algorithm].append(chosen_alg.result_widget(self.state.raw_data,
-                                                                                                   *result,
-                                                                                                   options=kwargs))
+        self.state.algorithm_results_widgets[technique][algorithm].append(
+            chosen_alg.result_widget(self.state.raw_data, *result, options=kwargs)
+        )
 
     def get_maximum_clusters(self) -> int:
         if self.state.imported_data is None:
@@ -55,13 +60,23 @@ class AlgorithmsEngine:
     def get_algorithms_for_techniques(technique: AlgorithmTechniques.list()) -> List:
         return list(ALGORITHMS_INFO[technique].keys())
 
-    def get_option_widget(self, technique: AlgorithmTechniques.list(), algorithm: str) -> AlgorithmOptions:
+    def get_option_widget(
+        self, technique: AlgorithmTechniques.list(), algorithm: str
+    ) -> AlgorithmOptions:
         return self.options[technique][algorithm]
 
     def update_options(self):
         clusters = min(self.get_maximum_clusters(), 100)
-        self.options[AlgorithmTechniques.CLUSTERING.value]["K-Means"].set_max_clusters(clusters)
+        self.options[AlgorithmTechniques.CLUSTERING.value]["K-Means"].set_max_clusters(
+            clusters
+        )
         columns = self.get_columns()
-        self.options[AlgorithmTechniques.ASSOCIATIONS.value]["Apriori"].set_columns_options(columns)
-        self.options[AlgorithmTechniques.CLASSIFICATION.value]["Extra Trees"].set_values(columns)
-        self.options[AlgorithmTechniques.CLUSTERING.value]["Gaussian Mixture Models"].set_max_clusters(clusters)
+        self.options[AlgorithmTechniques.ASSOCIATIONS.value][
+            "Apriori"
+        ].set_columns_options(columns)
+        self.options[AlgorithmTechniques.CLASSIFICATION.value][
+            "Extra Trees"
+        ].set_values(columns)
+        self.options[AlgorithmTechniques.CLUSTERING.value][
+            "Gaussian Mixture Models"
+        ].set_max_clusters(clusters)

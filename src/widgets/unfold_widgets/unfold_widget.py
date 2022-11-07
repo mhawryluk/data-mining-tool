@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QFrame, QWidget, QSizePolicy, QHBoxLayout
+from PyQt5.QtWidgets import QFrame, QHBoxLayout, QSizePolicy, QWidget
+
 from widgets import UNFOLD_BUTTON_WIDTH
 from widgets.rotated_button import RotatedButton
 

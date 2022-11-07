@@ -1,10 +1,22 @@
 from functools import partial
 
 import pandas as pd
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGroupBox, QFormLayout, QLabel, QVBoxLayout, QSpinBox, QPushButton, \
-    QComboBox, QTableView, QInputDialog, QMessageBox
 from matplotlib import pyplot as plt
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+)
 
 from algorithms import check_numeric, get_samples
 from visualization import KMeansCanvas
@@ -38,7 +50,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.params_layout = QFormLayout(self.params_group)
 
         for option, value in self.options.items():
-            self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
+            self.params_layout.addRow(QLabel(f"{option}:"), QLabel(f"{value}"))
 
         self.layout.addWidget(self.params_group)
 
@@ -56,7 +68,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.sample_box.setMaximum(min(self.data.shape[0], 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
-        self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
+        self.sample_button.clicked.connect(partial(self.click_listener, "new_samples"))
         self.settings_box_layout.addRow(self.sample_box, self.sample_button)
 
         # axis
@@ -67,8 +79,8 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.oy_box.addItems(columns)
         if len(columns) > 1:
             self.oy_box.setCurrentIndex(1)
-        self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
-        self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
+        self.ox_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
+        self.oy_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
         self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
 
@@ -96,9 +108,13 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
 
         self.centroids_table_header = QWidget()
         self.centroids_table_header_layout = QHBoxLayout()
-        self.centroids_table_instruction = QLabel("Double click on any field to preview a cluster")
+        self.centroids_table_instruction = QLabel(
+            "Double click on any field to preview a cluster"
+        )
         self.save_all_button = QPushButton("SAVE RESULTS")
-        self.save_all_button.clicked.connect(partial(self.on_save_button_click, self.data.assign(cluster=self.labels)))
+        self.save_all_button.clicked.connect(
+            partial(self.on_save_button_click, self.data.assign(cluster=self.labels))
+        )
         self.save_all_button.setFixedWidth(120)
         self.centroids_table_header_layout.addWidget(self.centroids_table_instruction)
         self.centroids_table_header_layout.addWidget(self.save_all_button)
@@ -117,13 +133,13 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
 
     def click_listener(self, button_type: str):
         match button_type:
-            case 'new_samples':
+            case "new_samples":
                 num = self.sample_box.value()
                 self.num_samples = num
                 self.samples = get_samples(self.data, self.num_samples)
                 self.update_plot()
                 self.update_cluster_plot()
-            case 'set_axis':
+            case "set_axis":
                 self.ox = self.ox_box.currentText()
                 self.oy = self.oy_box.currentText()
                 self.update_plot()
@@ -145,19 +161,42 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
             x_centroids = self.centroids[self.ox]
         else:
             x_centroids = pd.Series(
-                [self.data.iloc[self.labels == label][self.ox].mean() for label in range(max(self.labels) + 1)])
+                [
+                    self.data.iloc[self.labels == label][self.ox].mean()
+                    for label in range(max(self.labels) + 1)
+                ]
+            )
         if self.oy in self.centroids.columns:
             y_centroids = self.centroids[self.oy]
         else:
             y_centroids = pd.Series(
-                [self.data.iloc[self.labels == label][self.oy].mean() for label in range(max(self.labels) + 1)])
+                [
+                    self.data.iloc[self.labels == label][self.oy].mean()
+                    for label in range(max(self.labels) + 1)
+                ]
+            )
 
-        self.clusters_canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
-                                      min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+        self.clusters_canvas.all_plot(
+            x,
+            y,
+            x_centroids,
+            y_centroids,
+            labels,
+            self.ox,
+            self.oy,
+            min_x - sep_x,
+            max_x + sep_x,
+            min_y - sep_y,
+            max_y + sep_y,
+        )
 
     def update_cluster_plot(self):
         if self.selected_cluster is not None:
-            indexes = [i for i in range(len(self.labels)) if self.labels[i] == self.selected_cluster]
+            indexes = [
+                i
+                for i in range(len(self.labels))
+                if self.labels[i] == self.selected_cluster
+            ]
             x = self.data.iloc[indexes][self.ox]
             y = self.data.iloc[indexes][self.oy]
             min_x = x.min()
@@ -170,16 +209,40 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
             if self.ox in self.centroids.columns:
                 x_centroids = self.centroids[self.ox]
             else:
-                x_centroids = pd.Series([self.data.iloc[self.labels == label][self.ox].mean() for label in range(max(self.labels) + 1)])
+                x_centroids = pd.Series(
+                    [
+                        self.data.iloc[self.labels == label][self.ox].mean()
+                        for label in range(max(self.labels) + 1)
+                    ]
+                )
             if self.oy in self.centroids.columns:
                 y_centroids = self.centroids[self.oy]
             else:
-                y_centroids = pd.Series([self.data.iloc[self.labels == label][self.oy].mean() for label in range(max(self.labels) + 1)])
+                y_centroids = pd.Series(
+                    [
+                        self.data.iloc[self.labels == label][self.oy].mean()
+                        for label in range(max(self.labels) + 1)
+                    ]
+                )
 
-            self.centroids_canvas.chosen_centroid_plot(x, y, None, None, None, None, x_centroids.iloc[self.selected_cluster],
-                                                       y_centroids.iloc[self.selected_cluster], self.selected_cluster,
-                                                       len(x_centroids), self.ox, self.oy, min_x - sep_x, max_x + sep_x,
-                                                       min_y - sep_y, max_y + sep_y,)
+            self.centroids_canvas.chosen_centroid_plot(
+                x,
+                y,
+                None,
+                None,
+                None,
+                None,
+                x_centroids.iloc[self.selected_cluster],
+                y_centroids.iloc[self.selected_cluster],
+                self.selected_cluster,
+                len(x_centroids),
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+            )
         else:
             x = self.data[self.ox]
             y = self.data[self.oy]
@@ -193,19 +256,44 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
             if self.ox in self.centroids.columns:
                 x_centroids = self.centroids[self.ox]
             else:
-                x_centroids = pd.Series([self.data.iloc[self.labels == label][self.ox].mean() for label in range(max(self.labels) + 1)])
+                x_centroids = pd.Series(
+                    [
+                        self.data.iloc[self.labels == label][self.ox].mean()
+                        for label in range(max(self.labels) + 1)
+                    ]
+                )
             if self.oy in self.centroids.columns:
                 y_centroids = self.centroids[self.oy]
             else:
-                y_centroids = pd.Series([self.data.iloc[self.labels == label][self.oy].mean() for label in range(max(self.labels) + 1)])
+                y_centroids = pd.Series(
+                    [
+                        self.data.iloc[self.labels == label][self.oy].mean()
+                        for label in range(max(self.labels) + 1)
+                    ]
+                )
 
-            self.centroids_canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
-                                                     min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                                     )
+            self.centroids_canvas.new_centroids_plot(
+                None,
+                None,
+                x_centroids,
+                y_centroids,
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+            )
 
     def show_cluster(self):
-        self.selected_cluster = self.centroids_table.selectionModel().selectedIndexes()[0].row()
-        rows = [i for i in range(len(self.labels)) if self.labels[i] == self.selected_cluster]
+        self.selected_cluster = (
+            self.centroids_table.selectionModel().selectedIndexes()[0].row()
+        )
+        rows = [
+            i
+            for i in range(len(self.labels))
+            if self.labels[i] == self.selected_cluster
+        ]
         elements = self.data.iloc[rows]
         self.centroids_table.setModel(QtTable(elements))
         buttons_widget = QWidget()
@@ -234,16 +322,19 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.update_cluster_plot()
 
     def on_save_button_click(self, elements):
-        path, is_ok = QInputDialog.getText(self, 'Save to file', 'Enter filename')
+        path, is_ok = QInputDialog.getText(self, "Save to file", "Enter filename")
         if is_ok and path:
             if not path.endswith(".csv"):
                 path += ".csv"
             try:
                 elements.to_csv(path)
             except:
+                print(Exception)
                 error = QMessageBox()
                 error.setIcon(QMessageBox.Critical)
-                error.setText("Something wrong happened while writing data to file. Try again")
+                error.setText(
+                    "Something wrong happened while writing data to file. Try again."
+                )
                 error.setWindowTitle("Saving failed")
                 error.exec_()
         elif not is_ok:

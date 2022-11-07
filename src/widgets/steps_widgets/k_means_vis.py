@@ -1,21 +1,36 @@
 from functools import partial
-
-import numpy as np
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QFormLayout, QGroupBox, \
-    QSpinBox, QPushButton, QComboBox, QLabel, QScrollArea, QSizePolicy
-import pandas as pd
 from typing import List, Tuple
 
-from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
-from algorithms import get_samples, check_numeric
-from widgets.steps_widgets import AlgorithmStepsVisualization
+import numpy as np
+import pandas as pd
+from matplotlib.animation import FuncAnimation
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSpinBox,
+    QVBoxLayout,
+)
+
+from algorithms import check_numeric, get_samples
 from visualization import KMeansCanvas
+from widgets.steps_widgets import AlgorithmStepsVisualization
 
 
 class KMeansStepsVisualization(AlgorithmStepsVisualization):
-    def __init__(self, data: pd.DataFrame, algorithms_steps: List[Tuple[np.ndarray, pd.DataFrame]], is_animation: bool):
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        algorithms_steps: List[Tuple[np.ndarray, pd.DataFrame]],
+        is_animation: bool,
+    ):
         super().__init__(data, algorithms_steps, is_animation)
 
         self.is_running = False
@@ -54,7 +69,7 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
         self.sample_box.setMaximum(min(self.data.shape[0], 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
-        self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
+        self.sample_button.clicked.connect(partial(self.click_listener, "new_samples"))
         self.settings_box_layout.addRow(self.sample_box, self.sample_button)
 
         # axis
@@ -66,8 +81,8 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
         self.oy_box.addItems(columns)
         if len(columns) > 1:
             self.oy_box.setCurrentIndex(1)
-        self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
-        self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
+        self.ox_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
+        self.oy_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
         self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
 
@@ -86,16 +101,18 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
             self.animation_box_layout = QFormLayout(self.animation_box)
 
             self.restart_button = QPushButton("Restart")
-            self.restart_button.clicked.connect(partial(self.click_listener, 'restart'))
+            self.restart_button.clicked.connect(partial(self.click_listener, "restart"))
             self.run_button = QPushButton("Start animation")
-            self.run_button.clicked.connect(partial(self.click_listener, 'run'))
+            self.run_button.clicked.connect(partial(self.click_listener, "run"))
             self.interval_box = QSpinBox()
             self.interval_box.setMinimum(20)
             self.interval_box.setMaximum(2000)
             self.interval_box.setValue(200)
             self.interval_box.setSingleStep(20)
 
-            self.animation_box_layout.addRow(QLabel("Interval time [ms]:"), self.interval_box)
+            self.animation_box_layout.addRow(
+                QLabel("Interval time [ms]:"), self.interval_box
+            )
             self.animation_box_layout.addRow(self.restart_button)
             self.animation_box_layout.addRow(self.run_button)
 
@@ -117,9 +134,9 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
             self.right_box = QSpinBox()
             self.right_box.setMinimum(1)
             self.left_button = QPushButton("PREV")
-            self.left_button.clicked.connect(partial(self.click_listener, 'prev'))
+            self.left_button.clicked.connect(partial(self.click_listener, "prev"))
             self.right_button = QPushButton("NEXT")
-            self.right_button.clicked.connect(partial(self.click_listener, 'next'))
+            self.right_button.clicked.connect(partial(self.click_listener, "next"))
             self.step_label = QLabel("STEP: {}".format(self.current_step))
             self.control_buttons_layout.addWidget(self.left_button)
             self.control_buttons_layout.addWidget(self.left_box)
@@ -132,11 +149,17 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
             self.visualization_box_layout.addLayout(self.control_buttons_layout, 0)
         else:
             self.step_label = QLabel("STEP: {}".format(self.current_step))
-            self.visualization_box_layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
+            self.visualization_box_layout.addWidget(
+                self.step_label, 0, alignment=Qt.AlignCenter
+            )
 
         # description
-        description = "K-Means algorithm - steps visualization.\n\nEach color represents one cluster.\n\n" \
-                      "Circles are the points of the data set.\nSquares are centroids of the clusters."
+        description = (
+            "K-Means algorithm - steps visualization.\n\n"
+            "Each color represents one cluster.\n\n"
+            "Circles are the points of the data set.\n"
+            "Squares are centroids of the clusters."
+        )
         self.description_label = QLabel(description)
         self.description_label.setWordWrap(True)
 
@@ -167,37 +190,43 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
 
     def click_listener(self, button_type: str):
         match button_type:
-            case 'new_samples':
+            case "new_samples":
                 num = self.sample_box.value()
                 self.num_samples = num
                 self.samples = get_samples(self.data, self.num_samples)
                 self.update_plot()
-            case 'set_axis':
+            case "set_axis":
                 self.ox = self.ox_box.currentText()
                 self.oy = self.oy_box.currentText()
                 self.update_plot()
-            case 'prev':
+            case "prev":
                 num = self.left_box.value()
                 self.change_step(-1 * num)
-            case 'next':
+            case "next":
                 num = self.right_box.value()
                 self.change_step(num)
-            case 'restart':
+            case "restart":
                 self.animation = None
                 self.change_step(-1 * self.current_step)
                 self.change_enabled_buttons(True)
                 self.interval_box.setEnabled(True)
                 self.run_button.setEnabled(True)
-            case 'run':
+            case "run":
                 self.is_running = not self.is_running
                 self.change_enabled_buttons(False)
                 self.interval_box.setEnabled(False)
                 self.restart_button.setEnabled(not self.is_running)
                 if self.is_running:
                     if self.animation is None:
-                        self.animation = FuncAnimation(self.fig, self.update_plot, frames=self.max_step + 1,
-                                                       interval=self.interval_box.value(), blit=True,
-                                                       cache_frame_data=False, repeat=False)
+                        self.animation = FuncAnimation(
+                            self.fig,
+                            self.update_plot,
+                            frames=self.max_step + 1,
+                            interval=self.interval_box.value(),
+                            blit=True,
+                            cache_frame_data=False,
+                            repeat=False,
+                        )
                         self.canvas.draw()
                     else:
                         self.animation.resume()
@@ -245,9 +274,17 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
         sep_y = 0.1 * (max_y - min_y)
 
         if step == 0:
-            return self.canvas.data_plot(x, y, self.ox, self.oy,
-                                         min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                         not self.is_running)
+            return self.canvas.data_plot(
+                x,
+                y,
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+                not self.is_running,
+            )
 
         step_labels, step_centroids = self.algorithms_steps[0]
         labels = [step_labels[sample] for sample in self.samples]
@@ -255,13 +292,35 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
         y_centroids = step_centroids[self.oy]
 
         if step == 1:
-            return self.canvas.new_centroids_plot(None, None, x_centroids, y_centroids, self.ox, self.oy,
-                                                  min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                                  not self.is_running)
+            return self.canvas.new_centroids_plot(
+                None,
+                None,
+                x_centroids,
+                y_centroids,
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+                not self.is_running,
+            )
 
         if step == 2:
-            return self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
-                                        min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y, not self.is_running)
+            return self.canvas.all_plot(
+                x,
+                y,
+                x_centroids,
+                y_centroids,
+                labels,
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+                not self.is_running,
+            )
 
         index = (step - 3) // (self.num_cluster + 2) + 1
         mode = (step - 3) % (self.num_cluster + 2)
@@ -281,17 +340,51 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
             vector_y = y.loc[old_labels == mode]
             other_x = x.loc[old_labels != mode]
             other_y = y.loc[old_labels != mode]
-            return self.canvas.chosen_centroid_plot(vector_x, vector_y, other_x, other_y, old_x_centroids.iloc[mode],
-                                                    old_y_centroids.iloc[mode], x_centroids.iloc[mode],
-                                                    y_centroids.iloc[mode],
-                                                    mode, len(x_centroids), self.ox, self.oy,
-                                                    min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                                    not self.is_running)
+            return self.canvas.chosen_centroid_plot(
+                vector_x,
+                vector_y,
+                other_x,
+                other_y,
+                old_x_centroids.iloc[mode],
+                old_y_centroids.iloc[mode],
+                x_centroids.iloc[mode],
+                y_centroids.iloc[mode],
+                mode,
+                len(x_centroids),
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+                not self.is_running,
+            )
         elif mode == self.num_cluster:
-            return self.canvas.new_centroids_plot(old_x_centroids, old_y_centroids, x_centroids, y_centroids, self.ox,
-                                                  self.oy,
-                                                  min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y,
-                                                  not self.is_running)
+            return self.canvas.new_centroids_plot(
+                old_x_centroids,
+                old_y_centroids,
+                x_centroids,
+                y_centroids,
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+                not self.is_running,
+            )
         else:
-            return self.canvas.all_plot(x, y, x_centroids, y_centroids, labels, self.ox, self.oy,
-                                        min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y, not self.is_running)
+            return self.canvas.all_plot(
+                x,
+                y,
+                x_centroids,
+                y_centroids,
+                labels,
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+                not self.is_running,
+            )

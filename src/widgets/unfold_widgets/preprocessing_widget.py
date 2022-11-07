@@ -1,19 +1,34 @@
 from PyQt5.QtCore import QRect, Qt
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QPushButton, QCheckBox, \
-    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy, QScrollArea
+from PyQt5.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDesktopWidget,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSplashScreen,
+    QVBoxLayout,
+    QWidget,
+)
 
 from widgets import UnfoldWidget
 
 
 class PreprocessingWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
-        super().__init__(parent, engine, 'preprocessing_widget', 'PREPROCESSING')
+        super().__init__(parent, engine, "preprocessing_widget", "PREPROCESSING")
 
         self.data_submitted = False
         self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
 
-        self.plot_types = ['Histogram', 'Pie', "Null frequency"]
+        self.plot_types = ["Histogram", "Pie", "Null frequency"]
 
         # plot picker group
         self.plot_picker_group = QGroupBox(self.frame)
@@ -27,7 +42,9 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_select_box = QComboBox(self.plot_picker_group)
         self.column_select_box.setMinimumHeight(23)
 
-        self.plot_picker_group_layout.addRow(self.column_picker_label, self.column_select_box)
+        self.plot_picker_group_layout.addRow(
+            self.column_picker_label, self.column_select_box
+        )
         self.plot_picker_group.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.plot_picker_label = QLabel(self.plot_picker_group)
@@ -37,13 +54,18 @@ class PreprocessingWidget(UnfoldWidget):
         self.plot_select_box.setMinimumHeight(23)
         self.plot_select_box.addItems(self.plot_types)
 
-        self.plot_picker_group_layout.addRow(self.plot_picker_label, self.plot_select_box)
+        self.plot_picker_group_layout.addRow(
+            self.plot_picker_label, self.plot_select_box
+        )
 
         self.plot_picker_submit = QPushButton(self.plot_picker_group)
         self.plot_picker_submit.setText("Plot")
         self.plot_picker_submit.setMinimumHeight(23)
-        self.plot_picker_submit.clicked.connect(lambda: self.plot_data(self.column_select_box.currentText(),
-                                                                       self.plot_select_box.currentText()))
+        self.plot_picker_submit.clicked.connect(
+            lambda: self.plot_data(
+                self.column_select_box.currentText(), self.plot_select_box.currentText()
+            )
+        )
 
         self.plot_picker_group_layout.addRow(self.plot_picker_submit)
 
@@ -120,11 +142,12 @@ class PreprocessingWidget(UnfoldWidget):
         layout.addLayout(self.second_row, 1)
 
     def get_data(self):
-        """ check column names every time coming to that frame (potential changes) """
+        """check column names every time coming to that frame
+        (potential changes)"""
         if self.engine.state.imported_data is None:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText('No dataset was selected')
+            error.setText("No dataset was selected")
             error.setWindowTitle("Error")
             error.exec_()
             return
@@ -132,7 +155,9 @@ class PreprocessingWidget(UnfoldWidget):
         loading_screen = QSplashScreen()
         size = QDesktopWidget().screenGeometry(-1)
         loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
-        loading_screen.setGeometry(QRect(size.width()//2-125, size.height()//2-50, 250, 100)) # hardcoded alignment
+        loading_screen.setGeometry(
+            QRect(size.width() // 2 - 125, size.height() // 2 - 50, 250, 100)
+        )  # hardcoded alignment
         loading_screen.show()
         QApplication.processEvents()
 
@@ -174,7 +199,7 @@ class PreprocessingWidget(UnfoldWidget):
         if not columns:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText('No columns were chosen')
+            error.setText("No columns were chosen")
             error.setWindowTitle("Error")
             error.exec_()
             return
@@ -191,8 +216,10 @@ class PreprocessingWidget(UnfoldWidget):
         warning = QMessageBox()
         warning.setIcon(QMessageBox.Warning)
         warning.setText("Null values in set")
-        warning.setInformativeText("This data contains some empty values. After proceeding some of the rows will be "
-                                   "discarded. Continue?")
+        warning.setInformativeText(
+            "This data contains some empty values. After proceeding "
+            "some of the rows will be discarded. Continue?"
+        )
         warning.setWindowTitle("Cleaning data")
         warning.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         warning.buttonClicked.connect(self.handle_warning_click)

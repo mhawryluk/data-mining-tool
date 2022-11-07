@@ -2,23 +2,38 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from PyQt5.QtWidgets import QGroupBox, QFormLayout, QLabel, QTableView, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import (
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QTableView,
+    QVBoxLayout,
+)
 
-from visualization import APrioriScatterPlot, APrioriGraphPlot, APrioriGauge
+from visualization import APrioriGauge, APrioriGraphPlot, APrioriScatterPlot
 from widgets import QtTable
 from widgets.results_widgets import AlgorithmResultsWidget
 
 
 class APrioriResultsWidget(AlgorithmResultsWidget):
-    def __init__(self, data: pd.DataFrame, frequent_sets: pd.DataFrame, association_rules: pd.DataFrame,
-                 transaction_sets: List[set], options):
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        frequent_sets: pd.DataFrame,
+        association_rules: pd.DataFrame,
+        transaction_sets: List[set],
+        options,
+    ):
         super().__init__(data, options)
 
         self.transaction_sets = transaction_sets
         self.frequent_sets = frequent_sets.reset_index()
-        self.frequent_sets.rename(columns={'index': 'frequent sets'}, inplace=True)
+        self.frequent_sets.rename(columns={"index": "frequent sets"}, inplace=True)
         self.association_rules = association_rules.reset_index()
-        self.association_rules.rename(columns={'index': 'association rules'}, inplace=True)
+        self.association_rules.rename(
+            columns={"index": "association rules"}, inplace=True
+        )
         self.columns = self.data.columns.values
         self.min_support = self.options["min_support"]
         self.min_confidence = self.options["min_confidence"]
@@ -34,7 +49,7 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
         self.params_layout = QFormLayout(self.params_group)
 
         for option, value in self.options.items():
-            self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
+            self.params_layout.addRow(QLabel(f"{option}:"), QLabel(f"{value}"))
 
         # sets plots and charts
         self.gauge_chart = APrioriGauge()
@@ -49,7 +64,9 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
 
         # frequent sets group
         self.frequent_sets_result_group = QGroupBox()
-        self.frequent_sets_result_group_layout = QVBoxLayout(self.frequent_sets_result_group)
+        self.frequent_sets_result_group_layout = QVBoxLayout(
+            self.frequent_sets_result_group
+        )
         self.frequent_sets_result_group.setTitle("Frequent sets result")
 
         # frequent sets table
@@ -81,18 +98,33 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
         self.layout.addLayout(self.right_column, 1)
 
     def highlight_frequent_set(self):
-        selected_set = self.frequent_sets_table.selectionModel().selectedIndexes()[0].row()
-        column_list = self.frequent_sets.iloc[selected_set]["frequent sets"][1:-1].split(",  ")
+        selected_set = (
+            self.frequent_sets_table.selectionModel().selectedIndexes()[0].row()
+        )
+        column_list = self.frequent_sets.iloc[selected_set]["frequent sets"][
+            1:-1
+        ].split(",  ")
         self.graph_plot.plot_set(column_list)
-        self.gauge_chart.plot_value(self.frequent_sets.iloc[selected_set]["support"], self.min_support, "support")
+        self.gauge_chart.plot_value(
+            self.frequent_sets.iloc[selected_set]["support"],
+            self.min_support,
+            "support",
+        )
         self.transactions_canvas.plot_set(column_list)
 
     def highlight_rule(self):
-        selected_rule = self.association_rules_table.selectionModel().selectedIndexes()[0].row()
-        set_a, set_b = self.association_rules.iloc[selected_rule]["association rules"].split(" => ")
-        set_a = set_a[1:-1].split(',  ')
-        set_b = set_b[1:-1].split(',  ')
+        selected_rule = (
+            self.association_rules_table.selectionModel().selectedIndexes()[0].row()
+        )
+        set_a, set_b = self.association_rules.iloc[selected_rule][
+            "association rules"
+        ].split(" => ")
+        set_a = set_a[1:-1].split(",  ")
+        set_b = set_b[1:-1].split(",  ")
         self.graph_plot.plot_rule(set_a, set_b)
-        self.gauge_chart.plot_value(self.association_rules.iloc[selected_rule]["confidence"], self.min_confidence,
-                                    "confidence")
+        self.gauge_chart.plot_value(
+            self.association_rules.iloc[selected_rule]["confidence"],
+            self.min_confidence,
+            "confidence",
+        )
         self.transactions_canvas.plot_rule(set_a, set_b)

@@ -1,6 +1,7 @@
+from abc import ABC, abstractmethod
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-from abc import ABC, abstractmethod
 from PyQt5.QtWidgets import QVBoxLayout
 
 

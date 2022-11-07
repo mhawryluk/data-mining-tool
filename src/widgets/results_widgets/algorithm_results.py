@@ -1,12 +1,13 @@
-from PyQt5.QtWidgets import QWidget
 from typing import Dict
+
 import pandas as pd
+from PyQt5.QtWidgets import QWidget
 
 
 class AlgorithmResultsWidget(QWidget):
     """
-        Widget with result visualization and summary
-        It is shown in 'Results' section
+    Widget with result visualization and summary
+    It is shown in 'Results' section
     """
 
     def __init__(self, data: pd.DataFrame, options: Dict):

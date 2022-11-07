@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QPushButton, QStylePainter, QStyle, QStyleOptionButton
+from PyQt5.QtWidgets import QPushButton, QStyle, QStyleOptionButton, QStylePainter
 
 
 class RotatedButton(QPushButton):

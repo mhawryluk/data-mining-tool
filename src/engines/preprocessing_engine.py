@@ -1,7 +1,8 @@
 import numpy as np
-from state import State
-from visualization.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
+
 from preprocess import DataCleaner
+from state import State
+from visualization.plots import FallbackPlot, HistogramPlot, NullFrequencyPlot, PiePlot
 
 
 class PreprocessingEngine:
@@ -24,16 +25,16 @@ class PreprocessingEngine:
 
     def create_plot(self, column_name, plot_type):
         plotter = None
-        if column_name == '':
+        if column_name == "":
             plotter = FallbackPlot([])
             return plotter.plot()
         column = self.state.imported_data.loc[:, column_name]
         match plot_type:
-            case 'Histogram':
+            case "Histogram":
                 plotter = HistogramPlot(column)
-            case 'Pie':
+            case "Pie":
                 plotter = PiePlot(column)
-            case 'Null frequency':
+            case "Null frequency":
                 plotter = NullFrequencyPlot(column)
         return plotter.plot()
 

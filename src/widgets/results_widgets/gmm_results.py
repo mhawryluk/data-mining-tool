@@ -2,21 +2,32 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGroupBox, QFormLayout, QLabel, QVBoxLayout, QSpinBox, QPushButton, \
-    QComboBox, QTableView, QInputDialog, QMessageBox
-from algorithms import get_samples
 from matplotlib import pyplot as plt
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+)
 
+from algorithms import get_samples
 from visualization import GMMCanvas
-
 from widgets import QtTable
 from widgets.results_widgets import AlgorithmResultsWidget
 
 
 class GMMResultsWidget(AlgorithmResultsWidget):
     def __init__(self, df, labels, mean, sigma, options):
-        super().__init__(df.select_dtypes(include=['number']), options)
+        super().__init__(df.select_dtypes(include=["number"]), options)
 
         self.columns = self.data.columns
         self.labels = labels
@@ -36,7 +47,7 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.params_group.setTitle("Parameters")
         self.params_layout = QFormLayout(self.params_group)
         for option, value in self.options.items():
-            self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
+            self.params_layout.addRow(QLabel(f"{option}:"), QLabel(f"{value}"))
 
         self.layout.addWidget(self.params_group)
 
@@ -54,7 +65,7 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.sample_box.setMaximum(min(self.data.shape[0], 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
-        self.sample_button.clicked.connect(partial(self.click_listener, 'new_samples'))
+        self.sample_button.clicked.connect(partial(self.click_listener, "new_samples"))
         self.settings_box_layout.addRow(self.sample_box, self.sample_button)
         # axis
         self.settings_box_layout.addRow(QLabel("Set axis:"))
@@ -64,8 +75,8 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.oy_box.addItems(self.columns)
         if len(self.columns) > 1:
             self.oy_box.setCurrentIndex(1)
-        self.ox_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
-        self.oy_box.currentTextChanged.connect(partial(self.click_listener, 'set_axis'))
+        self.ox_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
+        self.oy_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
         self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
         self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
         self.settings_box_layout.setSpacing(10)
@@ -87,9 +98,13 @@ class GMMResultsWidget(AlgorithmResultsWidget):
             self.clusters_table.setColumnWidth(i, 120)
         self.clusters_table_header = QWidget()
         self.clusters_table_header_layout = QHBoxLayout()
-        self.clusters_table_instruction = QLabel("Double click on any field to preview a cluster")
+        self.clusters_table_instruction = QLabel(
+            "Double click on any field to preview a cluster"
+        )
         self.save_all_button = QPushButton("SAVE RESULTS")
-        self.save_all_button.clicked.connect(partial(self.on_save_button_click, self.data.assign(cluster=self.labels)))
+        self.save_all_button.clicked.connect(
+            partial(self.on_save_button_click, self.data.assign(cluster=self.labels))
+        )
         self.save_all_button.setFixedWidth(120)
         self.clusters_table_header_layout.addWidget(self.clusters_table_instruction)
         self.clusters_table_header_layout.addWidget(self.save_all_button)
@@ -106,13 +121,13 @@ class GMMResultsWidget(AlgorithmResultsWidget):
 
     def click_listener(self, button_type: str):
         match button_type:
-            case 'new_samples':
+            case "new_samples":
                 num = self.sample_box.value()
                 self.num_samples = num
                 self.samples = get_samples(self.data, self.num_samples)
                 self.update_plot()
                 self.update_cluster_plot()
-            case 'set_axis':
+            case "set_axis":
                 self.ox = self.ox_box.currentText()
                 self.oy = self.oy_box.currentText()
                 self.update_plot()
@@ -130,12 +145,29 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         sep_y = 0.1 * (max_y - min_y)
 
         labels = [self.labels[sample] for sample in self.samples]
-        self.results_canvas.clusters_plot(x, y, list(self.columns), self.mean.values, self.sigma, labels, self.max_label,
-                                           self.ox, self.oy, min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+        self.results_canvas.clusters_plot(
+            x,
+            y,
+            list(self.columns),
+            self.mean.values,
+            self.sigma,
+            labels,
+            self.max_label,
+            self.ox,
+            self.oy,
+            min_x - sep_x,
+            max_x + sep_x,
+            min_y - sep_y,
+            max_y + sep_y,
+        )
 
     def update_cluster_plot(self):
         if self.selected_cluster is not None:
-            indexes = [i for i in range(len(self.labels)) if self.labels[i] == self.selected_cluster]
+            indexes = [
+                i
+                for i in range(len(self.labels))
+                if self.labels[i] == self.selected_cluster
+            ]
             x = self.data.iloc[indexes][self.ox]
             y = self.data.iloc[indexes][self.oy]
             min_x = x.min()
@@ -146,17 +178,34 @@ class GMMResultsWidget(AlgorithmResultsWidget):
             sep_y = 0.1 * (max_y - min_y)
             x_means = self.mean[self.ox]
             y_means = self.mean[self.oy]
-            x_index, y_index = [self.columns.get_loc(self.ox), self.columns.get_loc(self.oy)]
-            mean = [x_means.iloc[self.selected_cluster], y_means.iloc[self.selected_cluster]]
+            x_index, y_index = [
+                self.columns.get_loc(self.ox),
+                self.columns.get_loc(self.oy),
+            ]
+            mean = [
+                x_means.iloc[self.selected_cluster],
+                y_means.iloc[self.selected_cluster],
+            ]
             sigma_helper = self.sigma[self.selected_cluster]
             sigma = [
                 [sigma_helper[x_index][x_index], sigma_helper[x_index][y_index]],
                 [sigma_helper[y_index][x_index], sigma_helper[y_index][y_index]],
             ]
 
-            self.clusters_canvas.chosen_cluster_plot(x, y, mean, sigma, self.selected_cluster,
-                                                     len(x_means), self.ox, self.oy, min_x - sep_x, max_x + sep_x,
-                                                     min_y - sep_y, max_y + sep_y)
+            self.clusters_canvas.chosen_cluster_plot(
+                x,
+                y,
+                mean,
+                sigma,
+                self.selected_cluster,
+                len(x_means),
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+            )
         else:
             x = self.data[self.ox]
             y = self.data[self.oy]
@@ -168,22 +217,47 @@ class GMMResultsWidget(AlgorithmResultsWidget):
             sep_y = 0.1 * (max_y - min_y)
             x_means = self.mean[self.ox]
             y_means = self.mean[self.oy]
-            x_index, y_index = [self.columns.get_loc(self.ox), self.columns.get_loc(self.oy)]
+            x_index, y_index = [
+                self.columns.get_loc(self.ox),
+                self.columns.get_loc(self.oy),
+            ]
             means = [x_means, y_means]
             sigmas = []
             for i in range(len(self.sigma)):
                 sigma_helper = self.sigma[i]
-                sigmas.append([
-                    [sigma_helper[x_index][x_index], sigma_helper[x_index][y_index]],
-                    [sigma_helper[y_index][x_index], sigma_helper[y_index][y_index]],
-                ])
+                sigmas.append(
+                    [
+                        [
+                            sigma_helper[x_index][x_index],
+                            sigma_helper[x_index][y_index],
+                        ],
+                        [
+                            sigma_helper[y_index][x_index],
+                            sigma_helper[y_index][y_index],
+                        ],
+                    ]
+                )
 
-            self.clusters_canvas.clusters_means_plot(means, sigmas, self.ox, self.oy,
-                                                     min_x - sep_x, max_x + sep_x, min_y - sep_y, max_y + sep_y)
+            self.clusters_canvas.clusters_means_plot(
+                means,
+                sigmas,
+                self.ox,
+                self.oy,
+                min_x - sep_x,
+                max_x + sep_x,
+                min_y - sep_y,
+                max_y + sep_y,
+            )
 
     def show_cluster(self):
-        self.selected_cluster = self.clusters_table.selectionModel().selectedIndexes()[0].row()
-        rows = [i for i in range(len(self.labels)) if self.labels[i] == self.selected_cluster]
+        self.selected_cluster = (
+            self.clusters_table.selectionModel().selectedIndexes()[0].row()
+        )
+        rows = [
+            i
+            for i in range(len(self.labels))
+            if self.labels[i] == self.selected_cluster
+        ]
         elements = self.data.iloc[rows]
         self.clusters_table.setModel(QtTable(elements))
         buttons_widget = QWidget()
@@ -212,7 +286,7 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.update_cluster_plot()
 
     def on_save_button_click(self, elements):
-        path, is_ok = QInputDialog.getText(self, 'Save to file', 'Enter filename')
+        path, is_ok = QInputDialog.getText(self, "Save to file", "Enter filename")
         if is_ok and path:
             if not path.endswith(".csv"):
                 path += ".csv"
@@ -221,7 +295,9 @@ class GMMResultsWidget(AlgorithmResultsWidget):
             except:
                 error = QMessageBox()
                 error.setIcon(QMessageBox.Critical)
-                error.setText("Something wrong happened while writing data to file. Try again")
+                error.setText(
+                    "Something wrong happened while writing data to file. Try again."
+                )
                 error.setWindowTitle("Saving failed")
                 error.exec_()
         elif not is_ok:

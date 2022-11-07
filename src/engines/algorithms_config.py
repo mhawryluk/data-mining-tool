@@ -1,17 +1,32 @@
-from typing import Dict, List
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import Dict, List
 
 from algorithms import Algorithm
-from algorithms.clustering import KMeans, GMM
 from algorithms.associations import APriori
 from algorithms.classification import ExtraTrees
-from widgets.steps_widgets import AlgorithmStepsVisualization, APrioriStepsVisualization, KMeansStepsVisualization, \
-    ExtraTreesStepsVisualization, GMMStepsVisualization
-from widgets.results_widgets import KMeansResultsWidget, ExtraTreesResultsWidget, AlgorithmResultsWidget, \
-    APrioriResultsWidget, GMMResultsWidget
-from widgets.options_widgets import KMeansOptions, ExtraTreesOptions, AlgorithmOptions, AssociationRulesOptions, \
-    GMMOptions
+from algorithms.clustering import GMM, KMeans
+from widgets.options_widgets import (
+    AlgorithmOptions,
+    AssociationRulesOptions,
+    ExtraTreesOptions,
+    GMMOptions,
+    KMeansOptions,
+)
+from widgets.results_widgets import (
+    AlgorithmResultsWidget,
+    APrioriResultsWidget,
+    ExtraTreesResultsWidget,
+    GMMResultsWidget,
+    KMeansResultsWidget,
+)
+from widgets.steps_widgets import (
+    AlgorithmStepsVisualization,
+    APrioriStepsVisualization,
+    ExtraTreesStepsVisualization,
+    GMMStepsVisualization,
+    KMeansStepsVisualization,
+)
 
 
 class AlgorithmTechniques(Enum):
@@ -34,21 +49,33 @@ class AlgorithmConfig:
 
 ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmConfig]] = {
     AlgorithmTechniques.CLUSTERING.value: {
-        'K-Means': AlgorithmConfig(algorithm=KMeans, options=KMeansOptions,
-                                   steps_visualization=KMeansStepsVisualization,
-                                   result_widget=KMeansResultsWidget),
-        'Gaussian Mixture Models': AlgorithmConfig(algorithm=GMM, options=GMMOptions,
-                                                   steps_visualization=GMMStepsVisualization,
-                                                   result_widget=GMMResultsWidget)
+        "K-Means": AlgorithmConfig(
+            algorithm=KMeans,
+            options=KMeansOptions,
+            steps_visualization=KMeansStepsVisualization,
+            result_widget=KMeansResultsWidget,
+        ),
+        "Gaussian Mixture Models": AlgorithmConfig(
+            algorithm=GMM,
+            options=GMMOptions,
+            steps_visualization=GMMStepsVisualization,
+            result_widget=GMMResultsWidget,
+        ),
     },
     AlgorithmTechniques.ASSOCIATIONS.value: {
-        'Apriori': AlgorithmConfig(algorithm=APriori, options=AssociationRulesOptions,
-                                   steps_visualization=APrioriStepsVisualization,
-                                   result_widget=APrioriResultsWidget)
+        "Apriori": AlgorithmConfig(
+            algorithm=APriori,
+            options=AssociationRulesOptions,
+            steps_visualization=APrioriStepsVisualization,
+            result_widget=APrioriResultsWidget,
+        )
     },
     AlgorithmTechniques.CLASSIFICATION.value: {
-        'Extra Trees': AlgorithmConfig(algorithm=ExtraTrees, options=ExtraTreesOptions,
-                                       steps_visualization=ExtraTreesStepsVisualization,
-                                       result_widget=ExtraTreesResultsWidget)
-    }
+        "Extra Trees": AlgorithmConfig(
+            algorithm=ExtraTrees,
+            options=ExtraTreesOptions,
+            steps_visualization=ExtraTreesStepsVisualization,
+            result_widget=ExtraTreesResultsWidget,
+        )
+    },
 }

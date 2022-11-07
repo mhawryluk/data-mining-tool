@@ -1,6 +1,6 @@
 from typing import List
 
-from PyQt5.QtWidgets import QLabel, QDoubleSpinBox, QComboBox
+from PyQt5.QtWidgets import QComboBox, QDoubleSpinBox, QLabel
 
 from widgets.options_widgets import AlgorithmOptions
 
@@ -27,9 +27,9 @@ class AssociationRulesOptions(AlgorithmOptions):
 
     def get_data(self) -> dict:
         return {
-            'min_support': self.min_support_spinbox.value(),
-            'min_confidence': self.min_confidence_spinbox.value(),
-            'index_column': self.index_columns_combobox.currentText(),
+            "min_support": self.min_support_spinbox.value(),
+            "min_confidence": self.min_confidence_spinbox.value(),
+            "index_column": self.index_columns_combobox.currentText(),
         }
 
     def set_columns_options(self, columns: List[str]):

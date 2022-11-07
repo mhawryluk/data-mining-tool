@@ -1,10 +1,11 @@
 from abc import abstractmethod
-from PyQt5.QtWidgets import QWidget, QFormLayout
+
+from PyQt5.QtWidgets import QFormLayout, QWidget
 
 
 class AlgorithmOptions(QWidget):
     """
-        Widget, which allows to set parameters of algorithm
+    Widget, which allows to set parameters of algorithm
     """
 
     def __init__(self):
@@ -14,6 +15,6 @@ class AlgorithmOptions(QWidget):
     @abstractmethod
     def get_data(self) -> dict:
         """
-            Return dict with parameters
+        Return dict with parameters
         """
         raise NotImplementedError
