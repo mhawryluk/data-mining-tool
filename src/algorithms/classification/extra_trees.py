@@ -197,9 +197,7 @@ class DecisionTree:
             case "entropy":
                 metrics_func = self._calculate_entropy
             case _:
-                raise ValueError(
-                    f"'{self.metrics_type}' is not valid type of metrics"
-                )
+                raise ValueError(f"'{self.metrics_type}' is not valid type of metrics")
         parent = metrics_func(mask)
         left = metrics_func(left_mask)
         right = metrics_func(right_mask)
@@ -221,11 +219,11 @@ class DecisionTree:
     def predict(self, record: pd.Series) -> pd.Series:
         node = self.root
         while not isinstance(node, Leaf):
-            node = self.next_node(record, node)
+            node = self._next_node(record, node)
         return node.prediction
 
     @staticmethod
-    def next_node(record: pd.Series, node: Node) -> Node | Leaf:
+    def _next_node(record: pd.Series, node: Node) -> Node | Leaf:
         value = record[node.label]
         pivot = node.pivot
         if isinstance(pivot, bool) or isinstance(pivot, str):
@@ -264,9 +262,7 @@ class DecisionTree:
             if side is None:
                 rows.append(f"{num_from} -> {num_next} [width=3] ;")
             elif side:
-                rows.append(
-                    f"{num_from} -> {num_next} [color=deepskyblue, width=3] ;"
-                )
+                rows.append(f"{num_from} -> {num_next} [color=deepskyblue, width=3] ;")
             else:
                 rows.append(f"{num_from} -> {num_next} [color=orange, width=3] ;")
             if isinstance(node_next, Node):
@@ -293,7 +289,7 @@ class DecisionTree:
         return dot_str, creation[0], creation[1]
 
     @staticmethod
-    def make_string(rows: List, nodes: Dict) -> str:
+    def _make_string(rows: List, nodes: Dict) -> str:
         rows_str = "\n".join(list(nodes.values()) + rows)
         rows_str = rows_str.replace("shape=circle", "shape=ellipse")
         dot_str = (
@@ -317,7 +313,7 @@ class DecisionTree:
         while len(queue):
             node, i = queue.popleft()
             nodes[i] = f"{i} {node.simple_graphviz_label('blue')} ;"
-            steps.append(self.make_string(rows, nodes))
+            steps.append(self._make_string(rows, nodes))
             creation_info[len(steps) - 1] = node.info
 
             nodes[i] = f"{i} {node.graphviz_label(get_color)} ;"
@@ -327,20 +323,16 @@ class DecisionTree:
             rows.append(f"{i} -> {left} [color=orange, width=3] ;")
             rows.append(f"{i} -> {right} [color=deepskyblue, width=3] ;")
             if isinstance(node.left, Node):
-                nodes[left] = (
-                    f"{left} {node.left.simple_graphviz_label('orange')} ;"
-                )
+                nodes[left] = f"{left} {node.left.simple_graphviz_label('orange')} ;"
                 queue.append((node.left, left))
             else:
                 nodes[left] = f"{left} {node.left.graphviz_label(get_color)} ;"
             if isinstance(node.right, Node):
-                nodes[right] = (
-                    f"{right} {node.right.simple_graphviz_label('orange')} ;"
-                )
+                nodes[right] = f"{right} {node.right.simple_graphviz_label('orange')} ;"
                 queue.append((node.right, right))
             else:
                 nodes[right] = f"{right} {node.right.graphviz_label(get_color)} ;"
-            steps.append(self.make_string(rows, nodes))
+            steps.append(self._make_string(rows, nodes))
         return creation_info, steps
 
 
@@ -402,9 +394,9 @@ class ExtraTrees(Algorithm):
         return result
 
     def get_steps(self) -> List:
-        return [tree.graphviz_str(self.get_color) for tree in self.forest]
+        return [tree.graphviz_str(self._get_color) for tree in self.forest]
 
-    def get_color(self, label: str) -> str:
+    def _get_color(self, label: str) -> str:
         normalize = matplotlib.colors.Normalize(vmin=0, vmax=len(self.labels))
         colormap = matplotlib.cm.get_cmap("gist_rainbow")
         index = np.argwhere(self.labels == label)[0]

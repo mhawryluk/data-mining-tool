@@ -225,9 +225,7 @@ class APriori(Algorithm):
 
 class APrioriPartLabel(Enum):
     CALCULATE_SUPPORT = "Calculating support"
-    FILTER_BY_SUPPORT = (
-        "Selecting frequent sets from generated and not already pruned"
-    )
+    FILTER_BY_SUPPORT = "Selecting frequent sets from generated and not already pruned"
     SAVE_K_SETS = "Saving found k-frequent sets"
     SAVE_RULES = "Saving found association rules"
     JOIN_AND_PRUNE = "Joining sets and pruning ones with infrequent subsets"
