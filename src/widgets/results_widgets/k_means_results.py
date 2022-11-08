@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from algorithms import check_numeric, get_samples
+from algorithms import get_samples
 from visualization import KMeansCanvas
 from widgets import QtTable
 from widgets.results_widgets import AlgorithmResultsWidget
@@ -32,9 +32,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.centroids = centroids
         self.selected_cluster = None
 
-        columns = [col for col in self.data.columns if check_numeric(self.data[col])]
-        for column in columns:
-            self.data[column] = pd.to_numeric(self.data[column])
+        columns = self.data.select_dtypes(include=["number"]).columns
 
         self.layout = QHBoxLayout(self)
 

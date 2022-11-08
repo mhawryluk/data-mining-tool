@@ -25,10 +25,7 @@ class KMeans(Algorithm):
         if init_type not in init_types:
             raise TypeError(f"{init_type} is invalid value of init_type parameter")
         self.step_counter = 0
-        self.data = data
-        self.is_numeric = [
-            self.check_numeric(column) for _, column in self.data.items()
-        ]
+        self.data = data.select_dtypes(include=["number"])
         self.centroids = []
         self.labels = np.zeros(self.data.shape[0], dtype=int)
         self.saved_steps = []
@@ -40,16 +37,7 @@ class KMeans(Algorithm):
     def distance(
         self, vector_x: Union[Tuple, List], vector_y: Union[Tuple, List]
     ) -> float:
-        diff = np.zeros_like(vector_x, dtype=float)
-        for i, (x, y) in enumerate(zip(vector_x, vector_y)):
-            if self.is_numeric[i]:
-                diff[i] = np.abs(float(x) - float(y))
-            else:
-                diff[i] = 0
-                # if x == y:
-                #     diff[i] = 0
-                # else:
-                #     diff[i] = 1
+        diff = np.abs(np.array(vector_x) - np.array(vector_y))
         return (np.sum(diff**self.metrics)) ** (1 / self.metrics)
 
     def random_centroids(self) -> List[Tuple]:
@@ -89,30 +77,9 @@ class KMeans(Algorithm):
             self.labels[i] = m
         return count
 
-    def check_numeric(self, element: any) -> bool:
-        try:
-            pd.to_numeric(element)
-            return True
-        except ValueError:
-            return False
-
-    def mean(self, group: pd.DataFrame) -> Tuple:
-        result = []
-        for i, (_, column) in enumerate(group.items()):
-            if self.is_numeric[i]:
-                result.append(column.mean())
-            else:
-                result.append(None)
-                # counter = {}
-                # most_frequent = None
-                # count = 0
-                # for element in column:
-                #     counter[element] = counter.get(element, 0) + 1
-                #     if counter[element] > count:
-                #         count = counter[element]
-                #         most_frequent = element
-                # result.append(most_frequent)
-        return tuple(result)
+    @staticmethod
+    def mean(group: pd.DataFrame) -> Tuple:
+        return tuple(group.mean(axis='index'))
 
     def update_centroids(self):
         for i, centroid in enumerate(self.centroids):

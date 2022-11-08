@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from algorithms import check_numeric, get_samples
+from algorithms import get_samples
 from visualization import KMeansCanvas
 from widgets.steps_widgets import AlgorithmStepsVisualization
 
@@ -38,9 +38,7 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
         self.layout = QHBoxLayout(self)
 
         self.num_cluster = algorithms_steps[0][1].shape[0]
-        columns = [col for col in self.data.columns if check_numeric(self.data[col])]
-        for column in columns:
-            self.data[column] = pd.to_numeric(self.data[column])
+        columns = self.data.select_dtypes(include=["number"]).columns
 
         self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
         self.current_step = 0
