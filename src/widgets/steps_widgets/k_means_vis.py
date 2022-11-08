@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
 )
 
 from algorithms import get_samples
-from visualization import KMeansCanvas
+from visualization import ClusteringCanvas
 from widgets.steps_widgets import AlgorithmStepsVisualization
 
 
@@ -118,7 +118,7 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
 
         # plot
         self.fig, axes = plt.subplots()
-        self.canvas = KMeansCanvas(self.fig, axes, self.is_animation)
+        self.canvas = ClusteringCanvas(self.fig, axes, self.is_animation)
         self.visualization_box_layout.addWidget(self.canvas, 1)
         self.update_plot()
 

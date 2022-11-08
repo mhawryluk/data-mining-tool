@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
 )
 
 from algorithms import get_samples
-from visualization import GMMCanvas
+from visualization import ClusteringCanvas
 from widgets import QtTable
 from widgets.results_widgets import AlgorithmResultsWidget
 
@@ -84,7 +84,7 @@ class GMMResultsWidget(AlgorithmResultsWidget):
 
         # plot
         self.fig, axes = plt.subplots(1, 1)
-        self.results_canvas = GMMCanvas(self.fig, axes, False)
+        self.results_canvas = ClusteringCanvas(self.fig, axes, False)
         self.clustering_group_layout.addWidget(self.results_canvas, 1)
 
         # cluster details
@@ -110,7 +110,7 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.clusters_table_header_layout.addWidget(self.save_all_button)
         self.clusters_table_header.setLayout(self.clusters_table_header_layout)
         self.fig_distributions, ax = plt.subplots(1, 1)
-        self.clusters_canvas = GMMCanvas(self.fig_distributions, ax, False)
+        self.clusters_canvas = ClusteringCanvas(self.fig_distributions, ax, False)
         self.clusters_group_layout.addWidget(self.clusters_table_header)
         self.clusters_group_layout.addWidget(self.clusters_table, 1)
         self.clusters_group_layout.addWidget(self.clusters_canvas, 1)

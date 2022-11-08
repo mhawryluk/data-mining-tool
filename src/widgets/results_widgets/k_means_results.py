@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import (
 )
 
 from algorithms import get_samples
-from visualization import KMeansCanvas
+from visualization import ClusteringCanvas
 from widgets import QtTable
 from widgets.results_widgets import AlgorithmResultsWidget
 
@@ -87,7 +87,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
 
         # plot
         self.fig, axes = plt.subplots(1, 1)
-        self.clusters_canvas = KMeansCanvas(self.fig, axes, False)
+        self.clusters_canvas = ClusteringCanvas(self.fig, axes, False)
         self.clustering_group_layout.addWidget(self.clusters_canvas, 1)
 
         self.layout.addWidget(self.clustering_result_group, 1)
@@ -119,7 +119,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.centroids_table_header.setLayout(self.centroids_table_header_layout)
 
         self.fig_centroids, ax = plt.subplots(1, 1)
-        self.centroids_canvas = KMeansCanvas(self.fig_centroids, ax, False)
+        self.centroids_canvas = ClusteringCanvas(self.fig_centroids, ax, False)
 
         self.centroids_group_layout.addWidget(self.centroids_table_header)
         self.centroids_group_layout.addWidget(self.centroids_table, 1)

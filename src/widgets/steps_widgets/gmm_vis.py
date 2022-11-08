@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 )
 
 from algorithms import get_samples
-from visualization import GMMCanvas
+from visualization import ClusteringCanvas
 from widgets.steps_widgets import AlgorithmStepsVisualization
 
 
@@ -112,7 +112,7 @@ class GMMStepsVisualization(AlgorithmStepsVisualization):
             self.left_column_layout.addWidget(self.animation_box, 0)
 
         self.fig, axes = plt.subplots()
-        self.canvas = GMMCanvas(self.fig, axes, self.is_animation)
+        self.canvas = ClusteringCanvas(self.fig, axes, self.is_animation)
         self.visualization_box_layout.addWidget(self.canvas, 1)
         self.update_plot()
 
