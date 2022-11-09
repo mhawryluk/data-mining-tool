@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import (
 from algorithms import get_samples
 from visualization import ClusteringCanvas
 from widgets import QtTable
+from widgets.components import ParametersGroupBox
 from widgets.results_widgets import AlgorithmResultsWidget
 
 
@@ -43,12 +44,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.oy = columns[0] if len(columns) < 2 else columns[1]
 
         # algorithm parameters
-        self.params_group = QGroupBox()
-        self.params_group.setTitle("Parameters")
-        self.params_layout = QFormLayout(self.params_group)
-
-        for option, value in self.options.items():
-            self.params_layout.addRow(QLabel(f"{option}:"), QLabel(f"{value}"))
+        self.params_group = ParametersGroupBox(self.options)
 
         self.layout.addWidget(self.params_group)
 

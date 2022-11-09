@@ -3,16 +3,15 @@ from typing import List
 import matplotlib.pyplot as plt
 import pandas as pd
 from PyQt5.QtWidgets import (
-    QFormLayout,
     QGroupBox,
     QHBoxLayout,
-    QLabel,
     QTableView,
     QVBoxLayout,
 )
 
 from visualization import APrioriGauge, APrioriGraphPlot, APrioriScatterPlot
 from widgets import QtTable
+from widgets.components import ParametersGroupBox
 from widgets.results_widgets import AlgorithmResultsWidget
 
 
@@ -44,12 +43,7 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
         self.right_column = QVBoxLayout()
 
         # algorithm parameters
-        self.params_group = QGroupBox()
-        self.params_group.setTitle("Parameters")
-        self.params_layout = QFormLayout(self.params_group)
-
-        for option, value in self.options.items():
-            self.params_layout.addRow(QLabel(f"{option}:"), QLabel(f"{value}"))
+        self.params_group = ParametersGroupBox(self.options)
 
         # sets plots and charts
         self.gauge_chart = APrioriGauge()

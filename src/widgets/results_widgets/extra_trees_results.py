@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
     QScrollArea,
 )
 
+from widgets.components import ParametersGroupBox
 from widgets.results_widgets import AlgorithmResultsWidget
 
 
@@ -28,12 +29,7 @@ class ExtraTreesResultsWidget(AlgorithmResultsWidget):
         self.layout = QHBoxLayout(self)
 
         # algorithm parameters
-        self.params_group = QGroupBox()
-        self.params_group.setTitle("Parameters")
-        self.params_layout = QFormLayout(self.params_group)
-
-        for option, value in self.options.items():
-            self.params_layout.addRow(QLabel(f"{option}:"), QLabel(f"{value}"))
+        self.params_group = ParametersGroupBox(self.options)
 
         self.layout.addWidget(self.params_group)
 
