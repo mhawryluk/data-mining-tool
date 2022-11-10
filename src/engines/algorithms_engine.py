@@ -17,7 +17,9 @@ class AlgorithmsEngine:
                 algorithm: classes.options() for algorithm, classes in info.items()
             }
 
-    def run(self, technique, algorithm, will_be_visualized, is_animation, **kwargs):
+    def run(
+        self, technique, algorithm, will_be_visualized, is_animation, **kwargs
+    ) -> bool:
         chosen_alg = ALGORITHMS_INFO[technique][algorithm]
 
         alg = chosen_alg.algorithm(self.state.imported_data, **kwargs)
@@ -25,7 +27,7 @@ class AlgorithmsEngine:
         result = alg.run(will_be_visualized)
 
         if result is None:
-            return
+            return False
 
         if will_be_visualized:
             steps = alg.get_steps()
@@ -43,6 +45,7 @@ class AlgorithmsEngine:
         self.state.algorithm_results_widgets[technique][algorithm].append(
             chosen_alg.result_widget(self.state.raw_data, *result, options=kwargs)
         )
+        return True
 
     def get_maximum_clusters(self) -> int:
         if self.state.imported_data is None:

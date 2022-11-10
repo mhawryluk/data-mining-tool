@@ -168,8 +168,11 @@ class AlgorithmSetupWidget(UnfoldWidget):
         type_visualization = self.animation_type.currentText()
         will_be_visualized = type_visualization != "No visualization"
         is_animation = type_visualization == "Animation"
-        self.engine.run(technique, algorithm, will_be_visualized, is_animation, **data)
-        if will_be_visualized:
-            self.parent().unfold_by_id("algorithm_run_widget")
-        else:
-            self.parent().unfold_by_id("results_widget")
+        is_run = self.engine.run(
+            technique, algorithm, will_be_visualized, is_animation, **data
+        )
+        if is_run:
+            if will_be_visualized:
+                self.parent().unfold_by_id("algorithm_run_widget")
+            else:
+                self.parent().unfold_by_id("results_widget")
