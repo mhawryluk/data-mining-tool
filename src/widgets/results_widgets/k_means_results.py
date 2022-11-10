@@ -2,26 +2,20 @@ from functools import partial
 
 import pandas as pd
 from matplotlib import pyplot as plt
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QComboBox,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
-    QInputDialog,
     QLabel,
-    QMessageBox,
     QPushButton,
     QSpinBox,
-    QTableView,
     QVBoxLayout,
-    QWidget,
 )
 
 from algorithms import get_samples
 from visualization import ClusteringCanvas
-from widgets import QtTable
-from widgets.components import ParametersGroupBox
+from widgets.components import ClustersTable, ParametersGroupBox
 from widgets.results_widgets import AlgorithmResultsWidget
 
 
@@ -31,7 +25,6 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
 
         self.labels = labels
         self.centroids = centroids
-        self.selected_cluster = None
 
         columns = self.data.select_dtypes(include=["number"]).columns
 
@@ -89,39 +82,22 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.layout.addWidget(self.clustering_result_group, 1)
 
         # centroids
-        self.centroids_group = QGroupBox()
-        self.centroids_group_layout = QVBoxLayout(self.centroids_group)
-        self.centroids_group.setTitle("Centroids")
+        self.clusters_group = QGroupBox()
+        self.clusters_group_layout = QVBoxLayout(self.clusters_group)
+        self.clusters_group.setTitle("Clusters")
 
-        self.centroids_table = QTableView()
-        self.centroids_table.setModel(QtTable(self.centroids.round(3)))
-        self.centroids_table.doubleClicked.connect(self.show_cluster)
-
-        for i in range(len(columns)):
-            self.centroids_table.setColumnWidth(i, 120)
-
-        self.centroids_table_header = QWidget()
-        self.centroids_table_header_layout = QHBoxLayout()
-        self.centroids_table_instruction = QLabel(
-            "Double click on any field to preview a cluster"
+        self.clusters_table = ClustersTable(
+            self.data, self.labels, self.centroids, len(columns)
         )
-        self.save_all_button = QPushButton("SAVE RESULTS")
-        self.save_all_button.clicked.connect(
-            partial(self.on_save_button_click, self.data.assign(cluster=self.labels))
-        )
-        self.save_all_button.setFixedWidth(120)
-        self.centroids_table_header_layout.addWidget(self.centroids_table_instruction)
-        self.centroids_table_header_layout.addWidget(self.save_all_button)
-        self.centroids_table_header.setLayout(self.centroids_table_header_layout)
+        self.clusters_table.table_changed.connect(self.update_cluster_plot)
+        self.clusters_group_layout.addWidget(self.clusters_table, 1)
 
         self.fig_centroids, ax = plt.subplots(1, 1)
-        self.centroids_canvas = ClusteringCanvas(self.fig_centroids, ax, False)
+        self.clusters_canvas = ClusteringCanvas(self.fig_centroids, ax, False)
 
-        self.centroids_group_layout.addWidget(self.centroids_table_header)
-        self.centroids_group_layout.addWidget(self.centroids_table, 1)
-        self.centroids_group_layout.addWidget(self.centroids_canvas, 1)
+        self.clusters_group_layout.addWidget(self.clusters_canvas, 1)
+        self.layout.addWidget(self.clusters_group, 1)
 
-        self.layout.addWidget(self.centroids_group, 1)
         self.update_plot()
         self.update_cluster_plot()
 
@@ -185,11 +161,11 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         )
 
     def update_cluster_plot(self):
-        if self.selected_cluster is not None:
+        if self.clusters_table.selected_cluster is not None:
             indexes = [
                 i
                 for i in range(len(self.labels))
-                if self.labels[i] == self.selected_cluster
+                if self.labels[i] == self.clusters_table.selected_cluster
             ]
             x = self.data.iloc[indexes][self.ox]
             y = self.data.iloc[indexes][self.oy]
@@ -219,16 +195,16 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
                     ]
                 )
 
-            self.centroids_canvas.chosen_centroid_plot(
+            self.clusters_canvas.chosen_centroid_plot(
                 x,
                 y,
                 None,
                 None,
                 None,
                 None,
-                x_centroids.iloc[self.selected_cluster],
-                y_centroids.iloc[self.selected_cluster],
-                self.selected_cluster,
+                x_centroids.iloc[self.clusters_table.selected_cluster],
+                y_centroids.iloc[self.clusters_table.selected_cluster],
+                self.clusters_table.selected_cluster,
                 len(x_centroids),
                 self.ox,
                 self.oy,
@@ -266,7 +242,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
                     ]
                 )
 
-            self.centroids_canvas.new_centroids_plot(
+            self.clusters_canvas.new_centroids_plot(
                 None,
                 None,
                 x_centroids,
@@ -278,70 +254,3 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
                 min_y - sep_y,
                 max_y + sep_y,
             )
-
-    def show_cluster(self):
-        self.selected_cluster = (
-            self.centroids_table.selectionModel().selectedIndexes()[0].row()
-        )
-        rows = [
-            i
-            for i in range(len(self.labels))
-            if self.labels[i] == self.selected_cluster
-        ]
-        elements = self.data.iloc[rows]
-        self.centroids_table.setModel(QtTable(elements))
-        buttons_widget = QWidget()
-        buttons_layout = QHBoxLayout()
-        exit_button = QPushButton("X")
-        exit_button.clicked.connect(self.exit_from_cluster)
-        exit_button.setFixedWidth(50)
-        save_button = QPushButton("SAVE")
-        save_button.clicked.connect(partial(self.on_save_button_click, elements))
-        save_button.setFixedWidth(100)
-        buttons_layout.addWidget(save_button)
-        buttons_layout.addWidget(exit_button)
-        buttons_layout.setAlignment(Qt.AlignRight)
-        buttons_widget.setLayout(buttons_layout)
-        self.centroids_group_layout.insertWidget(0, buttons_widget)
-        self.centroids_table_header.hide()
-        self.centroids_table.doubleClicked.disconnect()
-        self.update_cluster_plot()
-
-    def exit_from_cluster(self):
-        self.centroids_table.setModel(QtTable(self.centroids.round(3)))
-        self.centroids_group_layout.itemAt(0).widget().setParent(None)
-        self.centroids_table_header.show()
-        self.centroids_table.doubleClicked.connect(self.show_cluster)
-        self.selected_cluster = None
-        self.update_cluster_plot()
-
-    def on_save_button_click(self, elements):
-        path, is_ok = QInputDialog.getText(self, "Save to file", "Enter filename")
-        if is_ok and path:
-            if not path.endswith(".csv"):
-                path += ".csv"
-            try:
-                elements.to_csv(path)
-            except:
-                print(Exception)
-                error = QMessageBox()
-                error.setIcon(QMessageBox.Critical)
-                error.setText(
-                    "Something wrong happened while writing data to file. Try again."
-                )
-                error.setWindowTitle("Saving failed")
-                error.exec_()
-        elif not is_ok:
-            pass
-        elif not path:
-            error = QMessageBox()
-            error.setIcon(QMessageBox.Critical)
-            error.setText("No path was provided")
-            error.setWindowTitle("Empty path")
-            error.exec_()
-        else:
-            error = QMessageBox()
-            error.setIcon(QMessageBox.Critical)
-            error.setText("This file extension is not supported.")
-            error.setWindowTitle("Unsupported extension")
-            error.exec_()
