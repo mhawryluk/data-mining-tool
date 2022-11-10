@@ -1,9 +1,8 @@
 from functools import partial
 from typing import Callable, List
 
-from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (
     QComboBox,
     QFormLayout,
@@ -22,6 +21,8 @@ from algorithms import get_samples
 
 
 class ClusteringStepsTemplate(QWidget):
+    parameters_changed = pyqtSignal()
+
     def __init__(
         self,
         columns: List[str],
@@ -30,14 +31,14 @@ class ClusteringStepsTemplate(QWidget):
         description: str,
         is_animation: bool,
         canvas: FigureCanvasQTAgg,
-        update_plot: Callable,
+        get_func_animation: Callable,
     ):
         super().__init__()
 
         self.is_running = False
         self.is_animation = is_animation
         self.animation = None
-        self.update_plot = update_plot
+        self.get_func_animation = get_func_animation
         self.layout = QHBoxLayout(self)
 
         self.max_step = max_step
@@ -182,11 +183,11 @@ class ClusteringStepsTemplate(QWidget):
                 num = self.sample_box.value()
                 self.num_samples = num
                 self.samples = get_samples(self.size, self.num_samples)
-                self.update_plot()
+                self.parameters_changed.emit()
             case "set_axis":
                 self.ox = self.ox_box.currentText()
                 self.oy = self.oy_box.currentText()
-                self.update_plot()
+                self.parameters_changed.emit()
             case "prev":
                 num = self.left_box.value()
                 self.change_step(-1 * num)
@@ -206,15 +207,7 @@ class ClusteringStepsTemplate(QWidget):
                 self.restart_button.setEnabled(not self.is_running)
                 if self.is_running:
                     if self.animation is None:
-                        self.animation = FuncAnimation(
-                            self.canvas.figure,
-                            self.update_plot,
-                            frames=self.max_step + 1,
-                            interval=self.interval_box.value(),
-                            blit=True,
-                            cache_frame_data=False,
-                            repeat=False,
-                        )
+                        self.animation = self.get_func_animation()
                         self.canvas.draw()
                     else:
                         self.animation.resume()
@@ -235,7 +228,7 @@ class ClusteringStepsTemplate(QWidget):
             return
         self.current_step = new_step
         self.step_label.setText("STEP: {}".format(self.current_step))
-        self.update_plot()
+        self.parameters_changed.emit()
         self.step_label.update()
 
     def end_animation(self):

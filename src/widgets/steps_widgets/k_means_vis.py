@@ -3,6 +3,7 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.animation import FuncAnimation
 from PyQt5.QtWidgets import QHBoxLayout
 
 from visualization import ClusteringCanvas
@@ -41,10 +42,22 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
             description,
             self.is_animation,
             self.canvas,
-            self.update_plot,
+            self.get_func_animation,
         )
-        self.clustering_template.update_plot()
+        self.clustering_template.parameters_changed.connect(self.update_plot)
+        self.update_plot()
         self.layout.addWidget(self.clustering_template)
+
+    def get_func_animation(self):
+        return FuncAnimation(
+            self.canvas.figure,
+            self.update_plot,
+            frames=self.max_step + 1,
+            interval=self.clustering_template.interval_box.value(),
+            blit=True,
+            cache_frame_data=False,
+            repeat=False,
+        )
 
     def update_plot(self, step: int = -1):
         if step == self.max_step:
