@@ -1,22 +1,10 @@
-from functools import partial
-
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from PyQt5.QtWidgets import (
-    QComboBox,
-    QFormLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QSpinBox,
-    QVBoxLayout,
-)
+from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QVBoxLayout
 
-from algorithms import get_samples
 from visualization import ClusteringCanvas
-from widgets.components import ClustersTable, ParametersGroupBox
+from widgets.components import ClustersTable, ParametersGroupBox, SamplesColumnsChoice
 from widgets.results_widgets import AlgorithmResultsWidget
 
 
@@ -31,11 +19,6 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.sigma = sigma
         self.layout = QHBoxLayout(self)
 
-        self.num_samples = min(35, self.data.shape[0] // 2)
-        self.samples = get_samples(self.data, self.num_samples)
-        self.ox = self.columns[0]
-        self.oy = self.columns[0] if len(self.columns) < 2 else self.columns[1]
-
         # algorithm parameters
         self.params_group = ParametersGroupBox(self.options)
 
@@ -46,31 +29,11 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.clustering_group_layout = QVBoxLayout(self.clustering_result_group)
         self.clustering_result_group.setTitle("Clustering result")
 
-        # samples
-        self.settings_group_box = QGroupBox()
-        self.settings_box_layout = QFormLayout(self.settings_group_box)
-        self.settings_box_layout.addRow(QLabel("Set samples:"))
-        self.sample_box = QSpinBox()
-        self.sample_box.setMinimum(1)
-        self.sample_box.setMaximum(min(self.data.shape[0], 10000))
-        self.sample_box.setProperty("value", self.num_samples)
-        self.sample_button = QPushButton("Refresh samples")
-        self.sample_button.clicked.connect(partial(self.click_listener, "new_samples"))
-        self.settings_box_layout.addRow(self.sample_box, self.sample_button)
-        # axis
-        self.settings_box_layout.addRow(QLabel("Set axis:"))
-        self.ox_box = QComboBox()
-        self.ox_box.addItems(self.columns)
-        self.oy_box = QComboBox()
-        self.oy_box.addItems(self.columns)
-        if len(self.columns) > 1:
-            self.oy_box.setCurrentIndex(1)
-        self.ox_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
-        self.oy_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
-        self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
-        self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
-        self.settings_box_layout.setSpacing(10)
-        self.clustering_group_layout.addWidget(self.settings_group_box)
+        # samples columns choice
+        self.parameters_widget = SamplesColumnsChoice(self.columns, len(self.data))
+        self.parameters_widget.samples_columns_changed.connect(self.update_plot)
+        self.parameters_widget.samples_columns_changed.connect(self.update_cluster_plot)
+        self.clustering_group_layout.addWidget(self.parameters_widget)
 
         # plot
         self.fig, axes = plt.subplots(1, 1)
@@ -99,32 +62,18 @@ class GMMResultsWidget(AlgorithmResultsWidget):
         self.update_plot()
         self.update_cluster_plot()
 
-    def click_listener(self, button_type: str):
-        match button_type:
-            case "new_samples":
-                num = self.sample_box.value()
-                self.num_samples = num
-                self.samples = get_samples(self.data, self.num_samples)
-                self.update_plot()
-                self.update_cluster_plot()
-            case "set_axis":
-                self.ox = self.ox_box.currentText()
-                self.oy = self.oy_box.currentText()
-                self.update_plot()
-                self.update_cluster_plot()
-
     def update_plot(self):
-        samples_data = self.data.iloc[self.samples]
-        x = samples_data[self.ox]
-        y = samples_data[self.oy]
-        min_x = self.data[self.ox].min()
-        max_x = self.data[self.ox].max()
-        min_y = self.data[self.oy].min()
-        max_y = self.data[self.oy].max()
+        samples_data = self.data.iloc[self.parameters_widget.samples]
+        x = samples_data[self.parameters_widget.ox]
+        y = samples_data[self.parameters_widget.oy]
+        min_x = self.data[self.parameters_widget.ox].min()
+        max_x = self.data[self.parameters_widget.ox].max()
+        min_y = self.data[self.parameters_widget.oy].min()
+        max_y = self.data[self.parameters_widget.oy].max()
         sep_x = 0.1 * (max_x - min_x)
         sep_y = 0.1 * (max_y - min_y)
 
-        labels = [self.labels[sample] for sample in self.samples]
+        labels = [self.labels[sample] for sample in self.parameters_widget.samples]
         self.results_canvas.clusters_plot(
             x,
             y,
@@ -133,8 +82,8 @@ class GMMResultsWidget(AlgorithmResultsWidget):
             self.sigma,
             labels,
             self.max_label,
-            self.ox,
-            self.oy,
+            self.parameters_widget.ox,
+            self.parameters_widget.oy,
             min_x - sep_x,
             max_x + sep_x,
             min_y - sep_y,
@@ -148,19 +97,19 @@ class GMMResultsWidget(AlgorithmResultsWidget):
                 for i in range(len(self.labels))
                 if self.labels[i] == self.clusters_table.selected_cluster
             ]
-            x = self.data.iloc[indexes][self.ox]
-            y = self.data.iloc[indexes][self.oy]
+            x = self.data.iloc[indexes][self.parameters_widget.ox]
+            y = self.data.iloc[indexes][self.parameters_widget.oy]
             min_x = x.min()
             max_x = x.max()
             min_y = y.min()
             max_y = y.max()
             sep_x = 0.1 * (max_x - min_x)
             sep_y = 0.1 * (max_y - min_y)
-            x_means = self.mean[self.ox]
-            y_means = self.mean[self.oy]
+            x_means = self.mean[self.parameters_widget.ox]
+            y_means = self.mean[self.parameters_widget.oy]
             x_index, y_index = [
-                self.columns.get_loc(self.ox),
-                self.columns.get_loc(self.oy),
+                self.columns.get_loc(self.parameters_widget.ox),
+                self.columns.get_loc(self.parameters_widget.oy),
             ]
             mean = [
                 x_means.iloc[self.clusters_table.selected_cluster],
@@ -179,27 +128,27 @@ class GMMResultsWidget(AlgorithmResultsWidget):
                 sigma,
                 self.clusters_table.selected_cluster,
                 len(x_means),
-                self.ox,
-                self.oy,
+                self.parameters_widget.ox,
+                self.parameters_widget.oy,
                 min_x - sep_x,
                 max_x + sep_x,
                 min_y - sep_y,
                 max_y + sep_y,
             )
         else:
-            x = self.data[self.ox]
-            y = self.data[self.oy]
+            x = self.data[self.parameters_widget.ox]
+            y = self.data[self.parameters_widget.oy]
             min_x = x.min()
             max_x = x.max()
             min_y = y.min()
             max_y = y.max()
             sep_x = 0.1 * (max_x - min_x)
             sep_y = 0.1 * (max_y - min_y)
-            x_means = self.mean[self.ox]
-            y_means = self.mean[self.oy]
+            x_means = self.mean[self.parameters_widget.ox]
+            y_means = self.mean[self.parameters_widget.oy]
             x_index, y_index = [
-                self.columns.get_loc(self.ox),
-                self.columns.get_loc(self.oy),
+                self.columns.get_loc(self.parameters_widget.ox),
+                self.columns.get_loc(self.parameters_widget.oy),
             ]
             means = [x_means, y_means]
             sigmas = []
@@ -221,8 +170,8 @@ class GMMResultsWidget(AlgorithmResultsWidget):
             self.clusters_canvas.clusters_means_plot(
                 means,
                 sigmas,
-                self.ox,
-                self.oy,
+                self.parameters_widget.ox,
+                self.parameters_widget.oy,
                 min_x - sep_x,
                 max_x + sep_x,
                 min_y - sep_y,

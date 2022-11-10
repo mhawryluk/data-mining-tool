@@ -4,7 +4,6 @@ from typing import Callable, List
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (
-    QComboBox,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
@@ -17,7 +16,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from algorithms import get_samples
+from widgets.components import SamplesColumnsChoice
 
 
 class ClusteringStepsTemplate(QWidget):
@@ -43,12 +42,6 @@ class ClusteringStepsTemplate(QWidget):
 
         self.max_step = max_step
         self.current_step = 0
-        self.size = size
-        self.num_samples = min(35, self.size // 2)
-        self.samples = get_samples(self.size, self.num_samples)
-
-        self.ox = columns[0]
-        self.oy = columns[0] if len(columns) < 2 else columns[1]
 
         # left column layout
         self.left_column_layout = QVBoxLayout()
@@ -57,32 +50,17 @@ class ClusteringStepsTemplate(QWidget):
         self.settings_box = QGroupBox()
         self.settings_box.setTitle("Settings")
         self.settings_box.setFixedWidth(250)
-        self.settings_box_layout = QFormLayout(self.settings_box)
+        self.settings_box_layout = QVBoxLayout(self.settings_box)
 
-        # samples
-        self.settings_box_layout.addRow(QLabel("Set samples:"))
-
-        self.sample_box = QSpinBox()
-        self.sample_box.setMinimum(1)
-        self.sample_box.setMaximum(min(size, 10000))
-        self.sample_box.setProperty("value", self.num_samples)
-        self.sample_button = QPushButton("Refresh samples")
-        self.sample_button.clicked.connect(partial(self.click_listener, "new_samples"))
-        self.settings_box_layout.addRow(self.sample_box, self.sample_button)
-
-        # axis
-        self.settings_box_layout.addRow(QLabel("Set axis:"))
-
-        self.ox_box = QComboBox()
-        self.ox_box.addItems(columns)
-        self.oy_box = QComboBox()
-        self.oy_box.addItems(columns)
-        if len(columns) > 1:
-            self.oy_box.setCurrentIndex(1)
-        self.ox_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
-        self.oy_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
-        self.settings_box_layout.addRow(QLabel("OX:"), self.ox_box)
-        self.settings_box_layout.addRow(QLabel("OY:"), self.oy_box)
+        # samples columns choice
+        self.parameters_widget = SamplesColumnsChoice(columns, size)
+        self.parameters_widget.samples_columns_changed.connect(
+            partial(self.click_listener, "parameters_changed")
+        )
+        self.settings_box_layout.addWidget(self.parameters_widget)
+        self.ox = self.parameters_widget.ox
+        self.oy = self.parameters_widget.oy
+        self.samples = self.parameters_widget.samples
 
         self.left_column_layout.addWidget(self.settings_box, 0)
 
@@ -179,14 +157,10 @@ class ClusteringStepsTemplate(QWidget):
 
     def click_listener(self, button_type: str):
         match button_type:
-            case "new_samples":
-                num = self.sample_box.value()
-                self.num_samples = num
-                self.samples = get_samples(self.size, self.num_samples)
-                self.parameters_changed.emit()
-            case "set_axis":
-                self.ox = self.ox_box.currentText()
-                self.oy = self.oy_box.currentText()
+            case "parameters_changed":
+                self.ox = self.parameters_widget.ox
+                self.oy = self.parameters_widget.oy
+                self.samples = self.parameters_widget.samples
                 self.parameters_changed.emit()
             case "prev":
                 num = self.left_box.value()
