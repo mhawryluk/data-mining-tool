@@ -15,9 +15,13 @@ from algorithms import get_samples
 
 class SamplesColumnsChoice(QWidget):
     samples_columns_changed = pyqtSignal()
+    samples_changed = pyqtSignal()
 
-    def __init__(self, columns, size):
+    def __init__(self, columns=None, size=0):
         super().__init__()
+
+        if columns is None or len(columns) == 0:
+            columns = [""]
 
         self.layout = QFormLayout(self)
 
@@ -31,7 +35,7 @@ class SamplesColumnsChoice(QWidget):
         # samples
         self.layout.addRow(QLabel("Set samples:"))
         self.sample_box = QSpinBox()
-        self.sample_box.setMinimum(1)
+        self.sample_box.setMinimum(0)
         self.sample_box.setMaximum(min(self.size, 10000))
         self.sample_box.setProperty("value", self.num_samples)
         self.sample_button = QPushButton("Refresh samples")
@@ -58,7 +62,33 @@ class SamplesColumnsChoice(QWidget):
                 self.num_samples = num
                 self.samples = get_samples(self.size, self.num_samples)
                 self.samples_columns_changed.emit()
+                self.samples_changed.emit()
             case "set_axis":
                 self.ox = self.ox_box.currentText()
                 self.oy = self.oy_box.currentText()
                 self.samples_columns_changed.emit()
+
+    def new_columns_name(self, columns):
+        self.ox = columns[0]
+        self.oy = columns[0] if len(columns) < 2 else columns[1]
+
+        self.ox_box.clear()
+        self.oy_box.clear()
+        self.ox_box.addItems(columns)
+        self.oy_box.addItems(columns)
+        if len(columns) > 1:
+            self.oy_box.setCurrentIndex(1)
+        self.samples_columns_changed.emit()
+
+    def new_size(self, size):
+        self.size = size
+        self.num_samples = min(35, self.size // 2)
+        self.samples = get_samples(self.size, self.num_samples)
+        self.sample_box.setMaximum(min(self.size, 10000))
+        self.sample_box.setProperty("value", self.num_samples)
+        self.samples_columns_changed.emit()
+        self.samples_changed.emit()
+
+    def get_parameters(self):
+        parameters = {"ox": self.ox, "oy": self.oy, "samples": self.samples}
+        return parameters
