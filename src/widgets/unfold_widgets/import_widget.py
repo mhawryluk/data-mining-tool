@@ -22,12 +22,8 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-<<<<<<< HEAD
-from widgets import LoadingWidget, QtTable, UnfoldWidget
+from widgets import MergingSetsScreen, LoadingWidget, QtTable, UnfoldWidget
 from widgets.data_generator_widget import DataGeneratorWidget
-=======
-from widgets import UnfoldWidget, QtTable, LoadingWidget, MergingSetsScreen
->>>>>>> b68fd02 (feat: Introduce merge screen layout)
 
 
 class ImportWidget(UnfoldWidget):
@@ -274,7 +270,7 @@ class ImportWidget(UnfoldWidget):
             case "generate":
                 self.generate_window.show()
             case "merge_data":
-                self.new_window = MergingSetsScreen(self)
+                self.new_window = MergingSetsScreen(self, self.update_data_view)
                 self.new_window.show()
 
     def load_from_file_handle(self):

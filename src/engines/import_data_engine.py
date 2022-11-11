@@ -112,3 +112,15 @@ class ImportDataEngine:
     def set_generated_data(self, data: pd.DataFrame):
         self.state.raw_data = data
         self.state.imported_data = data.copy()
+
+    def reorder_columns(self, columns: [List[str]]) -> None:
+        self.state.imported_data = self.state.imported_data[columns]
+        self.state.raw_data = self.state.raw_data[columns]
+
+    def merge_sets(self, new_data: pd.DataFrame) -> None:
+        self.state.imported_data = pd.concat(
+            [self.state.imported_data, new_data], ignore_index=True
+        )
+        self.state.raw_data = pd.concat(
+            [self.state.raw_data, new_data], ignore_index=True
+        )

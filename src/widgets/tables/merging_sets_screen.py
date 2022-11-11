@@ -22,7 +22,7 @@ class DragButton(QPushButton):
 
 
 class MergingSetsScreen(QWidget):
-    def __init__(self, widget):
+    def __init__(self, widget, on_hide):
         super().__init__()
         self.engine = widget.engine
         self.setAcceptDrops(True)
@@ -30,6 +30,7 @@ class MergingSetsScreen(QWidget):
         self.setWindowTitle("Datasets concatenation")
         self._load_styles()
         self.drag_init_pos = None
+        self.on_hide_callback = on_hide
 
         # init all components to have a ref
         self.layout = QHBoxLayout()
@@ -143,6 +144,8 @@ class MergingSetsScreen(QWidget):
         self.columns_merge_group_layout.addWidget(self.columns_widget, 1)
 
         self.submit_button.setText("Submit")
+        self.submit_button.setEnabled(self.new_data is not None)
+        self.submit_button.clicked.connect(partial(self._click_listener, 'submit'))
         self.columns_merge_group_layout.addWidget(self.submit_button, 0)
 
     def _click_listener(self, button_type: str):
@@ -152,6 +155,9 @@ class MergingSetsScreen(QWidget):
                 loading.execute()
             case 'load_database':
                 loading = LoadingWidget(self._load_from_database_handle)
+                loading.execute()
+            case 'submit':
+                loading = LoadingWidget(self._on_submit)
                 loading.execute()
 
     def _load_from_file_handle(self):
@@ -201,8 +207,31 @@ class MergingSetsScreen(QWidget):
             for column in self.new_data.columns:
                 self.columns_right_layout.insertWidget(self.columns_right_layout.count()-1, DragButton(column))
 
+        self.submit_button.setEnabled(self.new_data is not None)
+
+    def _on_submit(self):
+        new_columns_left = []
+        new_columns_right = []
+        for i in range(self.columns_left_layout.count() - 1):
+            new_columns_left.append(self.columns_left_layout.itemAt(i).widget().text())
+        for i in range(self.columns_right_layout.count() - 1):
+            new_columns_right.append(self.columns_right_layout.itemAt(i).widget().text())
+
+        num_columns = min(len(new_columns_left), len(new_columns_right))
+        labels_left = new_columns_left[:num_columns]
+        labels_right = new_columns_right[:num_columns]
+        labels_mapping = dict(zip(labels_right, labels_left))
+
+        self.engine.reorder_columns(labels_left)
+        self.new_data.rename(columns=labels_mapping, inplace=True)
+
+        self.engine.merge_sets(self.new_data[labels_left])
+
+        self.on_hide_callback()
+        self.hide()
+
     def closeEvent(self, event):
-        close = QMessageBox.question(self, "QUIT", "Are you sure want to exit process? All changes will be discarded.",
+        close = QMessageBox.question(self, "Exit", "Are you sure want to exit process? All changes will be discarded.",
                                      QMessageBox.Yes | QMessageBox.No)
         if close == QMessageBox.Yes:
             event.accept()
