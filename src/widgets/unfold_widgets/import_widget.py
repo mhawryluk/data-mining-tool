@@ -244,9 +244,7 @@ class ImportWidget(UnfoldWidget):
                 else:
                     self.import_state_label.setText("Data was stored in database.")
             else:
-                self.import_state_label.setText(
-                    "The name of collection is not valid."
-                )
+                self.import_state_label.setText("The name of collection is not valid.")
 
     def not_save_data_handle(self):
         self.engine.read_data(self.get_checked_columns())
@@ -261,6 +259,4 @@ class ImportWidget(UnfoldWidget):
                 else:
                     self.import_state_label.setText("Data was stored in database.")
             else:
-                self.import_state_label.setText(
-                    "The name of collection is not valid."
-                )
+                self.import_state_label.setText("The name of collection is not valid.")

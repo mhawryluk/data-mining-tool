@@ -91,7 +91,7 @@ class ClustersTable(QWidget):
                 path += ".csv"
             try:
                 elements.to_csv(path)
-            except:
+            except Exception:
                 error = QMessageBox()
                 error.setIcon(QMessageBox.Critical)
                 error.setText(

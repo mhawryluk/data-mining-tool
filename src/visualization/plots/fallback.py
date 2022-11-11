@@ -6,5 +6,5 @@ class FallbackPlot(Plot):
         super().__init__(data)
 
     def plot(self):
-        ax = self.canvas.figure.subplots()
+        self.canvas.figure.subplots()
         return self.canvas

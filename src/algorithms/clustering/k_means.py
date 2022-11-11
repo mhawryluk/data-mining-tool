@@ -79,7 +79,7 @@ class KMeans(Algorithm):
 
     @staticmethod
     def mean(group: pd.DataFrame) -> Tuple:
-        return tuple(group.mean(axis='index'))
+        return tuple(group.mean(axis="index"))
 
     def update_centroids(self):
         for i, centroid in enumerate(self.centroids):
@@ -98,7 +98,7 @@ class KMeans(Algorithm):
         max_distance_intra = 0
         min_distance_inter = np.inf
         for i, first in enumerate(centroids):
-            for second in centroids[i + 1:]:
+            for second in centroids[i + 1 :]:
                 dis = self.distance(first, second)
                 if dis > max_distance_intra:
                     max_distance_intra = dis
