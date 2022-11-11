@@ -1,6 +1,5 @@
 from typing import List, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.animation import FuncAnimation
@@ -32,8 +31,7 @@ class KMeansStepsVisualization(AlgorithmStepsVisualization):
         self.max_step = (len(algorithms_steps) - 1) * (2 + self.num_cluster) + 2
         columns = list(self.data.select_dtypes(include=["number"]).columns)
 
-        fig, axes = plt.subplots()
-        self.canvas = ClusteringCanvas(fig, axes, self.is_animation)
+        self.canvas = ClusteringCanvas(self.is_animation)
 
         self.clustering_template = ClusteringStepsTemplate(
             columns,

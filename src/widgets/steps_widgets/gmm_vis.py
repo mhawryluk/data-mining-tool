@@ -1,5 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 from PyQt5.QtWidgets import QHBoxLayout
 
@@ -24,8 +23,7 @@ class GMMStepsVisualization(AlgorithmStepsVisualization):
         self.max_step = len(self.algorithms_steps) - 1
         self.columns = list(self.data.select_dtypes(include=["number"]).columns)
 
-        fig, axes = plt.subplots()
-        self.canvas = ClusteringCanvas(fig, axes, self.is_animation)
+        self.canvas = ClusteringCanvas(self.is_animation)
 
         self.clustering_template = ClusteringStepsTemplate(
             self.columns,

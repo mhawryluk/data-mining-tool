@@ -1,13 +1,7 @@
 from typing import List
 
-import matplotlib.pyplot as plt
 import pandas as pd
-from PyQt5.QtWidgets import (
-    QGroupBox,
-    QHBoxLayout,
-    QTableView,
-    QVBoxLayout,
-)
+from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QTableView, QVBoxLayout
 
 from visualization import APrioriGauge, APrioriGraphPlot, APrioriScatterPlot
 from widgets import QtTable
@@ -52,8 +46,7 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
         self.graph_plot.layout().setContentsMargins(0, 0, 0, 0)
         self.graph_plot.show_placeholder()
 
-        self.fig, axes = plt.subplots(1, 1)
-        self.transactions_canvas = APrioriScatterPlot(self.fig, axes, transaction_sets)
+        self.transactions_canvas = APrioriScatterPlot(transaction_sets)
         self.transactions_canvas.reset()
 
         # frequent sets group

@@ -17,14 +17,13 @@ class APrioriScatterPlot(FigureCanvasQTAgg):
     HIGHLIGHTED_RULE_B_COLOR = "#054a91"
     HIGHLIGHTED_RULE_A_B_COLOR = "#f17300"
 
-    def __init__(self, fig: plt.Figure, axes: plt.Axes, transaction_sets):
+    def __init__(self, transaction_sets):
         self.annot = None
         self.sc = None
-        self.axes = axes
+        fig, self.axes = plt.subplots()
         fig.tight_layout()
         self.transaction_sets = transaction_sets
         self._assign_random_positions()
-        self.fig = fig
 
         super().__init__(fig)
 
@@ -64,7 +63,7 @@ class APrioriScatterPlot(FigureCanvasQTAgg):
         )
 
         self.axes.legend()
-        self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
+        self.figure.canvas.mpl_connect("motion_notify_event", self.hover)
         self.draw()
 
     def plot_rule(self, set_a: tuple, set_b: tuple):
@@ -161,11 +160,11 @@ class APrioriScatterPlot(FigureCanvasQTAgg):
             if cont:
                 self.update_annot(ind)
                 self.annot.set_visible(True)
-                self.fig.canvas.draw_idle()
+                self.figure.canvas.draw_idle()
             else:
                 if vis:
                     self.annot.set_visible(False)
-                    self.fig.canvas.draw_idle()
+                    self.figure.canvas.draw_idle()
 
     def reset(self):
         self.axes.cla()

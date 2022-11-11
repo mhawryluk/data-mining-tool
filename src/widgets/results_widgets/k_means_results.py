@@ -1,5 +1,4 @@
 import pandas as pd
-from matplotlib import pyplot as plt
 from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QVBoxLayout
 
 from visualization import ClusteringCanvas
@@ -35,8 +34,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.clustering_group_layout.addWidget(self.parameters_widget)
 
         # plot
-        self.fig, axes = plt.subplots(1, 1)
-        self.results_canvas = ClusteringCanvas(self.fig, axes, False)
+        self.results_canvas = ClusteringCanvas(False)
         self.clustering_group_layout.addWidget(self.results_canvas, 1)
 
         self.layout.addWidget(self.clustering_result_group, 1)
@@ -52,8 +50,7 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
         self.clusters_table.table_changed.connect(self.update_cluster_plot)
         self.clusters_group_layout.addWidget(self.clusters_table, 1)
 
-        self.fig_centroids, ax = plt.subplots(1, 1)
-        self.clusters_canvas = ClusteringCanvas(self.fig_centroids, ax, False)
+        self.clusters_canvas = ClusteringCanvas(False)
 
         self.clusters_group_layout.addWidget(self.clusters_canvas, 1)
         self.layout.addWidget(self.clusters_group, 1)

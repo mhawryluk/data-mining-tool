@@ -1,13 +1,13 @@
 import numpy as np
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib import pyplot as plt
 from matplotlib import transforms
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.patches import Ellipse
 
 
 class ClusteringCanvas(FigureCanvasQTAgg):
-    def __init__(self, fig, axes, animation):
-        self.axes = axes
+    def __init__(self, animation):
+        fig, self.axes = plt.subplots()
         self.animation = animation
         super().__init__(fig)
 
@@ -323,4 +323,3 @@ class ClusteringCanvas(FigureCanvasQTAgg):
             )
         if drawing:
             self.draw()
-
