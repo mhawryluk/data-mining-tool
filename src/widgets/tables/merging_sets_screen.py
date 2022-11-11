@@ -3,7 +3,7 @@ import pandas as pd
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5.QtGui import QDrag, QPixmap
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTableView, QLabel, QVBoxLayout, QGroupBox, QFormLayout, QLineEdit, \
-    QPushButton, QComboBox, QMessageBox, QFileDialog
+    QPushButton, QComboBox, QMessageBox, QFileDialog, QBoxLayout
 from widgets import QtTable, LoadingWidget
 from data_import import CSVReader, JSONReader, DatabaseReader
 from engines import DB_NAME
@@ -53,6 +53,10 @@ class MergingSetsScreen(QWidget):
         self.columns_left_layout = QVBoxLayout()
         self.columns_right_layout = QVBoxLayout()
         self.submit_button = QPushButton()
+
+        # layouts stretch settings
+        self.columns_left_layout.addStretch(QBoxLayout.BottomToTop)
+        self.columns_right_layout.addStretch(QBoxLayout.BottomToTop)
 
         # rendering content
         self._render_table(self.current_data_view, True)
@@ -125,11 +129,11 @@ class MergingSetsScreen(QWidget):
         self.columns_merge_group_layout.addWidget(instruction, 0)
 
         for column in self.engine.get_columns():
-            self.columns_left_layout.addWidget(DragButton(column))
+            self.columns_left_layout.insertWidget(self.columns_left_layout.count()-1, DragButton(column))
 
         if self.new_data is not None and self.new_data.columns is not None:
             for column in self.new_data.columns:
-                self.columns_right_layout.addWidget(DragButton(column))
+                self.columns_right_layout.insertWidget(self.columns_right_layout.count()-1, DragButton(column))
 
         self.left_columns.setLayout(self.columns_left_layout)
         self.right_columns.setLayout(self.columns_right_layout)
@@ -183,19 +187,19 @@ class MergingSetsScreen(QWidget):
             last_preview.deleteLater()
         self._render_table(self.new_data_view, False)
 
-        for i in reversed(range(self.columns_left_layout.count())):
+        for i in reversed(range(self.columns_left_layout.count()-1)):
             # workaround to delete as low content as possible, removing nested layouts was giving me some segfault
             self.columns_left_layout.itemAt(i).widget().setParent(None)
 
-        for i in reversed(range(self.columns_right_layout.count())):
+        for i in reversed(range(self.columns_right_layout.count()-1)):
             self.columns_right_layout.itemAt(i).widget().setParent(None)
 
         for column in self.engine.get_columns():
-            self.columns_left_layout.addWidget(DragButton(column))
+            self.columns_left_layout.insertWidget(self.columns_left_layout.count()-1, DragButton(column))
 
         if self.new_data is not None and self.new_data.columns is not None:
             for column in self.new_data.columns:
-                self.columns_right_layout.addWidget(DragButton(column))
+                self.columns_right_layout.insertWidget(self.columns_right_layout.count()-1, DragButton(column))
 
     def closeEvent(self, event):
         close = QMessageBox.question(self, "QUIT", "Are you sure want to exit process? All changes will be discarded.",
@@ -225,7 +229,7 @@ class MergingSetsScreen(QWidget):
             if should_insert:
                 for n in range(self.columns_left_layout.count()):
                     w = self.columns_left_layout.itemAt(n).widget()
-                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y() + w.size().height() // 2:
+                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y():
                         self.columns_left_layout.insertWidget(n, widget)
                         break
         elif self.new_data is not None:
@@ -237,7 +241,7 @@ class MergingSetsScreen(QWidget):
             if should_insert:
                 for n in range(self.columns_right_layout.count()):
                     w = self.columns_right_layout.itemAt(n).widget()
-                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y() + w.size().height() // 2:
+                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y():
                         self.columns_right_layout.insertWidget(n, widget)
                         break
 
