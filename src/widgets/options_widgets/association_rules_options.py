@@ -3,6 +3,7 @@ from typing import List
 from PyQt5.QtWidgets import QLabel, QDoubleSpinBox, QComboBox
 
 from .options import Options
+from widgets.components import QLabelWithTooltip
 
 
 class AssociationRulesOptions(Options):
@@ -14,16 +15,16 @@ class AssociationRulesOptions(Options):
         self.min_support_spinbox.setValue(0.05)
         self.min_support_spinbox.setMaximum(1)
         self.min_support_spinbox.setSingleStep(0.1)
-        self.layout.addRow(QLabel("Minimum support:"), self.min_support_spinbox)
+        self.layout.addRow(QLabelWithTooltip("Minimum support:", "example"), self.min_support_spinbox)
 
         self.min_confidence_spinbox = QDoubleSpinBox()
         self.min_confidence_spinbox.setMinimum(0.01)
         self.min_confidence_spinbox.setValue(0.1)
         self.min_confidence_spinbox.setMaximum(1)
-        self.layout.addRow(QLabel("Minimum confidence:"), self.min_confidence_spinbox)
+        self.layout.addRow(QLabelWithTooltip("Minimum confidence:"), self.min_confidence_spinbox)
 
         self.index_columns_combobox = QComboBox()
-        self.layout.addRow(QLabel("Index column:"), self.index_columns_combobox)
+        self.layout.addRow(QLabelWithTooltip("Index column:"), self.index_columns_combobox)
 
     def get_data(self) -> dict:
         return {

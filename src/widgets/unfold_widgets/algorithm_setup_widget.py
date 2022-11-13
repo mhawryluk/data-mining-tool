@@ -89,15 +89,27 @@ class AlgorithmSetupWidget(UnfoldWidget):
         # animation group
         self.animation_group = QGroupBox()
         self.animation_group.setTitle("Animation")
-        self.animation_group.setMinimumSize(220, 200)
+        self.animation_group.setMinimumSize(220, 65)
         self.animation_group_layout = QFormLayout(self.animation_group)
 
         self.animation_type = QComboBox()
         self.animation_type.addItems(["Step by step", "Animation", "No visualization"])
         self.animation_group_layout.addRow(QLabel("Visualization type"), self.animation_type)
 
+        # description group
+        self.algorithm_description_group = QGroupBox()
+        self.algorithm_description_group.setTitle("Description")
+        self.algorithm_description_group.setFixedWidth(280)
+        self.algorithm_description_group.setMinimumHeight(125)
+        self.algorithm_description_group_layout = QVBoxLayout(self.algorithm_description_group)
+        self.algorithm_description = QLabel(f"Some description")
+        self.algorithm_description.setWordWrap(True)
+        self.algorithm_description_group_layout.addWidget(self.algorithm_description)
+
         self.third_column.addWidget(self.animation_group)
-        self.third_column.addStretch()
+        self.third_column.addStretch(1)
+        self.third_column.addWidget(self.algorithm_description_group)
+        self.third_column.addStretch(1)
 
         self.vertical_layout.addStretch(2)
         self.vertical_layout.addLayout(self.first_column)
@@ -150,6 +162,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
                     self.options_group_layout.itemAt(i).widget().setParent(None)
                 if algorithm:
                     self.options_group_layout.addWidget(self.algorithms_options[technique][algorithm])
+                    self.algorithm_description.setText(f"Some description for {algorithm}")  # get from algorithm config
                     self.enable_button()
             case 'run':
                 loading = LoadingWidget(self.run_handle)
