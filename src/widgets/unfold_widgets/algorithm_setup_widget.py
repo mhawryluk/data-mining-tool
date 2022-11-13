@@ -111,7 +111,6 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.run_button.setText("Submit and run")
         self.run_button.setFixedWidth(300)
         self.run_button.clicked.connect(partial(self.click_listener, "run"))
-        self.enable_button()
 
         self.layout.addStretch()
         self.layout.addLayout(self.vertical_layout)
@@ -129,13 +128,6 @@ class AlgorithmSetupWidget(UnfoldWidget):
 
         self.engine.update_options()
         self.parent().unfold(self)
-
-    def enable_button(self):
-        done = ["K-Means", "Extra Trees", "Apriori", "Gaussian Mixture Models"]
-        if self.algorithm_box.currentText() in done:
-            self.run_button.setEnabled(True)
-        else:
-            self.run_button.setEnabled(False)
 
     def click_listener(self, button_type: str):
         technique = self.technique_box.currentText()
@@ -156,7 +148,6 @@ class AlgorithmSetupWidget(UnfoldWidget):
                             algorithm,
                         )
                     )
-                    self.enable_button()
             case "run":
                 loading = LoadingWidget(self.run_handle)
                 loading.execute()
