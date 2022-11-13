@@ -4,6 +4,9 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGro
     QTableView, QSizePolicy
 from PyQt5.QtCore import QRect
 
+from data_generators import customer_data_generator
+from widgets.options_widgets import CustomerDataOptions
+
 
 class DataGeneratorWidget(QWidget):
     def __init__(self):
@@ -14,6 +17,10 @@ class DataGeneratorWidget(QWidget):
 
         with open('../static/css/styles.css') as stylesheet:
             self.setStyleSheet(stylesheet.read())
+
+        self.dataset_types_config = {
+            "customer data": (customer_data_generator, CustomerDataOptions),
+        }
 
         self.layout = QHBoxLayout()
         self._render_algorithm_selection()
@@ -35,7 +42,9 @@ class DataGeneratorWidget(QWidget):
 
         self.left_column = QVBoxLayout()
         self.left_column.addWidget(self.algorithm_group)
+        self.left_column.addStretch()
         self.left_column.addWidget(self.options_group)
+        self.left_column.addStretch()
         self.left_column.addWidget(self.generate_button)
         self.left_column.addWidget(self.save_button)
         self.left_column.addWidget(self.cancel_button)
@@ -54,16 +63,23 @@ class DataGeneratorWidget(QWidget):
         self.algorithm_group.setTitle("Algorithm selection")
         self.algorithm_group_layout = QVBoxLayout(self.algorithm_group)
 
-        self.technique_label = QLabel("Technique:")
-        self.technique_box = QComboBox(self.algorithm_group)
+        self.dataset_type_label = QLabel("Select dataset type:")
+        self.dataset_type_box = QComboBox(self.algorithm_group)
+        self.dataset_type_box.addItems(self.dataset_types_config.keys())
 
-        self.algorithm_group_layout.addWidget(self.technique_label)
-        self.algorithm_group_layout.addWidget(self.technique_box)
+        self.dataset_type_box.currentTextChanged.connect(partial(self.click_listener, 'dataset_type'))
+
+        self.algorithm_group_layout.addWidget(self.dataset_type_label)
+        self.algorithm_group_layout.addWidget(self.dataset_type_box)
 
     def _render_options(self):
         self.options_group = QGroupBox(self)
         self.options_group.setTitle("Options")
-        self.options_group.layout = QFormLayout(self.options_group)
+        self.options_group_layout = QFormLayout(self.options_group)
+        self._set_options_for_dataset_type(self.dataset_type_box.currentText())
+
+    def _set_options_for_dataset_type(self, dataset_type):
+        self.options_group_layout.addWidget(self.dataset_types_config[dataset_type][1]())
 
     def _render_data(self):
         self.data_group = QGroupBox(self)
@@ -76,6 +92,8 @@ class DataGeneratorWidget(QWidget):
 
     def click_listener(self, button_type: str):
         match button_type:
+            case 'dataset_type':
+                self._set_options_for_dataset_type(self.dataset_type_box.currentText())
             case 'generate':
                 pass
             case 'cancel':
