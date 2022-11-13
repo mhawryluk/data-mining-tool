@@ -23,6 +23,11 @@ class ResultsWidget(UnfoldWidget):
         for i in reversed(range(self.results_tab_widget.count())):
             self.results_tab_widget.removeTab(i)
 
+        if self.engine.state.last_algorithm is not None:
+            last_technique, last_algorithm = self.engine.state.last_algorithm
+        else:
+            last_technique = last_algorithm = ""
+
         for (
             technique,
             algorithms,
@@ -31,6 +36,11 @@ class ResultsWidget(UnfoldWidget):
                 algorithm_result_tab_widget = QTabWidget()
                 for i, result_widget in enumerate(results):
                     algorithm_result_tab_widget.addTab(result_widget, f"{i+1}")
-                self.results_tab_widget.addTab(
+                algorithm_idx = self.results_tab_widget.addTab(
                     algorithm_result_tab_widget, f"{technique}: {algorithm}"
                 )
+                if technique == last_technique and algorithm == last_algorithm:
+                    self.results_tab_widget.setCurrentIndex(algorithm_idx)
+                    self.results_tab_widget.widget(algorithm_idx).setCurrentIndex(
+                        len(results) - 1
+                    )
