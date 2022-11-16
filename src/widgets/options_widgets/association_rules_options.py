@@ -1,6 +1,6 @@
 from typing import List
 
-from PyQt5.QtWidgets import QComboBox, QDoubleSpinBox, QLabel
+from PyQt5.QtWidgets import QComboBox, QDoubleSpinBox
 
 from widgets.components import QLabelWithTooltip
 from widgets.options_widgets import AlgorithmOptions
