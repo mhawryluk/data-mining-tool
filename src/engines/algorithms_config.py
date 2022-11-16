@@ -45,6 +45,21 @@ class AlgorithmConfig:
     options: AlgorithmOptions.__class__
     steps_visualization: AlgorithmStepsVisualization.__class__
     result_widget: AlgorithmResultsWidget.__class__
+    description: str = ""
+
+
+descriptions = {
+    "K-Means": """
+        Some description.
+    """,
+    "Gaussian Mixture Models": "",
+    "Apriori": "",
+    "Extra Trees": "",
+}
+
+
+def preprocess_description(description: str):
+    return "\n".join([line.strip() for line in description.split("\n")])
 
 
 ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmConfig]] = {
@@ -54,12 +69,14 @@ ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmConfig]] = {
             options=KMeansOptions,
             steps_visualization=KMeansStepsVisualization,
             result_widget=KMeansResultsWidget,
+            description=preprocess_description(descriptions["K-Means"]),
         ),
         "Gaussian Mixture Models": AlgorithmConfig(
             algorithm=GMM,
             options=GMMOptions,
             steps_visualization=GMMStepsVisualization,
             result_widget=GMMResultsWidget,
+            description=preprocess_description(descriptions["Gaussian Mixture Models"]),
         ),
     },
     AlgorithmTechniques.ASSOCIATIONS.value: {
@@ -68,6 +85,7 @@ ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmConfig]] = {
             options=AssociationRulesOptions,
             steps_visualization=APrioriStepsVisualization,
             result_widget=APrioriResultsWidget,
+            description=preprocess_description(descriptions["Apriori"]),
         )
     },
     AlgorithmTechniques.CLASSIFICATION.value: {
@@ -76,6 +94,7 @@ ALGORITHMS_INFO: Dict[str, Dict[str, AlgorithmConfig]] = {
             options=ExtraTreesOptions,
             steps_visualization=ExtraTreesStepsVisualization,
             result_widget=ExtraTreesResultsWidget,
+            description=preprocess_description(descriptions["Extra Trees"]),
         )
     },
 }

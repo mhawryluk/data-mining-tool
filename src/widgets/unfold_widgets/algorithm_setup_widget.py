@@ -103,7 +103,12 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.algorithm_description_group_layout = QVBoxLayout(
             self.algorithm_description_group
         )
-        self.algorithm_description = QLabel("Some description")
+        self.algorithm_description = QLabel()
+        self.algorithm_description.setText(
+            self.engine.get_algorithm_description(
+                self.technique_box.currentText(), self.algorithm_box.currentText()
+            )
+        )
         self.algorithm_description.setWordWrap(True)
         self.algorithm_description_group_layout.addWidget(self.algorithm_description)
 
@@ -163,8 +168,8 @@ class AlgorithmSetupWidget(UnfoldWidget):
                         )
                     )
                     self.algorithm_description.setText(
-                        f"Some description for {algorithm}"
-                    )  # get from algorithm config
+                        self.engine.get_algorithm_description(technique, algorithm)
+                    )
             case "run":
                 loading = LoadingWidget(self.run_handle)
                 loading.execute()

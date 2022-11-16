@@ -84,3 +84,8 @@ class AlgorithmsEngine:
         self.options[AlgorithmTechniques.CLUSTERING.value][
             "Gaussian Mixture Models"
         ].set_max_clusters(clusters)
+
+    def get_algorithm_description(
+        self, technique: AlgorithmTechniques.list(), algorithm: str
+    ) -> str:
+        return ALGORITHMS_INFO[technique][algorithm].description
