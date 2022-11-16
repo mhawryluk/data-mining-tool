@@ -5,7 +5,7 @@ from widgets import UnfoldWidget
 
 class ResultsWidget(UnfoldWidget):
     def __init__(self, parent, engine):
-        super().__init__(parent, engine, 'results_widget', 'RESULTS')
+        super().__init__(parent, engine, "results_widget", "RESULTS")
         self.button.disconnect()
         self.button.clicked.connect(self.load_widget)
         self.engine = engine
@@ -28,12 +28,19 @@ class ResultsWidget(UnfoldWidget):
         else:
             last_technique = last_algorithm = ""
 
-        for technique, algorithms in self.engine.state.algorithm_results_widgets.items():
+        for (
+            technique,
+            algorithms,
+        ) in self.engine.state.algorithm_results_widgets.items():
             for algorithm, results in algorithms.items():
                 algorithm_result_tab_widget = QTabWidget()
                 for i, result_widget in enumerate(results):
-                    algorithm_result_tab_widget.addTab(result_widget, f'{i+1}')
-                algorithm_idx = self.results_tab_widget.addTab(algorithm_result_tab_widget, f'{technique}: {algorithm}')
+                    algorithm_result_tab_widget.addTab(result_widget, f"{i+1}")
+                algorithm_idx = self.results_tab_widget.addTab(
+                    algorithm_result_tab_widget, f"{technique}: {algorithm}"
+                )
                 if technique == last_technique and algorithm == last_algorithm:
                     self.results_tab_widget.setCurrentIndex(algorithm_idx)
-                    self.results_tab_widget.widget(algorithm_idx).setCurrentIndex(len(results) - 1)
+                    self.results_tab_widget.widget(algorithm_idx).setCurrentIndex(
+                        len(results) - 1
+                    )

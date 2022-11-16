@@ -2,15 +2,25 @@ from functools import partial
 
 import pandas as pd
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QGroupBox, QFormLayout, QLabel, QLineEdit, QPushButton, QMessageBox, \
-    QScrollArea, QSizePolicy
+from PyQt5.QtWidgets import (
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+)
+
+from widgets.components import ParametersGroupBox
+from widgets.results_widgets import AlgorithmResultsWidget
 
 
-class ExtraTreesResultsWidget(QWidget):
+class ExtraTreesResultsWidget(AlgorithmResultsWidget):
     def __init__(self, data, predict, configs, feature_importance, options):
-        super().__init__()
+        super().__init__(data, options)
 
-        self.data = data
         self.predict = predict
         self.configs = configs
         self.feature_importance = feature_importance
@@ -19,12 +29,7 @@ class ExtraTreesResultsWidget(QWidget):
         self.layout = QHBoxLayout(self)
 
         # algorithm parameters
-        self.params_group = QGroupBox()
-        self.params_group.setTitle("Parameters")
-        self.params_layout = QFormLayout(self.params_group)
-
-        for option, value in options.items():
-            self.params_layout.addRow(QLabel(f'{option}:'), QLabel(f'{value}'))
+        self.params_group = ParametersGroupBox(self.options)
 
         self.layout.addWidget(self.params_group)
 
@@ -34,7 +39,9 @@ class ExtraTreesResultsWidget(QWidget):
         self.feature_importance_layout = QFormLayout(self.feature_importance_group)
 
         for feature, value in self.feature_importance.items():
-            self.feature_importance_layout.addRow(QLabel(feature), QLabel(str(round(value, 2))))
+            self.feature_importance_layout.addRow(
+                QLabel(feature), QLabel(str(round(value, 2)))
+            )
 
         self.layout.addWidget(self.feature_importance_group)
 
@@ -48,9 +55,11 @@ class ExtraTreesResultsWidget(QWidget):
         for label, t in configs:
             self.prediction_input[label] = QLineEdit()
             self.input_type[label] = t
-            self.prediction_layout.addRow(QLabel(f"{label} [{str(t)}]"), self.prediction_input[label])
+            self.prediction_layout.addRow(
+                QLabel(f"{label} [{str(t)}]"), self.prediction_input[label]
+            )
         self.prediction_button = QPushButton("Predict")
-        self.prediction_button.clicked.connect(partial(self.click_listener, 'predict'))
+        self.prediction_button.clicked.connect(partial(self.click_listener, "predict"))
         self.prediction_layout.addRow(self.prediction_button)
 
         self.scroll_box = QGroupBox()
@@ -64,15 +73,18 @@ class ExtraTreesResultsWidget(QWidget):
 
     def click_listener(self, button_type: str):
         match button_type:
-            case 'predict':
+            case "predict":
                 try:
-                    input_dict = {label: [field.text()] for label, field in self.prediction_input.items()}
+                    input_dict = {
+                        label: [field.text()]
+                        for label, field in self.prediction_input.items()
+                    }
                     input_data = pd.DataFrame(input_dict)
                     input_data.astype(self.input_type, copy=False)
                 except ValueError:
                     error = QMessageBox()
                     error.setIcon(QMessageBox.Critical)
-                    error.setText('Entered data are not in valid types.')
+                    error.setText("Entered data are not in valid types.")
                     error.setWindowTitle("Error")
                     error.exec_()
                     return
@@ -80,7 +92,15 @@ class ExtraTreesResultsWidget(QWidget):
                     self.results_layout.addRow(QLabel("Results:"))
                     self.first_prediction = False
                 result = self.predict(input_data.iloc[0])
-                result_label = QLabel("\n".join([f"{label}: {100 * value}%" for label, value in result.items()]))
+                result_label = QLabel(
+                    "\n".join(
+                        [f"{label}: {100 * value}%" for label, value in result.items()]
+                    )
+                )
                 result_label.setAlignment(Qt.AlignRight)
-                input_label = QLabel("\n".join([f"{label}: {value}" for label, [value] in input_dict.items()]))
+                input_label = QLabel(
+                    "\n".join(
+                        [f"{label}: {value}" for label, [value] in input_dict.items()]
+                    )
+                )
                 self.results_layout.addRow(input_label, result_label)

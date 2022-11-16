@@ -8,6 +8,6 @@ class DocumentUpdater:
         self.collection = self.db_manager.get_collection(db_name, coll_name)
 
     def query_update(self, query, new_values):
-        """ Update all queried records with values from new_values dictionary """
+        """Update all queried records with values from new_values dictionary"""
         updated = {"$set": new_values}
         return self.collection.update_many(query, updated)

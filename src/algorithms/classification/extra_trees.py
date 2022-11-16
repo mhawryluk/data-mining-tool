@@ -1,13 +1,14 @@
+from collections import deque
+from typing import Callable, Dict, List, Optional, Tuple
+
+import joblib
 import matplotlib
 import numpy as np
 import pandas as pd
-import joblib
-from algorithms import check_numeric
-from typing import Tuple, List, Callable, Optional, Dict
-from algorithms import get_threads_count
-from collections import deque
 
-metrics_types = ['gini', 'entropy']
+from algorithms import Algorithm, check_numeric, get_threads_count
+
+metrics_types = ["gini", "entropy"]
 
 
 class Leaf:
@@ -20,7 +21,10 @@ class Leaf:
         samples_str = f"samples = {self.samples}"
         class_str = f"class = {self.prediction}"
         color_hex = get_color(self.prediction)
-        label_str = f'[label=<{samples_str}<br/>{class_str}>, fillcolor="{color_hex}", shape=circle]'
+        label_str = (
+            f"[label=<{samples_str}<br/>{class_str}>, "
+            f'fillcolor="{color_hex}", shape=circle]'
+        )
         return label_str
 
 
@@ -43,24 +47,40 @@ class Node:
         elif check_numeric(self.pivot):
             pivot_str = f"{self.label} &gt; {self.pivot}"
         else:
-            raise TypeError(f"pivot must be bool, string, list or number not {type(self.pivot)}")
+            raise TypeError(
+                f"pivot must be bool, string, list or number not {type(self.pivot)}"
+            )
         samples_str = f"samples = {self.samples}"
         class_str = f"class = {self.largest_class}"
         color_hex = get_color(self.largest_class)
-        label_str = f'[label=<{pivot_str}<br/>{samples_str}<br/>{class_str}>, fillcolor="{color_hex}", shape=box]'
+        label_str = (
+            f"[label=<{pivot_str}<br/>{samples_str}<br/>{class_str}>,"
+            f' fillcolor="{color_hex}", shape=box]'
+        )
         return label_str
 
     def simple_graphviz_label(self, color: str) -> str:
         samples_str = f"samples = {self.samples}"
         class_str = f"class = {self.largest_class}"
-        label_str = f'[label=<{samples_str}<br/>{class_str}>, fillcolor="{color}", shape=box]'
+        label_str = (
+            f"[label=<{samples_str}<br/>{class_str}>, "
+            f'fillcolor="{color}", shape=box]'
+        )
         return label_str
 
 
 class DecisionTree:
-
-    def __init__(self, data: pd.DataFrame, with_steps: bool, label_name: str, features_number: int, min_child_number: int,
-                 max_depth: Optional[int], min_metrics: float = 0., metrics_type: metrics_types = 'gini'):
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        with_steps: bool,
+        label_name: str,
+        features_number: int,
+        min_child_number: int,
+        max_depth: Optional[int],
+        min_metrics: float = 0.0,
+        metrics_type: metrics_types = "gini",
+    ):
         self.data = data
         self.with_steps = with_steps
         self.label_name = label_name
@@ -130,7 +150,9 @@ class DecisionTree:
             return False
         return True
 
-    def _split(self, mask: pd.Series, label: str, pivot: any) -> Optional[Tuple[float, pd.Series, pd.Series]]:
+    def _split(
+        self, mask: pd.Series, label: str, pivot: any
+    ) -> Optional[Tuple[float, pd.Series, pd.Series]]:
         def _set_label(row: pd.Series):
             if not mask[row.name]:
                 return 0
@@ -145,13 +167,18 @@ class DecisionTree:
                 if float(value) > pivot:
                     return 1
             else:
-                raise TypeError(f"pivot must be bool, string, list or number not {type(pivot)}")
+                raise TypeError(
+                    f"pivot must be bool, string, list or number not {type(pivot)}"
+                )
             return 2
 
-        division = self.data.apply(_set_label, axis='columns')
+        division = self.data.apply(_set_label, axis="columns")
         right_mask = division == 1
         left_mask = division == 2
-        if np.sum(left_mask) < self.min_child_number or np.sum(right_mask) < self.min_child_number:
+        if (
+            np.sum(left_mask) < self.min_child_number
+            or np.sum(right_mask) < self.min_child_number
+        ):
             return None
 
         metrics = self._calculate_metrics(mask, left_mask, right_mask)
@@ -161,11 +188,13 @@ class DecisionTree:
 
         return metrics, left_mask, right_mask
 
-    def _calculate_metrics(self, mask: pd.Series, left_mask: pd.Series, right_mask: pd.Series) -> float:
+    def _calculate_metrics(
+        self, mask: pd.Series, left_mask: pd.Series, right_mask: pd.Series
+    ) -> float:
         match self.metrics_type:
-            case 'gini':
+            case "gini":
                 metrics_func = self._calculate_gini
-            case 'entropy':
+            case "entropy":
                 metrics_func = self._calculate_entropy
             case _:
                 raise ValueError(f"'{self.metrics_type}' is not valid type of metrics")
@@ -190,11 +219,11 @@ class DecisionTree:
     def predict(self, record: pd.Series) -> pd.Series:
         node = self.root
         while not isinstance(node, Leaf):
-            node = self.next_node(record, node)
+            node = self._next_node(record, node)
         return node.prediction
 
     @staticmethod
-    def next_node(record: pd.Series, node: Node) -> Node | Leaf:
+    def _next_node(record: pd.Series, node: Node) -> Node | Leaf:
         value = record[node.label]
         pivot = node.pivot
         if isinstance(pivot, bool) or isinstance(pivot, str):
@@ -207,7 +236,9 @@ class DecisionTree:
             if float(value) > pivot:
                 return node.right
         else:
-            raise TypeError(f"pivot must be bool, string, list or number not {type(pivot)}")
+            raise TypeError(
+                f"pivot must be bool, string, list or number not {type(pivot)}"
+            )
         return node.left
 
     def calculate_importance(self) -> pd.Series:
@@ -246,7 +277,8 @@ class DecisionTree:
         rows_str = "\n".join(rows)
         dot_str = (
             "digraph Tree {\n"
-            'node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;\n'
+            'node [shape=box, style="filled, rounded", color="black", '
+            'fontname="helvetica"] ;\n'
             f"{rows_str}\n"
             "}"
         )
@@ -257,12 +289,13 @@ class DecisionTree:
         return dot_str, creation[0], creation[1]
 
     @staticmethod
-    def make_string(rows: List, nodes: Dict) -> str:
+    def _make_string(rows: List, nodes: Dict) -> str:
         rows_str = "\n".join(list(nodes.values()) + rows)
-        rows_str = rows_str.replace('shape=circle', 'shape=ellipse')
+        rows_str = rows_str.replace("shape=circle", "shape=ellipse")
         dot_str = (
             "digraph Tree {\n"
-            'node [shape=box, style="filled, rounded", color="black", fontname="helvetica"] ;\n'
+            'node [shape=box, style="filled, rounded", '
+            'color="black", fontname="helvetica"] ;\n'
             f"{rows_str}\n"
             "}"
         )
@@ -280,7 +313,7 @@ class DecisionTree:
         while len(queue):
             node, i = queue.popleft()
             nodes[i] = f"{i} {node.simple_graphviz_label('blue')} ;"
-            steps.append(self.make_string(rows, nodes))
+            steps.append(self._make_string(rows, nodes))
             creation_info[len(steps) - 1] = node.info
 
             nodes[i] = f"{i} {node.graphviz_label(get_color)} ;"
@@ -299,22 +332,24 @@ class DecisionTree:
                 queue.append((node.right, right))
             else:
                 nodes[right] = f"{right} {node.right.graphviz_label(get_color)} ;"
-            steps.append(self.make_string(rows, nodes))
+            steps.append(self._make_string(rows, nodes))
         return creation_info, steps
 
 
-class ExtraTrees:
-
+class ExtraTrees(Algorithm):
     def __init__(self, data: pd.DataFrame, forest_size: int, **tree_parameters):
         self.data = data
         self.forest_size = forest_size
         self.forest = None
         self.tree_parameters = tree_parameters
         self.feature_importance = None
-        self.labels = np.array(list(set(self.data[tree_parameters['label_name']])))
+        self.labels = np.array(list(set(self.data[tree_parameters["label_name"]])))
 
     def get_config(self):
-        return [(column, self.data[column].dtype) for column in self.data.columns.drop(self.tree_parameters['label_name'])]
+        return [
+            (column, self.data[column].dtype)
+            for column in self.data.columns.drop(self.tree_parameters["label_name"])
+        ]
 
     @staticmethod
     def _split_int_to_array(num: int, div: int) -> List[int]:
@@ -325,20 +360,33 @@ class ExtraTrees:
 
     def run(self, with_steps: bool):
         def do_job(num):
-            forest = [DecisionTree(self.data, with_steps=with_steps, **self.tree_parameters) for _ in range(num)]
-            feature_importance = pd.DataFrame([tree.calculate_importance() for tree in forest])
+            forest = [
+                DecisionTree(self.data, with_steps=with_steps, **self.tree_parameters)
+                for _ in range(num)
+            ]
+            feature_importance = pd.DataFrame(
+                [tree.calculate_importance() for tree in forest]
+            )
             return forest, feature_importance
 
         threads_count = get_threads_count()
         arr = self._split_int_to_array(self.forest_size, threads_count)
-        results = joblib.Parallel(n_jobs=threads_count)(joblib.delayed(do_job)(num) for num in arr)
+        results = joblib.Parallel(n_jobs=threads_count)(
+            joblib.delayed(do_job)(num) for num in arr
+        )
         self.forest = sum([result[0] for result in results], [])
-        self.feature_importance = pd.concat([result[1] for result in results]).sum(axis='index') / self.forest_size
+        self.feature_importance = (
+            pd.concat([result[1] for result in results]).sum(axis="index")
+            / self.forest_size
+        )
         self.feature_importance.sort_values(ascending=False, inplace=True)
         return self.predict, self.get_config(), self.feature_importance
 
     def predict(self, record: pd.Series) -> any:
-        predictions = pd.Series([tree.predict(record) for tree in self.forest]).value_counts() / self.forest_size
+        predictions = (
+            pd.Series([tree.predict(record) for tree in self.forest]).value_counts()
+            / self.forest_size
+        )
         result = pd.Series(0, index=self.labels)
         for idx, item in predictions.iteritems():
             result[idx] = item
@@ -346,11 +394,11 @@ class ExtraTrees:
         return result
 
     def get_steps(self) -> List:
-        return [tree.graphviz_str(self.get_color) for tree in self.forest]
+        return [tree.graphviz_str(self._get_color) for tree in self.forest]
 
-    def get_color(self, label: str) -> str:
+    def _get_color(self, label: str) -> str:
         normalize = matplotlib.colors.Normalize(vmin=0, vmax=len(self.labels))
-        colormap = matplotlib.cm.get_cmap('gist_rainbow')
+        colormap = matplotlib.cm.get_cmap("gist_rainbow")
         index = np.argwhere(self.labels == label)[0]
         color = [min(1, 1.2 * c) for c in colormap(normalize(index))[0]]
         return matplotlib.colors.to_hex(color)

@@ -1,7 +1,14 @@
 import numpy as np
-from state import State
-from widgets.plots import HistogramPlot, PiePlot, FallbackPlot, NullFrequencyPlot
+
 from preprocess import DataCleaner
+from state import State
+from visualization.plots import (
+    FallbackPlot,
+    HistogramPlot,
+    NullFrequencyPlot,
+    PiePlot,
+    ScatterPlot,
+)
 
 
 class PreprocessingEngine:
@@ -19,22 +26,37 @@ class PreprocessingEngine:
             return []
         return self.state.imported_data.columns
 
+    def get_numeric_columns(self):
+        if self.state.imported_data is None:
+            return []
+        return self.state.imported_data.select_dtypes(include=["number"]).columns
+
+    def get_size(self):
+        if self.state.imported_data is None:
+            return []
+        return len(self.state.imported_data.select_dtypes(include=["number"]))
+
     def set_state(self, columns):
         self.state.imported_data = self.state.raw_data[columns].copy()
 
-    def create_plot(self, column_name, plot_type):
+    def create_plot(self, column_name, plot_type, scatter_settings):
         plotter = None
-        if column_name == '':
+        if column_name == "":
             plotter = FallbackPlot([])
             return plotter.plot()
         column = self.state.imported_data.loc[:, column_name]
         match plot_type:
-            case 'Histogram':
+            case "Histogram":
                 plotter = HistogramPlot(column)
-            case 'Pie':
+            case "Pie":
                 plotter = PiePlot(column)
-            case 'Null frequency':
+            case "Null frequency":
                 plotter = NullFrequencyPlot(column)
+            case "Scatter plot":
+                plotter = ScatterPlot(
+                    self.state.imported_data.select_dtypes(include=["number"]),
+                    scatter_settings,
+                )
         return plotter.plot()
 
     def clean_data(self, op_type):

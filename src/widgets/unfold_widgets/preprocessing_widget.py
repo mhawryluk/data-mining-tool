@@ -1,19 +1,35 @@
 from PyQt5.QtCore import QRect, Qt
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QPushButton, QCheckBox, \
-    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy, QScrollArea
+from PyQt5.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDesktopWidget,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSplashScreen,
+    QVBoxLayout,
+    QWidget,
+)
 
 from widgets import UnfoldWidget
+from widgets.components import SamplesColumnsChoice
 
 
 class PreprocessingWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
-        super().__init__(parent, engine, 'preprocessing_widget', 'PREPROCESSING')
+        super().__init__(parent, engine, "preprocessing_widget", "PREPROCESSING")
 
         self.data_submitted = False
         self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
 
-        self.plot_types = ['Histogram', 'Pie', "Null frequency"]
+        self.plot_types = ["Histogram", "Pie", "Null frequency", "Scatter plot"]
 
         # plot picker group
         self.plot_picker_group = QGroupBox(self.frame)
@@ -26,24 +42,31 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_picker_label.setMinimumHeight(23)
         self.column_select_box = QComboBox(self.plot_picker_group)
         self.column_select_box.setMinimumHeight(23)
+        self.parameters_widget = SamplesColumnsChoice()
+        self.parameters_widget_connection = None
 
-        self.plot_picker_group_layout.addRow(self.column_picker_label, self.column_select_box)
         self.plot_picker_group.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.plot_picker_label = QLabel(self.plot_picker_group)
         self.plot_picker_label.setText("Select plot type:")
         self.plot_picker_label.setMinimumHeight(23)
         self.plot_select_box = QComboBox(self.plot_picker_group)
+        self.plot_select_box.currentTextChanged.connect(self.change_settings)
         self.plot_select_box.setMinimumHeight(23)
         self.plot_select_box.addItems(self.plot_types)
 
-        self.plot_picker_group_layout.addRow(self.plot_picker_label, self.plot_select_box)
+        self.plot_picker_group_layout.addRow(
+            self.plot_picker_label, self.plot_select_box
+        )
 
         self.plot_picker_submit = QPushButton(self.plot_picker_group)
         self.plot_picker_submit.setText("Plot")
         self.plot_picker_submit.setMinimumHeight(23)
-        self.plot_picker_submit.clicked.connect(lambda: self.plot_data(self.column_select_box.currentText(),
-                                                                       self.plot_select_box.currentText()))
+        self.plot_picker_submit.clicked.connect(
+            lambda: self.plot_data(
+                self.column_select_box.currentText(), self.plot_select_box.currentText()
+            )
+        )
 
         self.plot_picker_group_layout.addRow(self.plot_picker_submit)
 
@@ -119,12 +142,45 @@ class PreprocessingWidget(UnfoldWidget):
         layout.addLayout(self.first_row, 3)
         layout.addLayout(self.second_row, 1)
 
+    def change_settings(self):
+        if self.plot_select_box.currentText() == "Scatter plot":
+            self.column_select_box.setParent(None)
+            self.column_picker_label.setParent(None)
+            self.plot_picker_group_layout.insertRow(0, self.parameters_widget)
+        else:
+            self.parameters_widget.setParent(None)
+            self.plot_picker_group_layout.insertRow(
+                0, self.column_picker_label, self.column_select_box
+            )
+
+    def activate_scatter_plot(self):
+        self.parameters_widget_connection = (
+            self.parameters_widget.samples_changed.connect(
+                lambda: self.plot_data(
+                    self.column_select_box.currentText(),
+                    self.plot_select_box.currentText(),
+                )
+            )
+        )
+        self.parameters_widget.sample_button.setEnabled(True)
+        self.parameters_widget.sample_box.setEnabled(True)
+
+    def deactivate_scatter_plot(self):
+        if self.parameters_widget_connection is not None:
+            self.parameters_widget.samples_changed.disconnect(
+                self.parameters_widget_connection
+            )
+            self.parameters_widget_connection = None
+        self.parameters_widget.sample_button.setEnabled(False)
+        self.parameters_widget.sample_box.setEnabled(False)
+
     def get_data(self):
-        """ check column names every time coming to that frame (potential changes) """
+        """check column names every time coming to that frame
+        (potential changes)"""
         if self.engine.state.imported_data is None:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText('No dataset was selected')
+            error.setText("No dataset was selected")
             error.setWindowTitle("Error")
             error.exec_()
             return
@@ -132,23 +188,33 @@ class PreprocessingWidget(UnfoldWidget):
         loading_screen = QSplashScreen()
         size = QDesktopWidget().screenGeometry(-1)
         loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
-        loading_screen.setGeometry(QRect(size.width()//2-125, size.height()//2-50, 250, 100)) # hardcoded alignment
+        loading_screen.setGeometry(
+            QRect(size.width() // 2 - 125, size.height() // 2 - 50, 250, 100)
+        )  # hardcoded alignment
         loading_screen.show()
         QApplication.processEvents()
 
         self.parent().unfold(self)
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
+        self._clear_plot()
+        self.parameters_widget.new_columns_name(self.engine.get_numeric_columns())
+        self.parameters_widget.new_size(self.engine.get_size())
         self.add_columns_to_layout()
         self.engine.clean_data("cast")
         loading_screen.close()
 
     def plot_data(self, column_name, plot_type):
         self._clear_plot()
-        plot_box = self.engine.create_plot(column_name, plot_type)
+        plot_box = self.engine.create_plot(
+            column_name, plot_type, self.parameters_widget.get_parameters()
+        )
+        if plot_type == "Scatter plot":
+            self.activate_scatter_plot()
         self.plot_layout.addWidget(plot_box)
 
     def _clear_plot(self):
+        self.deactivate_scatter_plot()
         for i in reversed(range(self.plot_layout.count())):
             self.plot_layout.itemAt(i).widget().setParent(None)
 
@@ -174,7 +240,7 @@ class PreprocessingWidget(UnfoldWidget):
         if not columns:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText('No columns were chosen')
+            error.setText("No columns were chosen")
             error.setWindowTitle("Error")
             error.exec_()
             return
@@ -191,8 +257,10 @@ class PreprocessingWidget(UnfoldWidget):
         warning = QMessageBox()
         warning.setIcon(QMessageBox.Warning)
         warning.setText("Null values in set")
-        warning.setInformativeText("This data contains some empty values. After proceeding some of the rows will be "
-                                   "discarded. Continue?")
+        warning.setInformativeText(
+            "This data contains some empty values. After proceeding "
+            "some of the rows will be discarded. Continue?"
+        )
         warning.setWindowTitle("Cleaning data")
         warning.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         warning.buttonClicked.connect(self.handle_warning_click)

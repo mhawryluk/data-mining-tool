@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox
-from widgets.plots import Plot
+
+from visualization.plots import Plot
 
 
 class PiePlot(Plot):
@@ -13,12 +14,17 @@ class PiePlot(Plot):
             counts = self.data.value_counts().to_dict()
             first_key = next(iter(counts.keys()))
             data_size = self.data.size
-            labels = [k for k in counts.keys() if counts[k]/data_size > self.min_pie_plot_label_ratio or k == first_key]
+            labels = [
+                k
+                for k in counts.keys()
+                if counts[k] / data_size > self.min_pie_plot_label_ratio
+                or k == first_key
+            ]
             values = [counts[label] for label in labels]
             values_sum = sum(values)
             if values_sum < data_size:
-                labels.append('Other')
-                values.append(data_size-values_sum)
+                labels.append("Other")
+                values.append(data_size - values_sum)
             ax.pie(values, labels=labels)
             return self.canvas
         except Exception:

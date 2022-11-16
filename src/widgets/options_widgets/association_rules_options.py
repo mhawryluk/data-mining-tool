@@ -1,12 +1,12 @@
 from typing import List
 
-from PyQt5.QtWidgets import QLabel, QDoubleSpinBox, QComboBox
+from PyQt5.QtWidgets import QComboBox, QDoubleSpinBox, QLabel
 
-from .options import Options
 from widgets.components import QLabelWithTooltip
+from widgets.options_widgets import AlgorithmOptions
 
 
-class AssociationRulesOptions(Options):
+class AssociationRulesOptions(AlgorithmOptions):
     def __init__(self):
         super().__init__()
 
@@ -15,22 +15,28 @@ class AssociationRulesOptions(Options):
         self.min_support_spinbox.setValue(0.05)
         self.min_support_spinbox.setMaximum(1)
         self.min_support_spinbox.setSingleStep(0.1)
-        self.layout.addRow(QLabelWithTooltip("Minimum support:", "example"), self.min_support_spinbox)
+        self.layout.addRow(
+            QLabelWithTooltip("Minimum support:", "example"), self.min_support_spinbox
+        )
 
         self.min_confidence_spinbox = QDoubleSpinBox()
         self.min_confidence_spinbox.setMinimum(0.01)
         self.min_confidence_spinbox.setValue(0.1)
         self.min_confidence_spinbox.setMaximum(1)
-        self.layout.addRow(QLabelWithTooltip("Minimum confidence:"), self.min_confidence_spinbox)
+        self.layout.addRow(
+            QLabelWithTooltip("Minimum confidence:"), self.min_confidence_spinbox
+        )
 
         self.index_columns_combobox = QComboBox()
-        self.layout.addRow(QLabelWithTooltip("Index column:"), self.index_columns_combobox)
+        self.layout.addRow(
+            QLabelWithTooltip("Index column:"), self.index_columns_combobox
+        )
 
     def get_data(self) -> dict:
         return {
-            'min_support': self.min_support_spinbox.value(),
-            'min_confidence': self.min_confidence_spinbox.value(),
-            'index_column': self.index_columns_combobox.currentText(),
+            "min_support": self.min_support_spinbox.value(),
+            "min_confidence": self.min_confidence_spinbox.value(),
+            "index_column": self.index_columns_combobox.currentText(),
         }
 
     def set_columns_options(self, columns: List[str]):

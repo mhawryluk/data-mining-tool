@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox
-from widgets.plots import Plot
+
+from visualization.plots import Plot
 
 
 class HistogramPlot(Plot):
@@ -11,7 +12,7 @@ class HistogramPlot(Plot):
             ax = self.canvas.figure.subplots()
             stats = self.data.value_counts().to_dict()
             labels, values = zip(*stats.items())
-            ax.bar(labels, values, align='center')
+            ax.bar(labels, values, align="center")
             if len(labels) > self.max_labels_show:
                 self._reduce_labels(ax)
             return self.canvas

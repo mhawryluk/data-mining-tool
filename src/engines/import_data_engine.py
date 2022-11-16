@@ -1,10 +1,11 @@
 from typing import List, Optional
+
 import pandas as pd
 
-from data_import import CSVReader, JSONReader, DatabaseReader
+from data_import import CSVReader, DatabaseReader, JSONReader
 from database import DatabaseObjectManager, Writer
-from state import State
 from engines import DB_NAME
+from state import State
 
 
 class ImportDataEngine:
@@ -18,12 +19,12 @@ class ImportDataEngine:
     def load_data_from_file(self, file_path: str) -> None:
         if not file_path:
             raise ValueError("")
-        if '.' not in file_path:
+        if "." not in file_path:
             raise ValueError("Supported file format: .csv, .json.")
-        extension = file_path.split('.')[-1]
-        if extension == 'csv':
+        extension = file_path.split(".")[-1]
+        if extension == "csv":
             self.reader_data = CSVReader(file_path)
-        elif extension == 'json':
+        elif extension == "json":
             self.reader_data = JSONReader(file_path)
         else:
             raise ValueError("Supported file format: .csv, .json.")
@@ -38,7 +39,7 @@ class ImportDataEngine:
             self.reader_data = None
             return error
         self.from_file = False
-        return ''
+        return ""
 
     def get_table_names_from_database(self) -> List[str]:
         return self.database_manager.get_collections_list(DB_NAME)
@@ -75,9 +76,9 @@ class ImportDataEngine:
                     writer.add_dataset(chunk)
         except Exception as e:
             print(e)
-            return 'There is some problem with database.'
+            return "There is some problem with database."
         result = self.load_data_from_database(title)
         if result:
             return result
         self.read_data()
-        return ''
+        return ""

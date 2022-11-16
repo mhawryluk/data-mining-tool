@@ -1,17 +1,20 @@
-from database import Reader
-from typing import List, Optional, Generator, Union
-from data_import import AVAILABLE_RAM_MEMORY, SIZE_OF_VALUE
+from typing import Generator, List, Optional, Union
+
 import pandas as pd
+
+from data_import import AVAILABLE_RAM_MEMORY, SIZE_OF_VALUE
+from database import Reader
 
 
 class DatabaseReader:
     def __init__(self, db_name: str, coll_name: str):
         """
-            Class to read data from database.
-            self.reader is DataFrame or Generator of DataFrame.
-            We may implement some special class to have data and behave as DataFrame.
+        Class to read data from database.
+        self.reader is DataFrame or Generator of DataFrame.
+        We may implement some special class
+        to have data and behave as DataFrame.
         """
-        self.error = ''
+        self.error = ""
         self.need_chunks = False
         try:
             self.database = Reader(db_name, coll_name)
@@ -20,7 +23,7 @@ class DatabaseReader:
             self.need_chunks = size > self.get_chunksize()
         except Exception as e:
             print(e)
-            self.error = 'There is some problem with database. Please try again.'
+            self.error = "There is some problem with database. Please try again."
         self.reader = None
 
     def get_columns_name(self) -> List[str]:
@@ -36,7 +39,9 @@ class DatabaseReader:
     def is_file_big(self) -> bool:
         return self.need_chunks
 
-    def read(self, columns: Optional[List[str]]) -> Union[pd.DataFrame, Generator[pd.DataFrame, None, None]]:
+    def read(
+        self, columns: Optional[List[str]]
+    ) -> Union[pd.DataFrame, Generator[pd.DataFrame, None, None]]:
         if columns is None:
             columns = self.columns_name
         if self.need_chunks:
@@ -48,9 +53,11 @@ class DatabaseReader:
     def _read_by_chunks(self, columns: [List[str]]):
         chunksize = self.get_chunksize()
         chunk_num = 0
-        chunks = self.database.get_rows_number()//chunksize
+        chunks = self.database.get_rows_number() // chunksize
         while chunk_num <= chunks:
-            yield self.database.get_nth_chunk(columns=columns, chunk_size=chunksize, chunk_number=chunk_num)
+            yield self.database.get_nth_chunk(
+                columns=columns, chunk_size=chunksize, chunk_number=chunk_num
+            )
             chunk_num += 1
 
     def _read_all(self, columns: List[str]):
