@@ -1,25 +1,32 @@
 from functools import partial
+from typing import Dict, Tuple, Type, Callable
 
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QComboBox, QLabel, QFormLayout, \
     QTableView, QSizePolicy
 from PyQt5.QtCore import QRect
 
-from data_generators import customer_data_generator
-from widgets.options_widgets import CustomerDataOptions
+from data_generators import clustering_blobs_generator, DataGeneratorFunction
+from engines import ImportDataEngine
+from widgets import QtTable
+from widgets.options_widgets import ClusteringBlobsDataOptions, Options
 
 
 class DataGeneratorWidget(QWidget):
-    def __init__(self):
+    def __init__(self, engine: ImportDataEngine, callback: Callable):
         super().__init__()
+        self.engine = engine
+        self.callback = callback
+
+        self.generated_data = None
         self.setWindowTitle("Data Generator")
         self.setGeometry(QRect(400, 400, 800, 400))
-        self.setObjectName("data_generator_widget")
 
+        self.setObjectName("data_generator_widget")
         with open('../static/css/styles.css') as stylesheet:
             self.setStyleSheet(stylesheet.read())
 
-        self.dataset_types_config = {
-            "customer data": (customer_data_generator, CustomerDataOptions),
+        self.dataset_types_config: Dict[str, Tuple[DataGeneratorFunction, Type[Options]]] = {
+            "(Clustering) Normal distribution blobs": (clustering_blobs_generator, ClusteringBlobsDataOptions),
         }
 
         self.layout = QHBoxLayout()
@@ -33,6 +40,7 @@ class DataGeneratorWidget(QWidget):
         self.save_button = QPushButton(self)
         self.save_button.setText("Save")
         self.save_button.clicked.connect(partial(self.click_listener, 'save'))
+        self.save_button.setEnabled(False)
 
         self.cancel_button = QPushButton(self)
         self.cancel_button.setText("Cancel")
@@ -76,10 +84,12 @@ class DataGeneratorWidget(QWidget):
         self.options_group = QGroupBox(self)
         self.options_group.setTitle("Options")
         self.options_group_layout = QFormLayout(self.options_group)
-        self._set_options_for_dataset_type(self.dataset_type_box.currentText())
+        self._set_data_generator(self.dataset_type_box.currentText())
 
-    def _set_options_for_dataset_type(self, dataset_type):
-        self.options_group_layout.addWidget(self.dataset_types_config[dataset_type][1]())
+    def _set_data_generator(self, dataset_type):
+        self.options_widget = self.dataset_types_config[dataset_type][1]()
+        self.options_group_layout.addWidget(self.options_widget)
+        self.selected_generator = self.dataset_types_config[dataset_type][0]
 
     def _render_data(self):
         self.data_group = QGroupBox(self)
@@ -93,13 +103,14 @@ class DataGeneratorWidget(QWidget):
     def click_listener(self, button_type: str):
         match button_type:
             case 'dataset_type':
-                self._set_options_for_dataset_type(self.dataset_type_box.currentText())
+                self._set_data_generator(self.dataset_type_box.currentText())
             case 'generate':
-                pass
+                self.generated_data = self.selected_generator(self.options_widget.get_data())
+                self.data_table.setModel(QtTable(self.generated_data))
+                self.save_button.setEnabled(self.generated_data is not None)
             case 'cancel':
                 self.hide()
-            case 'pass':
-                pass
-
-
-
+            case 'save':
+                self.engine.set_generated_data(self.generated_data)
+                self.callback()
+                self.hide()

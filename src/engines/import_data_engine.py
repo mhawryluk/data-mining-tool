@@ -79,3 +79,7 @@ class ImportDataEngine:
             return result
         self.read_data()
         return ''
+
+    def set_generated_data(self, data: pd.DataFrame):
+        self.state.raw_data = data
+        self.state.imported_data = data.copy()

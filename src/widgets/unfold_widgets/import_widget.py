@@ -54,7 +54,7 @@ class ImportWidget(UnfoldWidget):
         self.generate_button.clicked.connect(partial(self.click_listener, 'generate'))
         self.load_data_group_layout.addRow(self.generate_button)
 
-        self.generate_window = DataGeneratorWidget()
+        self.generate_window = DataGeneratorWidget(self.engine, callback=lambda: self.update_data_view())
 
         self.import_state_label = QLabel(self.load_data_group)
         self.load_data_group_layout.addRow(self.import_state_label)
@@ -141,9 +141,10 @@ class ImportWidget(UnfoldWidget):
         for i in reversed(range(self.columns_group_form_layout.count())):
             self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
-    def set_columns_grid(self):
+    def set_columns_grid(self, columns=None):
         """ draw columns and checkbox to choose them """
-        columns = self.engine.get_columns()
+        if columns is None:
+            columns = self.engine.get_columns()
 
         for column in columns:
             checkbox = QCheckBox(column)
@@ -151,10 +152,17 @@ class ImportWidget(UnfoldWidget):
             checkbox.setChecked(True)
             self.columns_group_form_layout.addRow(checkbox)
 
+        self.columns_button.setEnabled(True)
+
     def display_data(self):
         self.engine.read_data(self.get_checked_columns())
         if (data := self.engine.imported_data) is not None:
             self.data_table.setModel(QtTable(data))
+
+    def update_data_view(self):
+        if (data := self.engine.state.imported_data) is not None:
+            self.data_table.setModel(QtTable(data))
+        self.set_columns_grid(self.engine.state.imported_data.columns)
 
     def reset_data_table(self):
         self.data_table.setModel(None)
