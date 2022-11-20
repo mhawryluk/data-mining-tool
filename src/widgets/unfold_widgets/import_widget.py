@@ -135,10 +135,10 @@ class ImportWidget(UnfoldWidget):
         self.columns_button.clicked.connect(partial(self.click_listener, "columns"))
 
         self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.columns_group_layout.addRow(self.limit_type_box, self.limit_number_box)
-        self.columns_group_layout.addRow(self.limit_button)
-        self.columns_group_layout.addRow(self.scroll)
-        self.columns_group_layout.addRow(self.columns_button)
+        self.columns_group_layout.addWidget(self.scroll)
+        self.columns_group_layout.addWidget(
+            self.columns_button, alignment=Qt.AlignCenter
+        )
         self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # data table
@@ -283,20 +283,21 @@ class ImportWidget(UnfoldWidget):
         except ValueError as e:
             self.import_state_label.setText(str(e))
         else:
-            self.clear_widgets()
-            self.filepath_line.setText(basename(file_path))
-            self.set_options()
-            self.engine.read_data()
-            self.set_columns_grid()
-            self.display_data()
+            self._on_success(file_path)
 
     def load_from_database_handle(self):
         self.import_state_label.setText("Loading ...")
         document_name = self.database_box.currentText()
-        result = self.engine.load_data_from_database(document_name)
-        if result:
-            self.import_state_label.setText(result)
-            return
+        try:
+            self.engine.load_data_from_database(document_name)
+        except ValueError as e:
+            self.import_state_label.setText(str(e))
+        else:
+            self._on_success()
+
+    def _on_success(self, file_path=None):
+        if file_path is not None:
+            self.filepath_line.setText(basename(file_path))
         self.clear_widgets()
         self.set_options()
         self.engine.read_data()

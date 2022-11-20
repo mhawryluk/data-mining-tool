@@ -18,8 +18,7 @@ from PyQt5.QtWidgets import (
     QBoxLayout,
 )
 from widgets import QtTable, LoadingWidget
-from data_import import CSVReader, JSONReader, DatabaseReader
-from engines import DB_NAME
+from data_import import Loader
 
 
 class DragButton(QPushButton):
@@ -38,6 +37,7 @@ class MergingSetsScreen(QWidget):
     def __init__(self, widget, on_hide):
         super().__init__()
         self.engine = widget.engine
+        self.loader = Loader()
         self.setAcceptDrops(True)
         self.new_data = None
         self.setWindowTitle("Datasets concatenation")
@@ -189,22 +189,25 @@ class MergingSetsScreen(QWidget):
             self, "Choose file", ".", "*.csv *.json"
         )[0]
         try:
-            reader = create_file_reader(filepath)
-            self._handle_success(reader)
-            self.filepath_line.setText(filepath)
+            reader = self.loader.create_file_reader(filepath)
         except ValueError as e:
             self.import_state_label.setText(str(e))
+        else:
+            self._on_success(reader, filepath)
 
     def _load_from_database_handle(self):
         self.import_state_label.setText("Loading ...")
         document_name = self.database_box.currentText()
         try:
-            reader = create_database_reader(document_name)
-            self._handle_success(reader)
+            reader = self.loader.create_database_reader(document_name)
         except ValueError as e:
             self.import_state_label.setText(str(e))
+        else:
+            self._on_success(reader)
 
-    def _handle_success(self, reader):
+    def _on_success(self, reader, file_path=None):
+        if file_path is not None:
+            self.filepath_line.setText(file_path)
         self.import_state_label.clear()
         if self.engine.is_data_big():
             error = QMessageBox()
@@ -328,28 +331,3 @@ class MergingSetsScreen(QWidget):
                         break
 
         e.accept()
-
-
-def create_file_reader(file_path):
-    reader = None
-    if not file_path:
-        raise ValueError("")
-    if "." not in file_path:
-        raise ValueError("Supported file format: .csv, .json.")
-    extension = file_path.split(".")[-1]
-    if extension == "csv":
-        reader = CSVReader(file_path)
-    elif extension == "json":
-        reader = JSONReader(file_path)
-    else:
-        raise ValueError("Supported file format: .csv, .json.")
-    if error := reader.get_error():
-        raise ValueError(error)
-    return reader
-
-
-def create_database_reader(document):
-    reader = DatabaseReader(DB_NAME, document)
-    if error := reader.get_error():
-        raise ValueError(error)
-    return reader
