@@ -1,7 +1,22 @@
 from PyQt5.QtCore import QRect, Qt
-from PyQt5.QtWidgets import QWidget, QGroupBox, QLabel, QComboBox, QVBoxLayout, QPushButton, QCheckBox, \
-    QMessageBox, QSplashScreen, QApplication, QDesktopWidget, QFormLayout, QHBoxLayout, QSizePolicy, QScrollArea, \
-    QSpinBox
+from PyQt5.QtWidgets import (
+    QWidget,
+    QGroupBox,
+    QLabel,
+    QComboBox,
+    QVBoxLayout,
+    QPushButton,
+    QCheckBox,
+    QMessageBox,
+    QSplashScreen,
+    QApplication,
+    QDesktopWidget,
+    QFormLayout,
+    QHBoxLayout,
+    QSizePolicy,
+    QScrollArea,
+    QSpinBox,
+)
 
 from widgets import UnfoldWidget
 from widgets.tables import DataPreviewScreen, PreviewReason
@@ -9,14 +24,14 @@ from widgets.tables import DataPreviewScreen, PreviewReason
 
 class PreprocessingWidget(UnfoldWidget):
     def __init__(self, parent: QWidget, engine):
-        super().__init__(parent, engine, 'preprocessing_widget', 'PREPROCESSING')
+        super().__init__(parent, engine, "preprocessing_widget", "PREPROCESSING")
 
         self.data_submitted = False
         self.mark_reduced_columns = False
         self.button.disconnect()
         self.button.clicked.connect(lambda: self.get_data())
 
-        self.plot_types = ['Histogram', 'Pie', "Null frequency"]
+        self.plot_types = ["Histogram", "Pie", "Null frequency"]
 
         # plot picker group
         self.plot_picker_group = QGroupBox(self.frame)
@@ -30,7 +45,9 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_select_box = QComboBox(self.plot_picker_group)
         self.column_select_box.setMinimumHeight(23)
 
-        self.plot_picker_group_layout.addRow(self.column_picker_label, self.column_select_box)
+        self.plot_picker_group_layout.addRow(
+            self.column_picker_label, self.column_select_box
+        )
         self.plot_picker_group.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.plot_picker_label = QLabel(self.plot_picker_group)
@@ -40,13 +57,18 @@ class PreprocessingWidget(UnfoldWidget):
         self.plot_select_box.setMinimumHeight(23)
         self.plot_select_box.addItems(self.plot_types)
 
-        self.plot_picker_group_layout.addRow(self.plot_picker_label, self.plot_select_box)
+        self.plot_picker_group_layout.addRow(
+            self.plot_picker_label, self.plot_select_box
+        )
 
         self.plot_picker_submit = QPushButton(self.plot_picker_group)
         self.plot_picker_submit.setText("Plot")
         self.plot_picker_submit.setMinimumHeight(23)
-        self.plot_picker_submit.clicked.connect(lambda: self.plot_data(self.column_select_box.currentText(),
-                                                                       self.plot_select_box.currentText()))
+        self.plot_picker_submit.clicked.connect(
+            lambda: self.plot_data(
+                self.column_select_box.currentText(), self.plot_select_box.currentText()
+            )
+        )
 
         self.plot_picker_group_layout.addRow(self.plot_picker_submit)
 
@@ -69,14 +91,18 @@ class PreprocessingWidget(UnfoldWidget):
         self.manual_reduction = QPushButton(self.auto_reduction_group)
         self.auto_reduction = QPushButton(self.auto_reduction_group)
 
-        self.num_dimensions_spinbox.setMinimum(2)
-        self.num_dimensions_spinbox.setValue(2)
-        self.auto_reduction_group_layout.addRow(QLabel("Number of dimensions:"), self.num_dimensions_spinbox)
+        self.num_dimensions_spinbox.setMinimum(1)
+        self.num_dimensions_spinbox.setValue(1)
+        self.auto_reduction_group_layout.addRow(
+            QLabel("Number of dimensions:"), self.num_dimensions_spinbox
+        )
 
         self.manual_reduction.setText("Reduce with fixed number")
         self.manual_reduction.setMinimumHeight(23)
         self.auto_reduction_group_layout.addRow(self.manual_reduction)
-        self.manual_reduction.clicked.connect(lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value()))
+        self.manual_reduction.clicked.connect(
+            lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value())
+        )
 
         self.auto_reduction.setText("Reduce dynamically")
         self.auto_reduction.setMinimumHeight(23)
@@ -136,11 +162,11 @@ class PreprocessingWidget(UnfoldWidget):
         layout.addLayout(self.second_row, 1)
 
     def get_data(self):
-        """ check column names every time coming to that frame (potential changes) """
+        """check column names every time coming to that frame (potential changes)"""
         if self.engine.state.imported_data is None:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText('No dataset was selected')
+            error.setText("No dataset was selected")
             error.setWindowTitle("Error")
             error.exec_()
             return
@@ -149,7 +175,8 @@ class PreprocessingWidget(UnfoldWidget):
         size = QDesktopWidget().screenGeometry(-1)
         loading_screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
         loading_screen.setGeometry(
-            QRect(size.width() // 2 - 125, size.height() // 2 - 50, 250, 100))  # hardcoded alignment
+            QRect(size.width() // 2 - 125, size.height() // 2 - 50, 250, 100)
+        )  # hardcoded alignment
         loading_screen.show()
         QApplication.processEvents()
 
@@ -159,8 +186,13 @@ class PreprocessingWidget(UnfoldWidget):
         self.add_columns_to_layout()
         self.engine.clean_data("cast")
 
-        max_dimensions = self.engine.number_of_numeric_columns() - \
-                         len([column for column in self.engine.state.reduced_columns if column in self.engine.state.imported_data])
+        max_dimensions = self.engine.number_of_numeric_columns() - len(
+            [
+                column
+                for column in self.engine.state.reduced_columns
+                if column in self.engine.state.imported_data
+            ]
+        )
         self.set_reduction_bounds(max_dimensions)
         loading_screen.close()
 
@@ -196,7 +228,7 @@ class PreprocessingWidget(UnfoldWidget):
         if not columns:
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
-            error.setText('No columns were chosen')
+            error.setText("No columns were chosen")
             error.setWindowTitle("Error")
             error.exec_()
             return
@@ -213,8 +245,10 @@ class PreprocessingWidget(UnfoldWidget):
         warning = QMessageBox()
         warning.setIcon(QMessageBox.Warning)
         warning.setText("Null values in set")
-        warning.setInformativeText("This data contains some empty values. After proceeding some of the rows will be "
-                                   "discarded. Continue?")
+        warning.setInformativeText(
+            "This data contains some empty values. After proceeding some of the rows will be "
+            "discarded. Continue?"
+        )
         warning.setWindowTitle("Cleaning data")
         warning.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
         warning.buttonClicked.connect(self.handle_warning_click)
@@ -224,20 +258,26 @@ class PreprocessingWidget(UnfoldWidget):
         self.data_submitted = "OK" in button.text()
 
     def reduce_dimensions(self, dim_number=None):
-        self.engine.state.imported_data.drop(self.engine.state.reduced_columns, axis=1, inplace=True, errors='ignore')
-        self.engine.state.raw_data.drop(self.engine.state.reduced_columns, axis=1, inplace=True)
+        self.engine.state.imported_data.drop(
+            self.engine.state.reduced_columns, axis=1, inplace=True, errors="ignore"
+        )
+        self.engine.state.raw_data.drop(
+            self.engine.state.reduced_columns, axis=1, inplace=True
+        )
         self.engine.state.reduced_columns = self.engine.reduce_dimensions(dim_number)
         self.mark_reduced_columns = True
         self.show_reduction_results()
 
     def set_reduction_bounds(self, max_dimensions):
-        self.num_dimensions_spinbox.setMinimum(2)
-        self.num_dimensions_spinbox.setMaximum(max(max_dimensions - 1, 2))
+        self.num_dimensions_spinbox.setMinimum(1)
+        self.num_dimensions_spinbox.setMaximum(max(max_dimensions - 1, 1))
         self.manual_reduction.setDisabled(max_dimensions < 3)
         self.auto_reduction.setDisabled(max_dimensions < 3)
 
     def show_reduction_results(self):
-        self.preview_screen = DataPreviewScreen(self, title="Reduction results", reason=PreviewReason.REDUCTION)
+        self.preview_screen = DataPreviewScreen(
+            self, title="Reduction results", reason=PreviewReason.REDUCTION
+        )
         self.preview_screen.show()
 
     def render_estimation_group(self):
@@ -251,13 +291,19 @@ class PreprocessingWidget(UnfoldWidget):
         self.estimate_automatically_button.setText("Mean/mode estimation")
         self.estimate_automatically_button.setMinimumHeight(23)
         self.estimate_group_layout.addRow(self.estimate_automatically_button)
-        self.estimate_automatically_button.clicked.connect(self.estimate_with_mean_or_mode)
+        self.estimate_automatically_button.clicked.connect(
+            self.estimate_with_mean_or_mode
+        )
 
     def estimate_manually(self):
-        self.preview_screen = DataPreviewScreen(self, title="Input missing values", reason=PreviewReason.ESTIMATION)
+        self.preview_screen = DataPreviewScreen(
+            self, title="Input missing values", reason=PreviewReason.ESTIMATION
+        )
         self.preview_screen.show()
 
     def estimate_with_mean_or_mode(self):
         self.engine.mean_or_mode_estimate()
-        self.preview_screen = DataPreviewScreen(self, title="Estimation results", reason=PreviewReason.PREVIEW)
+        self.preview_screen = DataPreviewScreen(
+            self, title="Estimation results", reason=PreviewReason.PREVIEW
+        )
         self.preview_screen.show()
