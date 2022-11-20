@@ -176,7 +176,7 @@ class PreprocessingWidget(UnfoldWidget):
     def add_columns_to_layout(self):
         self.clear_column_layout()
         columns = self.engine.get_raw_columns()
-        selected_columns = self.engine.state.reduced_columns if self.mark_reduced_columns else self.engine.get_columns()
+        selected_columns = self.engine.get_columns()
         self.mark_reduced_columns = False
         for column in columns:
             checkbox = QCheckBox(column)
