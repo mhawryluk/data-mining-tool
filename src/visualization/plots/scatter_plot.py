@@ -41,7 +41,7 @@ class ScatterPlot(Plot):
 
         if group_by:
             labels = self.all_data.iloc[samples][group_by]
-            num_labels = pd.factorize(labels)[0]
+            num_labels = pd.factorize(labels, sort=True)[0]
             self.canvas.all_plot(
                 x,
                 y,
