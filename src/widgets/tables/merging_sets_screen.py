@@ -2,8 +2,21 @@ from functools import partial
 import pandas as pd
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5.QtGui import QDrag, QPixmap
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTableView, QLabel, QVBoxLayout, QGroupBox, QFormLayout, QLineEdit, \
-    QPushButton, QComboBox, QMessageBox, QFileDialog, QBoxLayout
+from PyQt5.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QTableView,
+    QLabel,
+    QVBoxLayout,
+    QGroupBox,
+    QFormLayout,
+    QLineEdit,
+    QPushButton,
+    QComboBox,
+    QMessageBox,
+    QFileDialog,
+    QBoxLayout,
+)
 from widgets import QtTable, LoadingWidget
 from data_import import CSVReader, JSONReader, DatabaseReader
 from engines import DB_NAME
@@ -67,7 +80,7 @@ class MergingSetsScreen(QWidget):
         self.setLayout(self.layout)
 
     def _load_styles(self):
-        with open('../static/css/styles.css') as stylesheet:
+        with open("../static/css/styles.css") as stylesheet:
             self.setStyleSheet(stylesheet.read())
 
     def _render_table(self, table_widget, current):
@@ -92,7 +105,9 @@ class MergingSetsScreen(QWidget):
         self.layout.addWidget(panel, 1)
 
     def _render_import_view(self):
-        self.load_data_group_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+        self.load_data_group_layout.setFieldGrowthPolicy(
+            QFormLayout.AllNonFixedFieldsGrow
+        )
         self.load_data_group.setTitle("Load data")
 
         self.filepath_label.setText("Load data from file:")
@@ -102,7 +117,7 @@ class MergingSetsScreen(QWidget):
         self.filepath_line.setFixedWidth(150)
 
         self.file_button.setText("Select file")
-        self.file_button.clicked.connect(partial(self._click_listener, 'load_file'))
+        self.file_button.clicked.connect(partial(self._click_listener, "load_file"))
         self.load_data_group_layout.addRow(self.filepath_line, self.file_button)
 
         self.database_label.setText("Choose data from database:")
@@ -113,7 +128,9 @@ class MergingSetsScreen(QWidget):
             self.database_box.addItem(name)
 
         self.database_button.setText("Load")
-        self.database_button.clicked.connect(partial(self._click_listener, 'load_database'))
+        self.database_button.clicked.connect(
+            partial(self._click_listener, "load_database")
+        )
         self.load_data_group_layout.addRow(self.database_box, self.database_button)
 
         self.load_data_group_layout.addRow(self.import_state_label)
@@ -121,20 +138,26 @@ class MergingSetsScreen(QWidget):
     def _render_columns_view(self):
         self.columns_merge_group.setTitle("Merge columns")
         instruction = QLabel()
-        instruction.setText("Firstly, you need to import another dataset here.\nIf everything goes well, the new "
-                            "columns should appear inside the right empty box.\nYou should see two lists of columns "
-                            "and you can set which columns will be merged together by drag and drop.\nWhen you're "
-                            "ready, click the 'submit' button, then another screen with results will be shown.\n"
-                            "You will be asked whether you'd like to accept or reject integration.\nIf you choose to "
-                            "concatenate, the newly created dataset should be visible on the import screen.")
+        instruction.setText(
+            "Firstly, you need to import another dataset here.\nIf everything goes well, the new "
+            "columns should appear inside the right empty box.\nYou should see two lists of columns "
+            "and you can set which columns will be merged together by drag and drop.\nWhen you're "
+            "ready, click the 'submit' button, then another screen with results will be shown.\n"
+            "You will be asked whether you'd like to accept or reject integration.\nIf you choose to "
+            "concatenate, the newly created dataset should be visible on the import screen."
+        )
         self.columns_merge_group_layout.addWidget(instruction, 0)
 
-        for column in self.engine.get_columns():
-            self.columns_left_layout.insertWidget(self.columns_left_layout.count()-1, DragButton(column))
+        for column in self._get_imported_columns():
+            self.columns_left_layout.insertWidget(
+                self.columns_left_layout.count() - 1, DragButton(column)
+            )
 
         if self.new_data is not None and self.new_data.columns is not None:
-            for column in self.new_data.columns:
-                self.columns_right_layout.insertWidget(self.columns_right_layout.count()-1, DragButton(column))
+            for column in sorted(self.new_data.columns):
+                self.columns_right_layout.insertWidget(
+                    self.columns_right_layout.count() - 1, DragButton(column)
+                )
 
         self.left_columns.setLayout(self.columns_left_layout)
         self.right_columns.setLayout(self.columns_right_layout)
@@ -145,24 +168,26 @@ class MergingSetsScreen(QWidget):
 
         self.submit_button.setText("Submit")
         self.submit_button.setEnabled(self.new_data is not None)
-        self.submit_button.clicked.connect(partial(self._click_listener, 'submit'))
+        self.submit_button.clicked.connect(partial(self._click_listener, "submit"))
         self.columns_merge_group_layout.addWidget(self.submit_button, 0)
 
     def _click_listener(self, button_type: str):
         match button_type:
-            case 'load_file':
+            case "load_file":
                 loading = LoadingWidget(self._load_from_file_handle)
                 loading.execute()
-            case 'load_database':
+            case "load_database":
                 loading = LoadingWidget(self._load_from_database_handle)
                 loading.execute()
-            case 'submit':
+            case "submit":
                 loading = LoadingWidget(self._on_submit)
                 loading.execute()
 
     def _load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
-        filepath = QFileDialog.getOpenFileName(self, 'Choose file', '.', "*.csv *.json")[0]
+        filepath = QFileDialog.getOpenFileName(
+            self, "Choose file", ".", "*.csv *.json"
+        )[0]
         try:
             reader = create_file_reader(filepath)
             self._handle_success(reader)
@@ -184,7 +209,7 @@ class MergingSetsScreen(QWidget):
         if self.engine.is_data_big():
             error = QMessageBox()
             error.setIcon(QMessageBox.Warning)
-            error.setText('This file is too big.\nYou must save it in database!')
+            error.setText("This file is too big.\nYou must save it in database!")
             error.setWindowTitle("Warning")
             error.exec_()
         self.new_data = reader.read(None)
@@ -193,19 +218,23 @@ class MergingSetsScreen(QWidget):
             last_preview.deleteLater()
         self._render_table(self.new_data_view, False)
 
-        for i in reversed(range(self.columns_left_layout.count()-1)):
+        for i in reversed(range(self.columns_left_layout.count() - 1)):
             # workaround to delete as low content as possible, removing nested layouts was giving me some segfault
             self.columns_left_layout.itemAt(i).widget().setParent(None)
 
-        for i in reversed(range(self.columns_right_layout.count()-1)):
+        for i in reversed(range(self.columns_right_layout.count() - 1)):
             self.columns_right_layout.itemAt(i).widget().setParent(None)
 
-        for column in self.engine.get_columns():
-            self.columns_left_layout.insertWidget(self.columns_left_layout.count()-1, DragButton(column))
+        for column in self._get_imported_columns():
+            self.columns_left_layout.insertWidget(
+                self.columns_left_layout.count() - 1, DragButton(column)
+            )
 
         if self.new_data is not None and self.new_data.columns is not None:
-            for column in self.new_data.columns:
-                self.columns_right_layout.insertWidget(self.columns_right_layout.count()-1, DragButton(column))
+            for column in sorted(self.new_data.columns):
+                self.columns_right_layout.insertWidget(
+                    self.columns_right_layout.count() - 1, DragButton(column)
+                )
 
         self.submit_button.setEnabled(self.new_data is not None)
 
@@ -215,7 +244,9 @@ class MergingSetsScreen(QWidget):
         for i in range(self.columns_left_layout.count() - 1):
             new_columns_left.append(self.columns_left_layout.itemAt(i).widget().text())
         for i in range(self.columns_right_layout.count() - 1):
-            new_columns_right.append(self.columns_right_layout.itemAt(i).widget().text())
+            new_columns_right.append(
+                self.columns_right_layout.itemAt(i).widget().text()
+            )
 
         num_columns = min(len(new_columns_left), len(new_columns_right))
         labels_left = new_columns_left[:num_columns]
@@ -230,9 +261,16 @@ class MergingSetsScreen(QWidget):
         self.on_hide_callback()
         self.hide()
 
+    def _get_imported_columns(self):
+        return sorted(self.engine.state.imported_data.columns)
+
     def closeEvent(self, event):
-        close = QMessageBox.question(self, "Exit", "Are you sure want to exit process? All changes will be discarded.",
-                                     QMessageBox.Yes | QMessageBox.No)
+        close = QMessageBox.question(
+            self,
+            "Exit",
+            "Are you sure want to exit process? All changes will be discarded.",
+            QMessageBox.Yes | QMessageBox.No,
+        )
         if close == QMessageBox.Yes:
             event.accept()
         else:
@@ -248,8 +286,12 @@ class MergingSetsScreen(QWidget):
 
         widget_helper = self.columns_left_layout.itemAt(0).widget()
         should_insert = False
-        if pos.x() < widget_helper.mapToGlobal(widget_helper.rect().topLeft()).x() - self.pos().x() + \
-                widget_helper.size().width():
+        if (
+            pos.x()
+            < widget_helper.mapToGlobal(widget_helper.rect().topLeft()).x()
+            - self.pos().x()
+            + widget_helper.size().width()
+        ):
             for n in range(self.columns_left_layout.count()):
                 w = self.columns_left_layout.itemAt(n).widget()
                 if w == widget:
@@ -258,9 +300,15 @@ class MergingSetsScreen(QWidget):
             if should_insert:
                 for n in range(self.columns_left_layout.count()):
                     w = self.columns_left_layout.itemAt(n).widget()
-                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y():
+                    if w is None:
+                        self.columns_left_layout.insertWidget(n - 1, widget)
+                        break
+                    elif (
+                        pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y()
+                    ):
                         self.columns_left_layout.insertWidget(n, widget)
                         break
+
         elif self.new_data is not None:
             for n in range(self.columns_right_layout.count()):
                 w = self.columns_right_layout.itemAt(n).widget()
@@ -270,7 +318,12 @@ class MergingSetsScreen(QWidget):
             if should_insert:
                 for n in range(self.columns_right_layout.count()):
                     w = self.columns_right_layout.itemAt(n).widget()
-                    if pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y():
+                    if w is None:
+                        self.columns_right_layout.insertWidget(n - 1, widget)
+                        break
+                    elif (
+                        pos.y() < w.mapToGlobal(w.rect().topLeft()).y() - self.pos().y()
+                    ):
                         self.columns_right_layout.insertWidget(n, widget)
                         break
 
@@ -281,12 +334,12 @@ def create_file_reader(file_path):
     reader = None
     if not file_path:
         raise ValueError("")
-    if '.' not in file_path:
+    if "." not in file_path:
         raise ValueError("Supported file format: .csv, .json.")
-    extension = file_path.split('.')[-1]
-    if extension == 'csv':
+    extension = file_path.split(".")[-1]
+    if extension == "csv":
         reader = CSVReader(file_path)
-    elif extension == 'json':
+    elif extension == "json":
         reader = JSONReader(file_path)
     else:
         raise ValueError("Supported file format: .csv, .json.")
