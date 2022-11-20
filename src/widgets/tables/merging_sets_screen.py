@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import (
 )
 from widgets import QtTable, LoadingWidget
 from data_import import Loader
+import numpy as np
 
 
 class DragButton(QPushButton):
@@ -44,6 +45,7 @@ class MergingSetsScreen(QWidget):
         self._load_styles()
         self.drag_init_pos = None
         self.on_hide_callback = on_hide
+        self.cancel_merge = False
 
         # init all components to have a ref
         self.layout = QHBoxLayout()
@@ -185,15 +187,15 @@ class MergingSetsScreen(QWidget):
 
     def _load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
-        filepath = QFileDialog.getOpenFileName(
+        file_path = QFileDialog.getOpenFileName(
             self, "Choose file", ".", "*.csv *.json"
         )[0]
         try:
-            reader = self.loader.create_file_reader(filepath)
+            reader = self.loader.create_file_reader(file_path)
         except ValueError as e:
             self.import_state_label.setText(str(e))
         else:
-            self._on_success(reader, filepath)
+            self._on_success(reader, file_path)
 
     def _load_from_database_handle(self):
         self.import_state_label.setText("Loading ...")
@@ -251,9 +253,26 @@ class MergingSetsScreen(QWidget):
                 self.columns_right_layout.itemAt(i).widget().text()
             )
 
-        num_columns = min(len(new_columns_left), len(new_columns_right))
+        if len(new_columns_left) != len(new_columns_right):
+            self._render_equality_warning()
+            if self.cancel_merge:
+                self.cancel_merge = False
+                return
+
+        num_columns = max(len(new_columns_left), len(new_columns_right))
         labels_left = new_columns_left[:num_columns]
         labels_right = new_columns_right[:num_columns]
+        for i in range(len(new_columns_right) - len(new_columns_left)):
+            new_column_name = f"Column {i}"
+            labels_left.append(new_column_name)
+            self.engine.state.imported_data[new_column_name] = np.nan
+            self.engine.state.raw_data[new_column_name] = np.nan
+
+        for i in range(len(new_columns_left) - len(new_columns_right)):
+            new_column_name = f"Column {i}"
+            labels_right.append(new_column_name)
+            self.new_data[new_column_name] = np.nan
+
         labels_mapping = dict(zip(labels_right, labels_left))
 
         self.engine.reorder_columns(labels_left)
@@ -331,3 +350,18 @@ class MergingSetsScreen(QWidget):
                         break
 
         e.accept()
+
+    def _render_equality_warning(self):
+        warning = QMessageBox()
+        warning.setIcon(QMessageBox.Warning)
+        warning.setText("The numbers of dimensions are not the same")
+        warning.setInformativeText(
+            "You can let the system fill the dataset or you can cancel submission and try to remove some columns. Do you want to add extra columns with nulls?"
+        )
+        warning.setWindowTitle("Dimensions are not the same")
+        warning.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        warning.buttonClicked.connect(self._on_warning_submit_callback)
+        warning.exec_()
+
+    def _on_warning_submit_callback(self, button):
+        self.cancel_merge = "Cancel" in button.text()
