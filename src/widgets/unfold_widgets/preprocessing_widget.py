@@ -271,8 +271,8 @@ class PreprocessingWidget(UnfoldWidget):
     def set_reduction_bounds(self, max_dimensions):
         self.num_dimensions_spinbox.setMinimum(1)
         self.num_dimensions_spinbox.setMaximum(max(max_dimensions - 1, 1))
-        self.manual_reduction.setDisabled(max_dimensions < 3)
-        self.auto_reduction.setDisabled(max_dimensions < 3)
+        self.manual_reduction.setDisabled(max_dimensions < 2)
+        self.auto_reduction.setDisabled(max_dimensions < 2)
 
     def show_reduction_results(self):
         self.preview_screen = DataPreviewScreen(
