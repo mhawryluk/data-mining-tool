@@ -54,7 +54,7 @@ class PreprocessingEngine:
                 plotter = NullFrequencyPlot(column)
             case "Scatter plot":
                 plotter = ScatterPlot(
-                    self.state.imported_data.select_dtypes(include=["number"]),
+                    self.state.imported_data,
                     scatter_settings,
                 )
         return plotter.plot()

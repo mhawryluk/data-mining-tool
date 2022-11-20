@@ -9,6 +9,7 @@ class ClusteringCanvas(FigureCanvasQTAgg):
     def __init__(self, animation):
         fig, self.axes = plt.subplots()
         self.animation = animation
+        self.sc = None
         super().__init__(fig)
 
     def data_plot(
@@ -28,7 +29,7 @@ class ClusteringCanvas(FigureCanvasQTAgg):
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
         self.axes.set_ylim(min_y, max_y)
-        self.axes.scatter(x=vector_x, y=vector_y)
+        self.sc = self.axes.scatter(x=vector_x, y=vector_y)
         if drawing:
             self.draw()
         if self.animation:
@@ -51,25 +52,29 @@ class ClusteringCanvas(FigureCanvasQTAgg):
     ):
         self.axes.cla()
         label = [labels[i] for i in range(len(vector_x))]
-        max_label = len(vector_x_centroids)
+        if vector_x_centroids is not None:
+            max_label = len(vector_x_centroids)
+        else:
+            max_label = max(label) + 1
         self.axes.set_xlabel(name_x)
         self.axes.set_ylabel(name_y)
         self.axes.set_xlim(min_x, max_x)
         self.axes.set_ylim(min_y, max_y)
-        self.axes.scatter(
+        self.sc = self.axes.scatter(
             vector_x, vector_y, c=label, cmap="gist_rainbow", vmin=0, vmax=max_label
         )
-        self.axes.scatter(
-            vector_x_centroids,
-            vector_y_centroids,
-            c=np.arange(max_label),
-            marker="s",
-            cmap="gist_rainbow",
-            vmin=0,
-            vmax=max_label,
-            edgecolor="black",
-            linewidths=1,
-        )
+        if vector_x_centroids is not None:
+            self.axes.scatter(
+                vector_x_centroids,
+                vector_y_centroids,
+                c=np.arange(max_label),
+                marker="s",
+                cmap="gist_rainbow",
+                vmin=0,
+                vmax=max_label,
+                edgecolor="black",
+                linewidths=1,
+            )
         if drawing:
             self.draw()
         if self.animation:
