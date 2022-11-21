@@ -16,7 +16,12 @@ class AssociationRulesOptions(AlgorithmOptions):
         self.min_support_spinbox.setMaximum(1)
         self.min_support_spinbox.setSingleStep(0.1)
         self.layout.addRow(
-            QLabelWithTooltip("Minimum support:", "example"), self.min_support_spinbox
+            QLabelWithTooltip(
+                "Minimum support:",
+                "Minimum percentage of transactions containing a specific subset for it to be considered a frequent set.\n"
+                "Too low of a value will result in a very big number of sets found which may affect performance.",
+            ),
+            self.min_support_spinbox,
         )
 
         self.min_confidence_spinbox = QDoubleSpinBox()
@@ -24,12 +29,22 @@ class AssociationRulesOptions(AlgorithmOptions):
         self.min_confidence_spinbox.setValue(0.1)
         self.min_confidence_spinbox.setMaximum(1)
         self.layout.addRow(
-            QLabelWithTooltip("Minimum confidence:"), self.min_confidence_spinbox
+            QLabelWithTooltip(
+                "Minimum confidence:",
+                "Confidence of a rule is calculated by dividing the probability of the items occurring together by the probability of the occurrence of the antecedent.\n"
+                "It signifies how strong the association rule really is.\n"
+                "Too low of a value may lead to obtaining a high amount of rules.\n"
+                "Bigger value will limit rules to just the strongest selection.",
+            ),
+            self.min_confidence_spinbox,
         )
 
         self.index_columns_combobox = QComboBox()
         self.layout.addRow(
-            QLabelWithTooltip("Index column:"), self.index_columns_combobox
+            QLabelWithTooltip(
+                "Index column:", "Column containing each transaction's ID"
+            ),
+            self.index_columns_combobox,
         )
 
     def get_data(self) -> dict:
