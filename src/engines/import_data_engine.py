@@ -69,6 +69,7 @@ class ImportDataEngine:
         if columns is not None:
             self.state.raw_data = self.state.raw_data[columns]
         if limit_type is not None:
+            self.state.raw_data.drop(self.state.reduced_columns, axis=1, inplace=True)
             if limit_type == "first":
                 self.state.raw_data = self.state.raw_data.iloc[:limit_num]
             elif limit_type == "random":

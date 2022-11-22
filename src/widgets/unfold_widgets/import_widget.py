@@ -76,7 +76,7 @@ class ImportWidget(UnfoldWidget):
         self.limit_type_box.addItems(["random", "first"])
         self.limit_type_box.setEnabled(False)
         self.limit_number_box = QSpinBox()
-        self.limit_number_box.setMinimum(0)
+        self.limit_number_box.setMinimum(1)
         self.limit_number_box.setEnabled(False)
         self.limit_button = QPushButton("Limit number of rows")
         self.limit_button.clicked.connect(partial(self.click_listener, 'limit_data'))
@@ -197,6 +197,14 @@ class ImportWidget(UnfoldWidget):
                 loading = LoadingWidget(self.save_data_handle)
                 loading.execute()
             case 'columns':
+                columns = self.get_checked_columns()
+                if not columns:
+                    error = QMessageBox()
+                    error.setIcon(QMessageBox.Critical)
+                    error.setText("No columns were chosen")
+                    error.setWindowTitle("Error")
+                    error.exec_()
+                    return
                 self.engine.limit_data(columns=self.get_checked_columns())
                 self.set_columns_grid()
                 self.display_data()
