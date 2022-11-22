@@ -66,14 +66,18 @@ class ImportDataEngine:
         self.state.last_algorithm = None
 
     def limit_data(self, columns: Optional[List[str]] = None, limit_type: Optional[str] = None, limit_num: Optional[str] = None):
+        self.drop_additional_columns()
         if columns is not None:
             self.state.raw_data = self.state.raw_data[columns]
         if limit_type is not None:
-            self.state.raw_data.drop(self.state.reduced_columns, axis=1, inplace=True)
             if limit_type == "first":
                 self.state.raw_data = self.state.raw_data.iloc[:limit_num]
             elif limit_type == "random":
                 self.state.raw_data = self.state.raw_data.sample(limit_num)
+        self.state.imported_data = self.state.raw_data.copy()
+
+    def drop_additional_columns(self):
+        self.state.raw_data.drop(self.state.reduced_columns, axis=1, inplace=True)
         self.state.imported_data = self.state.raw_data.copy()
         self.state.reduced_columns = []
         self.state.steps_visualization = None

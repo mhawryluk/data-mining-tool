@@ -246,7 +246,7 @@ class ImportWidget(UnfoldWidget):
         self.reset_data_table()
 
     def save_data_handle(self):
-        self.engine.limit_data(columns=self.get_checked_columns())
+        self.engine.drop_additional_columns()
         text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
         if is_ok:
             if text:
