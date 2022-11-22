@@ -11,7 +11,6 @@ class ImportDataEngine:
     def __init__(self, state: State):
         self.state = state
         self.reader_data = None
-        self.imported_data = None
         self.from_file = False
         self.database_manager = DatabaseObjectManager()
 
@@ -47,7 +46,7 @@ class ImportDataEngine:
         return self.from_file and self.reader_data.is_file_big()
 
     def get_columns(self) -> List[str]:
-        return self.reader_data.get_columns_name()
+        return list(self.state.raw_data.columns)
 
     def clear_import(self):
         self.reader_data = None
@@ -59,9 +58,22 @@ class ImportDataEngine:
         self.state.last_algorithm = None
 
     def read_data(self, columns: Optional[List[str]] = None):
-        self.imported_data = self.reader_data.read(columns)
-        self.state.imported_data = self.imported_data
-        self.state.raw_data = self.imported_data.copy()
+        self.state.imported_data = self.reader_data.read(columns)
+        self.state.raw_data = self.state.imported_data.copy()
+        self.state.reduced_columns = []
+        self.state.steps_visualization = None
+        self.state.algorithm_results_widgets = {}
+        self.state.last_algorithm = None
+
+    def limit_data(self, columns: Optional[List[str]] = None, limit_type: Optional[str] = None, limit_num: Optional[str] = None):
+        if columns is not None:
+            self.state.raw_data = self.state.raw_data[columns]
+        if limit_type is not None:
+            if limit_type == "first":
+                self.state.raw_data = self.state.raw_data.iloc[:limit_num]
+            elif limit_type == "random":
+                self.state.raw_data = self.state.raw_data.sample(limit_num)
+        self.state.imported_data = self.state.raw_data.copy()
         self.state.reduced_columns = []
         self.state.steps_visualization = None
         self.state.algorithm_results_widgets = {}
@@ -70,10 +82,10 @@ class ImportDataEngine:
     def save_to_database(self, title: str) -> str:
         writer = Writer(DB_NAME, title)
         try:
-            if type(self.imported_data) == pd.DataFrame:
-                writer.add_dataset(self.imported_data)
+            if type(self.state.raw_data) == pd.DataFrame:
+                writer.add_dataset(self.state.raw_data)
             else:
-                for chunk in self.imported_data:
+                for chunk in self.state.save_data:
                     writer.add_dataset(chunk)
         except Exception as e:
             print(e)

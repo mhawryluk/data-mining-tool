@@ -137,6 +137,9 @@ class ImportWidget(UnfoldWidget):
         """ draw columns and checkbox to choose them """
         columns = self.engine.get_columns()
 
+        for i in reversed(range(self.columns_group_form_layout.count())):
+            self.columns_group_form_layout.itemAt(i).widget().setParent(None)
+
         for column in columns:
             checkbox = QCheckBox(column)
             checkbox.setMinimumHeight(26)
@@ -144,8 +147,7 @@ class ImportWidget(UnfoldWidget):
             self.columns_group_form_layout.addRow(checkbox)
 
     def display_data(self):
-        self.engine.read_data(self.get_checked_columns())
-        if (data := self.engine.imported_data) is not None:
+        if (data := self.engine.state.raw_data) is not None:
             self.data_table.setModel(QtTable(data))
 
     def reset_data_table(self):
@@ -172,10 +174,9 @@ class ImportWidget(UnfoldWidget):
             case 'save_data':
                 loading = LoadingWidget(self.save_data_handle)
                 loading.execute()
-            case 'not_save_data':
-                loading = LoadingWidget(self.not_save_data_handle)
-                loading.execute()
             case 'columns':
+                self.engine.limit_data(columns=self.get_checked_columns())
+                self.set_columns_grid()
                 self.display_data()
 
     def load_from_file_handle(self):
@@ -189,6 +190,7 @@ class ImportWidget(UnfoldWidget):
             self.clear_widgets()
             self.filepath_line.setText(basename(file_path))
             self.set_options()
+            self.engine.read_data()
             self.set_columns_grid()
             self.display_data()
 
@@ -201,6 +203,7 @@ class ImportWidget(UnfoldWidget):
             return
         self.clear_widgets()
         self.set_options()
+        self.engine.read_data()
         self.set_columns_grid()
         self.display_data()
 
@@ -210,20 +213,7 @@ class ImportWidget(UnfoldWidget):
         self.reset_data_table()
 
     def save_data_handle(self):
-        self.engine.read_data(self.get_checked_columns())
-        text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
-        if is_ok:
-            if text:
-                label = self.engine.save_to_database(str(text))
-                if label:
-                    self.import_state_label.setText(label)
-                else:
-                    self.import_state_label.setText("Data was stored in database.")
-            else:
-                self.import_state_label.setText("The name of collection is not valid.")
-
-    def not_save_data_handle(self):
-        self.engine.read_data(self.get_checked_columns())
+        self.engine.limit_data(columns=self.get_checked_columns())
         text, is_ok = QInputDialog.getText(self, 'input name', 'Enter name of collection:')
         if is_ok:
             if text:
