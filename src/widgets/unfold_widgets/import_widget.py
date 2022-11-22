@@ -3,8 +3,10 @@ from os.path import basename
 from typing import List
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, QPushButton, QWidget, \
-    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, QScrollArea, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QGroupBox, QCheckBox, QLabel, QComboBox, QLineEdit, \
+    QPushButton, QWidget, \
+    QInputDialog, QTableView, QHBoxLayout, QVBoxLayout, QSizePolicy, QFormLayout, \
+    QScrollArea, QMessageBox, QFileDialog, QSpinBox
 
 from widgets import UnfoldWidget, QtTable, LoadingWidget
 
@@ -67,8 +69,18 @@ class ImportWidget(UnfoldWidget):
 
         # columns group
         self.columns_group = QGroupBox(self.frame)
-        self.columns_group.setTitle("Columns")
-        self.columns_group_layout = QVBoxLayout(self.columns_group)
+        self.columns_group.setTitle("Limit data")
+        self.columns_group_layout = QFormLayout(self.columns_group)
+
+        self.limit_type_box = QComboBox()
+        self.limit_type_box.addItems(["random", "first"])
+        self.limit_type_box.setEnabled(False)
+        self.limit_number_box = QSpinBox()
+        self.limit_number_box.setMinimum(0)
+        self.limit_number_box.setEnabled(False)
+        self.limit_button = QPushButton("Limit number of rows")
+        self.limit_button.clicked.connect(partial(self.click_listener, 'limit_data'))
+        self.limit_button.setEnabled(False)
 
         self.scroll_box = QGroupBox(self.frame)
         self.columns_group_form_layout = QFormLayout(self.scroll_box)
@@ -82,8 +94,10 @@ class ImportWidget(UnfoldWidget):
         self.columns_button.clicked.connect(partial(self.click_listener, 'columns'))
 
         self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.columns_group_layout.addWidget(self.scroll)
-        self.columns_group_layout.addWidget(self.columns_button, alignment=Qt.AlignCenter)
+        self.columns_group_layout.addRow(self.limit_type_box, self.limit_number_box)
+        self.columns_group_layout.addRow(self.limit_button)
+        self.columns_group_layout.addRow(self.scroll)
+        self.columns_group_layout.addRow(self.columns_button)
         self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # data table
@@ -117,6 +131,9 @@ class ImportWidget(UnfoldWidget):
         """ enable buttons after load data """
         self.save_button.setEnabled(True)
         self.columns_button.setEnabled(True)
+        self.limit_button.setEnabled(True)
+        self.limit_type_box.setEnabled(True)
+        self.limit_number_box.setEnabled(True)
         if self.engine.is_data_big():
             error = QMessageBox()
             error.setIcon(QMessageBox.Warning)
@@ -128,6 +145,9 @@ class ImportWidget(UnfoldWidget):
         """ clear import widget from loaded data """
         self.save_button.setEnabled(False)
         self.columns_button.setEnabled(False)
+        self.limit_button.setEnabled(False)
+        self.limit_type_box.setEnabled(False)
+        self.limit_number_box.setEnabled(False)
         self.import_state_label.clear()
         self.filepath_line.clear()
         for i in reversed(range(self.columns_group_form_layout.count())):
@@ -149,6 +169,8 @@ class ImportWidget(UnfoldWidget):
     def display_data(self):
         if (data := self.engine.state.raw_data) is not None:
             self.data_table.setModel(QtTable(data))
+            self.limit_number_box.setMaximum(len(data))
+            self.limit_number_box.setValue(len(data) // 2)
 
     def reset_data_table(self):
         self.data_table.setModel(None)
@@ -177,6 +199,9 @@ class ImportWidget(UnfoldWidget):
             case 'columns':
                 self.engine.limit_data(columns=self.get_checked_columns())
                 self.set_columns_grid()
+                self.display_data()
+            case 'limit_data':
+                self.engine.limit_data(limit_type=self.limit_type_box.currentText(), limit_num=self.limit_number_box.value())
                 self.display_data()
 
     def load_from_file_handle(self):
