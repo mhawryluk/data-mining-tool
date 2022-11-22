@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from visualization import plots
 from widgets import UnfoldWidget
 from widgets.components import SamplesColumnsChoice
 from widgets.tables import DataPreviewScreen, PreviewReason
@@ -234,7 +235,7 @@ class PreprocessingWidget(UnfoldWidget):
 
     def plot_data(self, column_name, plot_type):
         self._clear_plot()
-        plot_box = self.engine.create_plot(
+        plot_box = self.create_plot(
             column_name, plot_type, self.parameters_widget.get_parameters()
         )
         if plot_type == "Scatter plot":
@@ -281,6 +282,26 @@ class PreprocessingWidget(UnfoldWidget):
             self.engine.set_state(columns)
             self.engine.clean_data("remove")
             self.get_data()
+
+    def create_plot(self, column_name, plot_type, scatter_settings):
+        plotter = None
+        if column_name == "":
+            plotter = plots.FallbackPlot([])
+            return plotter.plot()
+        column = self.engine.state.imported_data.loc[:, column_name]
+        match plot_type:
+            case "Histogram":
+                plotter = plots.HistogramPlot(column)
+            case "Pie":
+                plotter = plots.PiePlot(column)
+            case "Null frequency":
+                plotter = plots.NullFrequencyPlot(column)
+            case "Scatter plot":
+                plotter = plots.ScatterPlot(
+                    self.engine.state.imported_data.select_dtypes(include=["number"]),
+                    scatter_settings,
+                )
+        return plotter.plot()
 
     def remove_nulls_warning(self):
         warning = QMessageBox()

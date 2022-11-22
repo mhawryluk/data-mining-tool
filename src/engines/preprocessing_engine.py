@@ -3,13 +3,6 @@ from pandas.api.types import is_numeric_dtype
 
 from preprocess import DataCleaner, PCAReducer
 from state import State
-from visualization.plots import (
-    FallbackPlot,
-    HistogramPlot,
-    NullFrequencyPlot,
-    PiePlot,
-    ScatterPlot,
-)
 
 
 class PreprocessingEngine:
@@ -40,26 +33,6 @@ class PreprocessingEngine:
 
     def set_state(self, columns):
         self.state.imported_data = self.state.raw_data[columns].copy()
-
-    def create_plot(self, column_name, plot_type, scatter_settings):
-        plotter = None
-        if column_name == "":
-            plotter = FallbackPlot([])
-            return plotter.plot()
-        column = self.state.imported_data.loc[:, column_name]
-        match plot_type:
-            case "Histogram":
-                plotter = HistogramPlot(column)
-            case "Pie":
-                plotter = PiePlot(column)
-            case "Null frequency":
-                plotter = NullFrequencyPlot(column)
-            case "Scatter plot":
-                plotter = ScatterPlot(
-                    self.state.imported_data.select_dtypes(include=["number"]),
-                    scatter_settings,
-                )
-        return plotter.plot()
 
     def clean_data(self, op_type):
         match op_type:
