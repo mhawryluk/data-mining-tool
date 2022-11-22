@@ -92,3 +92,9 @@ class SamplesColumnsChoice(QWidget):
     def get_parameters(self):
         parameters = {"ox": self.ox, "oy": self.oy, "samples": self.samples}
         return parameters
+
+    def change_enabled_buttons(self, value):
+        self.ox_box.setEnabled(value)
+        self.oy_box.setEnabled(value)
+        self.sample_button.setEnabled(value)
+        self.sample_box.setEnabled(value)
