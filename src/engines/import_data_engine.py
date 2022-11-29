@@ -73,7 +73,7 @@ class ImportDataEngine:
             if limit_type == "first":
                 self.state.raw_data = self.state.raw_data.iloc[:limit_num]
             elif limit_type == "random":
-                self.state.raw_data = self.state.raw_data.sample(limit_num)
+                self.state.raw_data = self.state.raw_data.sample(limit_num).reset_index(drop=True)
         self.state.imported_data = self.state.raw_data.copy()
 
     def drop_additional_columns(self):
