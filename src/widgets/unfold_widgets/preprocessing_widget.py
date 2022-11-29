@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
 
 from visualization import plots
 from widgets import UnfoldWidget
-from widgets.components import SamplesColumnsChoice
+from widgets.components import QLabelWithTooltip, SamplesColumnsChoice
 from widgets.tables import DataPreviewScreen, PreviewReason
 
 
@@ -104,14 +104,26 @@ class PreprocessingWidget(UnfoldWidget):
             QLabel("Number of dimensions:"), self.num_dimensions_spinbox
         )
 
-        self.manual_reduction.setText("Reduce with fixed number")
+        self.manual_reduction_label = QLabelWithTooltip(
+            "Reduce with fixed number",
+            "Reduce dimensions using the Principal Component Analysis algorithm.",
+        )
+        self.manual_reduction_label.layout.setAlignment(
+            Qt.AlignCenter | Qt.AlignVCenter
+        )
+        self.manual_reduction.setLayout(self.manual_reduction_label.layout)
         self.manual_reduction.setMinimumHeight(23)
         self.auto_reduction_group_layout.addRow(self.manual_reduction)
         self.manual_reduction.clicked.connect(
             lambda: self.reduce_dimensions(self.num_dimensions_spinbox.value())
         )
 
-        self.auto_reduction.setText("Reduce dynamically")
+        self.auto_reduction_label = QLabelWithTooltip(
+            "Reduce dynamically",
+            "Reduce dimensions using the Principal Component Analysis algorithm.\nTake dimensions with imapct more than 5%.",
+        )
+        self.auto_reduction_label.layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.auto_reduction.setLayout(self.auto_reduction_label.layout)
         self.auto_reduction.setMinimumHeight(23)
         self.auto_reduction_group_layout.addRow(self.auto_reduction)
         self.auto_reduction.clicked.connect(lambda: self.reduce_dimensions())
