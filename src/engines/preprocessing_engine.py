@@ -28,7 +28,7 @@ class PreprocessingEngine:
 
     def get_size(self):
         if self.state.imported_data is None:
-            return []
+            return 0
         return len(self.state.imported_data.select_dtypes(include=["number"]))
 
     def set_state(self, columns):

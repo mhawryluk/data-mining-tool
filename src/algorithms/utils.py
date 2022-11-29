@@ -5,14 +5,8 @@ import numpy as np
 import pandas as pd
 
 
-def get_samples(data, num_samples) -> List:
-    if isinstance(data, int):
-        array = np.arange(data)
-        np.random.shuffle(array)
-        return list(array[:num_samples])
-    array = np.arange(data.shape[0])
-    np.random.shuffle(array)
-    return list(array[:num_samples])
+def get_samples(arr_size, num_samples) -> List:
+    return np.random.choice(arr_size, num_samples, replace=False)
 
 
 def check_numeric(element: any) -> bool:
