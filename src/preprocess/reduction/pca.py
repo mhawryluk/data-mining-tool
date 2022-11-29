@@ -1,7 +1,9 @@
 from typing import Optional
-from state import State
+
 import numpy as np
 import pandas as pd
+
+from state import State
 
 
 class PCAReducer:
@@ -17,17 +19,24 @@ class PCAReducer:
         covariance_matrix = data.cov()
         reduce_matrix = self._pca(covariance_matrix, dim_number)
         override = np.dot(data, reduce_matrix)
-        columns = ["{}".format(self.format_column_name(reduce_matrix[:, i])) for i in range(dim_number or override.shape[1])]
+        columns = [
+            "{}".format(self.format_column_name(reduce_matrix[:, i]))
+            for i in range(dim_number or override.shape[1])
+        ]
         self.state.imported_data = pd.DataFrame(override, columns=columns)
-        self.state.raw_data = pd.concat([self.state.raw_data, pd.DataFrame(override, columns=columns)], axis=1)
+        self.state.raw_data = pd.concat(
+            [self.state.raw_data, pd.DataFrame(override, columns=columns)], axis=1
+        )
         return columns
 
     def _pca(self, matrix, dim_number=None):
         reducer, weights = self._svd(matrix, k=dim_number)
         if dim_number is None:
             total = sum(weights)
-            ratios = [weight/total for weight in weights]
-            columns_num = max(len(list(filter(lambda x: x > self.acceptable_ratio, ratios))), 2)
+            ratios = [weight / total for weight in weights]
+            columns_num = max(
+                len(list(filter(lambda x: x > self.acceptable_ratio, ratios))), 2
+            )
             return reducer[:, :columns_num]
         return reducer
 
@@ -65,5 +74,7 @@ class PCAReducer:
         label = ""
         indexes = np.argpartition(vector, -2)[-2:]
         for index in indexes:  # arbitrary value
-            label += "{}*{}+".format(round(vector[index], 2), self.initial_columns[index])
+            label += "{}*{}+".format(
+                round(vector[index], 2), self.initial_columns[index]
+            )
         return label.rstrip("+")
