@@ -91,7 +91,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.animation_type.setFixedWidth(175)
 
         self.animation_group_layout.addStretch()
-        self.animation_group_layout.addWidget(QLabel("Visualization type"))
+        self.animation_group_layout.addWidget(QLabel("Visualization type:"))
         self.animation_group_layout.addWidget(self.animation_type)
 
         self.second_column.addWidget(self.options_group)
