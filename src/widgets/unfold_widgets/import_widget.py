@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSizePolicy,
+    QSpinBox,
     QTableView,
     QVBoxLayout,
     QWidget,
@@ -87,8 +88,18 @@ class ImportWidget(UnfoldWidget):
 
         # columns group
         self.columns_group = QGroupBox(self.frame)
-        self.columns_group.setTitle("Columns")
-        self.columns_group_layout = QVBoxLayout(self.columns_group)
+        self.columns_group.setTitle("Limit data")
+        self.columns_group_layout = QFormLayout(self.columns_group)
+
+        self.limit_type_box = QComboBox()
+        self.limit_type_box.addItems(["random", "first"])
+        self.limit_type_box.setEnabled(False)
+        self.limit_number_box = QSpinBox()
+        self.limit_number_box.setMinimum(1)
+        self.limit_number_box.setEnabled(False)
+        self.limit_button = QPushButton("Limit number of rows")
+        self.limit_button.clicked.connect(partial(self.click_listener, "limit_data"))
+        self.limit_button.setEnabled(False)
 
         self.scroll_box = QGroupBox(self.frame)
         self.columns_group_form_layout = QFormLayout(self.scroll_box)
@@ -102,10 +113,10 @@ class ImportWidget(UnfoldWidget):
         self.columns_button.clicked.connect(partial(self.click_listener, "columns"))
 
         self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.columns_group_layout.addWidget(self.scroll)
-        self.columns_group_layout.addWidget(
-            self.columns_button, alignment=Qt.AlignCenter
-        )
+        self.columns_group_layout.addRow(self.limit_type_box, self.limit_number_box)
+        self.columns_group_layout.addRow(self.limit_button)
+        self.columns_group_layout.addRow(self.scroll)
+        self.columns_group_layout.addRow(self.columns_button)
         self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # data table
@@ -139,6 +150,9 @@ class ImportWidget(UnfoldWidget):
         """enable buttons after load data"""
         self.save_button.setEnabled(True)
         self.columns_button.setEnabled(True)
+        self.limit_button.setEnabled(True)
+        self.limit_type_box.setEnabled(True)
+        self.limit_number_box.setEnabled(True)
         if self.engine.is_data_big():
             error = QMessageBox()
             error.setIcon(QMessageBox.Warning)
@@ -150,6 +164,9 @@ class ImportWidget(UnfoldWidget):
         """clear import widget from loaded data"""
         self.save_button.setEnabled(False)
         self.columns_button.setEnabled(False)
+        self.limit_button.setEnabled(False)
+        self.limit_type_box.setEnabled(False)
+        self.limit_number_box.setEnabled(False)
         self.import_state_label.clear()
         self.filepath_line.clear()
         for i in reversed(range(self.columns_group_form_layout.count())):
@@ -159,6 +176,9 @@ class ImportWidget(UnfoldWidget):
         """draw columns and checkbox to choose them"""
         columns = self.engine.get_columns()
 
+        for i in reversed(range(self.columns_group_form_layout.count())):
+            self.columns_group_form_layout.itemAt(i).widget().setParent(None)
+
         for column in columns:
             checkbox = QCheckBox(column)
             checkbox.setMinimumHeight(26)
@@ -166,9 +186,10 @@ class ImportWidget(UnfoldWidget):
             self.columns_group_form_layout.addRow(checkbox)
 
     def display_data(self):
-        self.engine.read_data(self.get_checked_columns())
-        if (data := self.engine.imported_data) is not None:
+        if (data := self.engine.state.raw_data) is not None:
             self.data_table.setModel(QtTable(data))
+            self.limit_number_box.setMaximum(len(data))
+            self.limit_number_box.setValue(len(data) // 2)
 
     def reset_data_table(self):
         self.data_table.setModel(None)
@@ -194,10 +215,23 @@ class ImportWidget(UnfoldWidget):
             case "save_data":
                 loading = LoadingWidget(self.save_data_handle)
                 loading.execute()
-            case "not_save_data":
-                loading = LoadingWidget(self.not_save_data_handle)
-                loading.execute()
             case "columns":
+                columns = self.get_checked_columns()
+                if not columns:
+                    error = QMessageBox()
+                    error.setIcon(QMessageBox.Critical)
+                    error.setText("No columns were chosen")
+                    error.setWindowTitle("Error")
+                    error.exec_()
+                    return
+                self.engine.limit_data(columns=self.get_checked_columns())
+                self.set_columns_grid()
+                self.display_data()
+            case "limit_data":
+                self.engine.limit_data(
+                    limit_type=self.limit_type_box.currentText(),
+                    limit_num=self.limit_number_box.value(),
+                )
                 self.display_data()
 
     def load_from_file_handle(self):
@@ -213,6 +247,7 @@ class ImportWidget(UnfoldWidget):
             self.clear_widgets()
             self.filepath_line.setText(basename(file_path))
             self.set_options()
+            self.engine.read_data()
             self.set_columns_grid()
             self.display_data()
 
@@ -225,6 +260,7 @@ class ImportWidget(UnfoldWidget):
             return
         self.clear_widgets()
         self.set_options()
+        self.engine.read_data()
         self.set_columns_grid()
         self.display_data()
 
@@ -234,22 +270,7 @@ class ImportWidget(UnfoldWidget):
         self.reset_data_table()
 
     def save_data_handle(self):
-        self.engine.read_data(self.get_checked_columns())
-        text, is_ok = QInputDialog.getText(
-            self, "input name", "Enter name of collection:"
-        )
-        if is_ok:
-            if text:
-                label = self.engine.save_to_database(str(text))
-                if label:
-                    self.import_state_label.setText(label)
-                else:
-                    self.import_state_label.setText("Data was stored in database.")
-            else:
-                self.import_state_label.setText("The name of collection is not valid.")
-
-    def not_save_data_handle(self):
-        self.engine.read_data(self.get_checked_columns())
+        self.engine.drop_additional_columns()
         text, is_ok = QInputDialog.getText(
             self, "input name", "Enter name of collection:"
         )
