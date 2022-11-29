@@ -1,6 +1,6 @@
-import numpy as np
 from PyQt5.QtWidgets import QMessageBox
-from widgets.plots import Plot
+
+from visualization.plots import Plot
 
 
 class NullFrequencyPlot(Plot):
@@ -10,7 +10,7 @@ class NullFrequencyPlot(Plot):
     def plot(self):
         try:
             ax = self.canvas.figure.subplots()
-            nulls = self.data.isna().sum()/len(self.data)
+            nulls = self.data.isna().sum() / len(self.data)
             not_nulls = 1 - nulls
             values = []
             labels = []
@@ -20,7 +20,7 @@ class NullFrequencyPlot(Plot):
             if not_nulls:
                 values.append(not_nulls)
                 labels.append("Not NULLs")
-            ax.pie(values, labels=labels, autopct='%1.0f%%')
+            ax.pie(values, labels=labels, autopct="%1.0f%%")
             return self.canvas
         except Exception:
             error = QMessageBox()

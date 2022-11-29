@@ -1,10 +1,11 @@
 from typing import List, Optional
+
 import pandas as pd
 
-from data_import import CSVReader, JSONReader, DatabaseReader
+from data_import import CSVReader, DatabaseReader, JSONReader
 from database import DatabaseObjectManager, Writer
-from state import State
 from engines import DB_NAME
+from state import State
 
 
 class ImportDataEngine:
@@ -17,12 +18,12 @@ class ImportDataEngine:
     def load_data_from_file(self, file_path: str) -> None:
         if not file_path:
             raise ValueError("")
-        if '.' not in file_path:
+        if "." not in file_path:
             raise ValueError("Supported file format: .csv, .json.")
-        extension = file_path.split('.')[-1]
-        if extension == 'csv':
+        extension = file_path.split(".")[-1]
+        if extension == "csv":
             self.reader_data = CSVReader(file_path)
-        elif extension == 'json':
+        elif extension == "json":
             self.reader_data = JSONReader(file_path)
         else:
             raise ValueError("Supported file format: .csv, .json.")
@@ -37,7 +38,7 @@ class ImportDataEngine:
             self.reader_data = None
             return error
         self.from_file = False
-        return ''
+        return ""
 
     def get_table_names_from_database(self) -> List[str]:
         return self.database_manager.get_collections_list(DB_NAME)
@@ -65,7 +66,12 @@ class ImportDataEngine:
         self.state.algorithm_results_widgets = {}
         self.state.last_algorithm = None
 
-    def limit_data(self, columns: Optional[List[str]] = None, limit_type: Optional[str] = None, limit_num: Optional[str] = None):
+    def limit_data(
+        self,
+        columns: Optional[List[str]] = None,
+        limit_type: Optional[str] = None,
+        limit_num: Optional[str] = None,
+    ):
         self.drop_additional_columns()
         if columns is not None:
             self.state.raw_data = self.state.raw_data[columns]
@@ -73,7 +79,9 @@ class ImportDataEngine:
             if limit_type == "first":
                 self.state.raw_data = self.state.raw_data.iloc[:limit_num]
             elif limit_type == "random":
-                self.state.raw_data = self.state.raw_data.sample(limit_num).reset_index(drop=True)
+                self.state.raw_data = self.state.raw_data.sample(limit_num).reset_index(
+                    drop=True
+                )
         self.state.imported_data = self.state.raw_data.copy()
 
     def drop_additional_columns(self):
@@ -94,9 +102,9 @@ class ImportDataEngine:
                     writer.add_dataset(chunk)
         except Exception as e:
             print(e)
-            return 'There is some problem with database.'
+            return "There is some problem with database."
         result = self.load_data_from_database(title)
         if result:
             return result
         self.read_data()
-        return ''
+        return ""

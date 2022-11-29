@@ -1,11 +1,12 @@
 import os
-from data_import import AVAILABLE_RAM_MEMORY, SIZE_OF_VALUE
 from typing import List
+
+from data_import import AVAILABLE_RAM_MEMORY, SIZE_OF_VALUE
 
 
 class FileReader:
     def __init__(self, filepath: str):
-        self.error = ''
+        self.error = ""
         self.filepath = filepath
 
         # check size of file

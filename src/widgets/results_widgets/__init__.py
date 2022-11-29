@@ -1,4 +1,5 @@
-from .k_means_results import KMeansResultsWidget
-from .extra_trees_results import ExtraTreesResultsWidget
+from .algorithm_results import AlgorithmResultsWidget
 from .a_priori_results import APrioriResultsWidget
+from .extra_trees_results import ExtraTreesResultsWidget
 from .gmm_results import GMMResultsWidget
+from .k_means_results import KMeansResultsWidget

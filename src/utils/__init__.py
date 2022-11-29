@@ -1,6 +1,6 @@
 from .automate_steps import AutomateSteps
-from .QtImageViewer import QtImageViewer
 from .QImage import QImage
+from .QtImageViewer import QtImageViewer
 
 
 def format_set(set_: tuple):
