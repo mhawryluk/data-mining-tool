@@ -90,11 +90,12 @@ class AlgorithmSetupWidget(UnfoldWidget):
         self.animation_type.addItems(["Step by step", "Animation", "No visualization"])
         self.animation_type.setFixedWidth(175)
 
-        self.animation_group_layout.addWidget(QLabel("Visualization type"))
         self.animation_group_layout.addStretch()
+        self.animation_group_layout.addWidget(QLabel("Visualization type"))
         self.animation_group_layout.addWidget(self.animation_type)
 
         self.second_column.addWidget(self.options_group)
+        self.second_column.addSpacing(10)
         self.second_column.addWidget(self.animation_group)
 
         # description group
@@ -112,6 +113,7 @@ class AlgorithmSetupWidget(UnfoldWidget):
             )
         )
         self.algorithm_description.setWordWrap(True)
+        self.algorithm_description.setAlignment(Qt.AlignJustify)
         self.algorithm_description_group_layout.addWidget(self.algorithm_description)
 
         self.third_column.addWidget(self.algorithm_description_group)
