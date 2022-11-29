@@ -171,12 +171,12 @@ class ClusteringStepsTemplate(QWidget):
             case "restart":
                 self.animation = None
                 self.change_step(-1 * self.current_step)
-                self.change_enabled_buttons(True)
+                self.parameters_widget.change_enabled_buttons(True)
                 self.interval_box.setEnabled(True)
                 self.run_button.setEnabled(True)
             case "run":
                 self.is_running = not self.is_running
-                self.change_enabled_buttons(False)
+                self.parameters_widget.change_enabled_buttons(False)
                 self.interval_box.setEnabled(False)
                 self.restart_button.setEnabled(not self.is_running)
                 if self.is_running:
@@ -190,12 +190,6 @@ class ClusteringStepsTemplate(QWidget):
                     self.animation.pause()
                     self.run_button.setText("Start animation")
 
-    def change_enabled_buttons(self, value):
-        self.ox_box.setEnabled(value)
-        self.oy_box.setEnabled(value)
-        self.sample_button.setEnabled(value)
-        self.sample_box.setEnabled(value)
-
     def change_step(self, change: int):
         new_step = max(0, min(self.max_step, self.current_step + change))
         if new_step == self.current_step:
@@ -207,7 +201,7 @@ class ClusteringStepsTemplate(QWidget):
 
     def end_animation(self):
         self.run_button.setText("Start animation")
-        self.change_enabled_buttons(True)
+        self.parameters_widget.change_enabled_buttons(True)
         self.run_button.setEnabled(False)
         self.restart_button.setEnabled(True)
         self.is_running = False

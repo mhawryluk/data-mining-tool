@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Type
 
 from algorithms import Algorithm
 from algorithms.associations import APriori
@@ -41,10 +41,10 @@ class AlgorithmTechniques(Enum):
 
 @dataclass
 class AlgorithmConfig:
-    algorithm: Algorithm.__class__
-    options: AlgorithmOptions.__class__
-    steps_visualization: AlgorithmStepsVisualization.__class__
-    result_widget: AlgorithmResultsWidget.__class__
+    algorithm: Type[Algorithm]
+    options: Type[AlgorithmOptions]
+    steps_visualization: Type[AlgorithmStepsVisualization]
+    result_widget: Type[AlgorithmResultsWidget]
     description: str = ""
 
 
