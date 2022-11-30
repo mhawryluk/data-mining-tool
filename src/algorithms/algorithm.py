@@ -7,6 +7,8 @@ class Algorithm:
     Abstract class of algorithm
     """
 
+    metrics_info = {}
+
     @abstractmethod
     def run(self, with_steps: bool):
         """

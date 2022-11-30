@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QPushButton,
     QScrollArea,
+    QVBoxLayout,
 )
 
 from widgets.components import ParametersGroupBox
@@ -18,8 +19,10 @@ from widgets.results_widgets import AlgorithmResultsWidget
 
 
 class ExtraTreesResultsWidget(AlgorithmResultsWidget):
-    def __init__(self, data, predict, configs, feature_importance, options):
-        super().__init__(data, options)
+    def __init__(
+        self, data, predict, configs, feature_importance, options, metrics_info
+    ):
+        super().__init__(data, options, metrics_info)
 
         self.predict = predict
         self.configs = configs
@@ -28,10 +31,16 @@ class ExtraTreesResultsWidget(AlgorithmResultsWidget):
 
         self.layout = QHBoxLayout(self)
 
-        # algorithm parameters
+        # algorithm parameters and metrics
         self.params_group = ParametersGroupBox(self.options)
-
-        self.layout.addWidget(self.params_group)
+        if self.metrics_info:
+            self.metrics_group = ParametersGroupBox(self.metrics_info, "Metrics")
+            self.params_metric_layout = QVBoxLayout()
+            self.params_metric_layout.addWidget(self.params_group)
+            self.params_metric_layout.addWidget(self.metrics_group)
+            self.layout.addLayout(self.params_metric_layout)
+        else:
+            self.layout.addWidget(self.params_group)
 
         # feature importance
         self.feature_importance_group = QGroupBox()

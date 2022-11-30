@@ -7,8 +7,8 @@ from widgets.results_widgets import AlgorithmResultsWidget
 
 
 class KMeansResultsWidget(AlgorithmResultsWidget):
-    def __init__(self, data, labels, centroids, options):
-        super().__init__(data, options)
+    def __init__(self, data, labels, centroids, options, metrics_info):
+        super().__init__(data, options, metrics_info)
 
         self.labels = labels
         self.centroids = centroids
@@ -17,10 +17,16 @@ class KMeansResultsWidget(AlgorithmResultsWidget):
 
         self.layout = QHBoxLayout(self)
 
-        # algorithm parameters
+        # algorithm parameters and metrics
         self.params_group = ParametersGroupBox(self.options)
-
-        self.layout.addWidget(self.params_group)
+        if self.metrics_info:
+            self.metrics_group = ParametersGroupBox(self.metrics_info, "Metrics")
+            self.params_metric_layout = QVBoxLayout()
+            self.params_metric_layout.addWidget(self.params_group)
+            self.params_metric_layout.addWidget(self.metrics_group)
+            self.layout.addLayout(self.params_metric_layout)
+        else:
+            self.layout.addWidget(self.params_group)
 
         # clustering result group
         self.clustering_result_group = QGroupBox()
