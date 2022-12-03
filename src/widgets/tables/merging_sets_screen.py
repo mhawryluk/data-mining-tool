@@ -190,7 +190,7 @@ class MergingSetsScreen(QWidget):
             )
 
         if self.new_data is not None and self.new_data.columns is not None:
-            for column in sorted(self.new_data.columns):
+            for column in sorted(self.new_data.columns, key=lambda x: x.upper()):
                 self.columns_right_layout.insertWidget(
                     self.columns_right_layout.count() - 1,
                     ColumnWidget(column, self.columns_right_layout),
@@ -273,7 +273,7 @@ class MergingSetsScreen(QWidget):
             )
 
         if self.new_data is not None and self.new_data.columns is not None:
-            for column in sorted(self.new_data.columns):
+            for column in sorted(self.new_data.columns, key=lambda x: x.upper()):
                 self.columns_right_layout.insertWidget(
                     self.columns_right_layout.count() - 1,
                     ColumnWidget(column, self.columns_right_layout),
@@ -324,7 +324,7 @@ class MergingSetsScreen(QWidget):
         self.hide()
 
     def _get_imported_columns(self):
-        return sorted(self.engine.state.imported_data.columns)
+        return sorted(self.engine.state.imported_data.columns, key=lambda x: x.upper())
 
     def closeEvent(self, event):
         close = QMessageBox.question(
