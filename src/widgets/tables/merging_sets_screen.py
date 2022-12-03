@@ -69,6 +69,7 @@ class ColumnWidget(QWidget):
 class MergingSetsScreen(QWidget):
     def __init__(self, widget, on_hide):
         super().__init__()
+        self.widget = widget
         self.engine = widget.engine
         self.loader = Loader()
         self.setAcceptDrops(True)
@@ -319,6 +320,7 @@ class MergingSetsScreen(QWidget):
         self.new_data.rename(columns=labels_mapping, inplace=True)
 
         self.engine.merge_sets(self.new_data[labels_left])
+        self.widget.set_columns_grid()
 
         self.on_hide_callback()
         self.hide()
