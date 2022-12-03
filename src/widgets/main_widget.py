@@ -1,26 +1,33 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QWIDGETSIZE_MAX
+from PyQt5.QtWidgets import QWIDGETSIZE_MAX, QHBoxLayout, QWidget
 
-from widgets import UNFOLD_BUTTON_WIDTH, AlgorithmSetupWidget, ImportWidget, PreprocessingWidget, \
-    ResultsWidget, AlgorithmRunWidget
+from widgets import (
+    UNFOLD_BUTTON_WIDTH,
+    AlgorithmRunWidget,
+    AlgorithmSetupWidget,
+    ImportWidget,
+    PreprocessingWidget,
+    ResultsWidget,
+)
 
 
 class MainWidget(QWidget):
-
     def __init__(self, engines):
         super().__init__()
 
-        self.import_widget = ImportWidget(self, engines['import_data'])
-        self.preprocessing_widget = PreprocessingWidget(self, engines['preprocess'])
-        self.algorithm_setup_widget = AlgorithmSetupWidget(self, engines['algorithm_setup'])
-        self.algorithm_run_widget = AlgorithmRunWidget(self, engines['algorithm_run'])
-        self.results_widget = ResultsWidget(self, engines['results'])
+        self.import_widget = ImportWidget(self, engines["import_data"])
+        self.preprocessing_widget = PreprocessingWidget(self, engines["preprocess"])
+        self.algorithm_setup_widget = AlgorithmSetupWidget(
+            self, engines["algorithm_setup"]
+        )
+        self.algorithm_run_widget = AlgorithmRunWidget(self, engines["algorithm_run"])
+        self.results_widget = ResultsWidget(self, engines["results"])
 
         self.widgets = {
-            'import_widget': self.import_widget,
-            'preprocessing_widget': self.preprocessing_widget,
-            'algorithm_setup_widget': self.algorithm_setup_widget,
-            'algorithm_run_widget': self.algorithm_run_widget,
-            'results_widget': self.results_widget
+            "import_widget": self.import_widget,
+            "preprocessing_widget": self.preprocessing_widget,
+            "algorithm_setup_widget": self.algorithm_setup_widget,
+            "algorithm_run_widget": self.algorithm_run_widget,
+            "results_widget": self.results_widget,
         }
 
         layout = QHBoxLayout()

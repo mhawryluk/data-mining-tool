@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QAbstractTableModel, Qt
 from PyQt5 import QtCore
+from PyQt5.QtCore import QAbstractTableModel, Qt
 
 
 class QtTable(QAbstractTableModel):
@@ -20,7 +20,12 @@ class QtTable(QAbstractTableModel):
         return None
 
     @QtCore.pyqtSlot(int, QtCore.Qt.Orientation, result=str)
-    def headerData(self, section: int, orientation: QtCore.Qt.Orientation, role: int = QtCore.Qt.DisplayRole):
+    def headerData(
+        self,
+        section: int,
+        orientation: QtCore.Qt.Orientation,
+        role: int = QtCore.Qt.DisplayRole,
+    ):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 return self._data.columns[section]

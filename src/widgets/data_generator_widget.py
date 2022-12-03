@@ -1,14 +1,25 @@
 from functools import partial
-from typing import Dict, Tuple, Type, Callable
+from typing import Callable, Dict, Tuple, Type
 
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QComboBox, QLabel, QFormLayout, \
-    QTableView, QSizePolicy, QMessageBox
 from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSizePolicy,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+)
 
-from data_generators import clustering_blobs_generator, DataGeneratorFunction
+from data_generators import DataGeneratorFunction, clustering_blobs_generator
 from engines import ImportDataEngine
 from widgets import QtTable
-from widgets.options_widgets import ClusteringBlobsDataOptions, Options
+from widgets.options_widgets import AlgorithmOptions, ClusteringBlobsDataOptions
 
 
 class DataGeneratorWidget(QWidget):
@@ -22,11 +33,16 @@ class DataGeneratorWidget(QWidget):
         self.setGeometry(QRect(400, 400, 800, 400))
 
         self.setObjectName("data_generator_widget")
-        with open('../static/css/styles.css') as stylesheet:
+        with open("../static/css/styles.css") as stylesheet:
             self.setStyleSheet(stylesheet.read())
 
-        self.dataset_types_config: Dict[str, Tuple[DataGeneratorFunction, Type[Options]]] = {
-            "(Clustering) Normal distribution blobs": (clustering_blobs_generator, ClusteringBlobsDataOptions),
+        self.dataset_types_config: Dict[
+            str, Tuple[DataGeneratorFunction, Type[AlgorithmOptions]]
+        ] = {
+            "(Clustering) Normal distribution blobs": (
+                clustering_blobs_generator,
+                ClusteringBlobsDataOptions,
+            ),
         }
 
         self.layout = QHBoxLayout()
@@ -35,16 +51,16 @@ class DataGeneratorWidget(QWidget):
 
         self.generate_button = QPushButton(self)
         self.generate_button.setText("Generate")
-        self.generate_button.clicked.connect(partial(self.click_listener, 'generate'))
+        self.generate_button.clicked.connect(partial(self.click_listener, "generate"))
 
         self.load_button = QPushButton(self)
         self.load_button.setText("Load")
-        self.load_button.clicked.connect(partial(self.click_listener, 'load'))
+        self.load_button.clicked.connect(partial(self.click_listener, "load"))
         self.load_button.setEnabled(False)
 
         self.cancel_button = QPushButton(self)
         self.cancel_button.setText("Cancel")
-        self.cancel_button.clicked.connect(partial(self.click_listener, 'cancel'))
+        self.cancel_button.clicked.connect(partial(self.click_listener, "cancel"))
 
         self._render_data()
 
@@ -75,7 +91,9 @@ class DataGeneratorWidget(QWidget):
         self.dataset_type_box = QComboBox(self.algorithm_group)
         self.dataset_type_box.addItems(self.dataset_types_config.keys())
 
-        self.dataset_type_box.currentTextChanged.connect(partial(self.click_listener, 'dataset_type'))
+        self.dataset_type_box.currentTextChanged.connect(
+            partial(self.click_listener, "dataset_type")
+        )
 
         self.algorithm_group_layout.addWidget(self.dataset_type_label)
         self.algorithm_group_layout.addWidget(self.dataset_type_box)
@@ -106,25 +124,27 @@ class DataGeneratorWidget(QWidget):
 
     def click_listener(self, button_type: str):
         match button_type:
-            case 'dataset_type':
+            case "dataset_type":
                 self._set_data_generator(self.dataset_type_box.currentText())
-            case 'generate':
+            case "generate":
                 try:
                     options = self.options_widget.get_data()
                 except Exception as e:
                     error = QMessageBox()
                     error.setIcon(QMessageBox.Critical)
-                    error.setText(f"The format of the set options is incorrect. {f'({e})' if e else ''}")
+                    error.setText(
+                        f"The format of the set options is incorrect. {f'({e})' if e else ''}"
+                    )
                     error.setWindowTitle("Error")
                     error.exec_()
                 else:
                     self.generated_data = self.selected_generator(options)
                     self.data_table.setModel(QtTable(self.generated_data))
                     self.load_button.setEnabled(self.generated_data is not None)
-            case 'cancel':
+            case "cancel":
                 self._reset()
                 self.hide()
-            case 'load':
+            case "load":
                 self.engine.set_generated_data(self.generated_data)
                 self._reset()
                 self.callback()

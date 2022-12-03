@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QSplashScreen, QDesktopWidget, QApplication
+from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtWidgets import QApplication, QDesktopWidget, QSplashScreen
 
 
 class LoadingWidget:
@@ -11,7 +11,9 @@ class LoadingWidget:
 
     def execute(self):
         self.screen.showMessage("<h1>Loading...</h1>", Qt.AlignCenter)
-        self.screen.setGeometry(QRect(self.size.width()//2-125, self.size.height()//2-50, 250, 100))
+        self.screen.setGeometry(
+            QRect(self.size.width() // 2 - 125, self.size.height() // 2 - 50, 250, 100)
+        )
         self.screen.show()
         QApplication.processEvents()
         if self.args:

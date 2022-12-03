@@ -1,6 +1,6 @@
-from database import DatabaseObjectManager
 import pandas as pd
-from bson import Code
+
+from database import DatabaseObjectManager
 
 
 class Reader:
@@ -10,7 +10,7 @@ class Reader:
         self.collection = self.db_manager.get_collection(db_name, coll_name)
 
     def execute_query(self, query=None, columns=None, use_id=0, limit=0):
-        """ Make a query for specified collection and return result as a list """
+        """Make a query for specified collection and return result as a list"""
         if columns is None:
             columns = self.get_columns_names()
         if query is None:
@@ -18,11 +18,16 @@ class Reader:
         fields_selected = {}
         for name in columns:
             fields_selected[name] = 1
-        fields_selected['_id'] = use_id
-        return list(self.collection.find(query, fields_selected).limit(limit)) # maybe changed to another format
+        fields_selected["_id"] = use_id
+        return list(
+            self.collection.find(query, fields_selected).limit(limit)
+        )  # maybe changed to another format
 
-    def get_nth_chunk(self, query=None, columns=None, use_id=0, chunk_size=0, chunk_number=0):
-        """ Returns a n-th chunk of data from database, chunks are indexed from 0 """
+    def get_nth_chunk(
+        self, query=None, columns=None, use_id=0, chunk_size=0, chunk_number=0
+    ):
+        """Returns a n-th chunk of data from database,
+        chunks are indexed from 0"""
         if columns is None:
             columns = self.get_columns_names()
         if query is None:
@@ -30,18 +35,29 @@ class Reader:
         fields_selected = {}
         for name in columns:
             fields_selected[name] = 1
-        fields_selected['_id'] = use_id
-        chunk = self.collection.find(query, fields_selected).skip(chunk_size*chunk_number).limit(chunk_size)
+        fields_selected["_id"] = use_id
+        chunk = (
+            self.collection.find(query, fields_selected)
+            .skip(chunk_size * chunk_number)
+            .limit(chunk_size)
+        )
         return pd.DataFrame(list(chunk))
 
     def get_rows_number(self):
         return self.collection.count_documents({})
 
     def get_columns_names(self):
-        result = self.collection.aggregate([
-            {"$project": {"arrayofkeyvalue": {"$objectToArray": "$$ROOT"}}},
-            {"$unwind": "$arrayofkeyvalue"},
-            {"$group": {"_id": "null", "allkeys": {"$addToSet": "$arrayofkeyvalue.k"}}}
-        ]).next()["allkeys"]
+        result = self.collection.aggregate(
+            [
+                {"$project": {"arrayofkeyvalue": {"$objectToArray": "$$ROOT"}}},
+                {"$unwind": "$arrayofkeyvalue"},
+                {
+                    "$group": {
+                        "_id": "null",
+                        "allkeys": {"$addToSet": "$arrayofkeyvalue.k"},
+                    }
+                },
+            ]
+        ).next()["allkeys"]
         result.remove("_id")
         return result

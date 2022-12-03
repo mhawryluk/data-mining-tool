@@ -1,6 +1,8 @@
 from typing import List, Optional
-from data_import import FileReader
+
 import pandas as pd
+
+from data_import import FileReader
 
 
 class JSONReader(FileReader):
@@ -11,11 +13,13 @@ class JSONReader(FileReader):
 
             # if file is big we can not read by chunks because of .json format
             if self.need_chunks:
-                self.error = 'File is to big for parsing in .json format'
+                self.error = "File is to big for parsing in .json format"
         except FileNotFoundError:
-            self.error = 'This filepath: {} is invalid. Please write correct path.'.format(filepath)
+            self.error = (
+                f"This filepath: {filepath} is invalid. Please write correct path."
+            )
         except Exception:
-            self.error = 'There is some problem with file. Please try again.'
+            self.error = "There is some problem with file. Please try again."
         self.reader = None
 
     def read(self, columns: Optional[List[str]]):
@@ -24,5 +28,7 @@ class JSONReader(FileReader):
 
     def _read_all(self, columns: Optional[List[str]]):
         if columns is None:
-            self.reader = pd.read_json(self.filepath, typ='frame')
-        self.reader = pd.read_json(self.filepath, typ='frame').filter(items=columns, axis='columns')
+            self.reader = pd.read_json(self.filepath, typ="frame")
+        self.reader = pd.read_json(self.filepath, typ="frame").filter(
+            items=columns, axis="columns"
+        )

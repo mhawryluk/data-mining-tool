@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QVBoxLayout
 
 from widgets import UnfoldWidget
 
 
 class AlgorithmRunWidget(UnfoldWidget):
     def __init__(self, parent, engine):
-        super().__init__(parent, engine, 'algorithm_run_widget', 'ALGORITHM RUN')
+        super().__init__(parent, engine, "algorithm_run_widget", "ALGORITHM RUN")
 
         self.button.disconnect()
         self.button.clicked.connect(self.load_widget)
@@ -18,9 +18,9 @@ class AlgorithmRunWidget(UnfoldWidget):
             error = QMessageBox()
             error.setIcon(QMessageBox.Critical)
             if self.engine.state.imported_data is None:
-                error.setText('No dataset was selected')
+                error.setText("No dataset was selected")
             else:
-                error.setText('Steps visualization is disabled')
+                error.setText("Steps visualization is disabled")
             error.setWindowTitle("Error")
             error.exec_()
             return

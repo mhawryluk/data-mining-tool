@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QRect
-from PyQt5.QtGui import QPixmap, QPainter, QPaintEvent
+from PyQt5.QtGui import QPainter, QPaintEvent, QPixmap
 from PyQt5.QtWidgets import QWidget
 
 
@@ -19,7 +19,7 @@ class QImage(QWidget):
             _, _, w_widget, h_widget = self.rect().getRect()
             x, y, w, h = self.p.rect().getRect()
             if w > w_widget or h > h_widget:
-                alfa = min(w_widget/w, h_widget/h)
+                alfa = min(w_widget / w, h_widget / h)
                 w = int(alfa * w)
                 h = int(alfa * h)
             x = int(0.5 * (w_widget - w))

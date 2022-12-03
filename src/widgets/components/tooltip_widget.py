@@ -1,8 +1,11 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QStyle
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 
 class QLabelWithTooltip(QWidget):
+    INFO_ICON_FILE = "../static/img/info_icon.svg"
+
     def __init__(self, label: str, description: str = ""):
         super().__init__()
 
@@ -13,7 +16,7 @@ class QLabelWithTooltip(QWidget):
         self.layout.addWidget(self.label, alignment=Qt.AlignVCenter)
 
         if description:
-            self.icon = self.style().standardIcon(QStyle.StandardPixmap.SP_FileDialogInfoView).pixmap(14)
+            self.icon = QIcon(self.INFO_ICON_FILE).pixmap(14)
             self.icon_label = QLabel()
             self.icon_label.setPixmap(self.icon)
             self.icon_label.setToolTip(description)

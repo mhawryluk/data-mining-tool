@@ -8,9 +8,9 @@ class DocumentRemover:
         self.collection = self.db_manager.get_collection(db_name, coll_name)
 
     def query_remove(self, query):
-        """ Remove all elements that passed the query """
+        """Remove all elements that passed the query"""
         return self.collection.delete_many(query)
 
     def remove_all(self):
-        """ Clear a collection """
+        """Clear a collection"""
         return self.collection.delete_many({})

@@ -3,10 +3,10 @@ from typing import Dict
 from PyQt5.QtWidgets import QLabel, QLineEdit, QSpinBox
 
 from widgets.components import QLabelWithTooltip
-from .options import Options
+from widgets.options_widgets import AlgorithmOptions
 
 
-class ClusteringBlobsDataOptions(Options):
+class ClusteringBlobsDataOptions(AlgorithmOptions):
     def __init__(self):
         super().__init__()
         self.number_of_blobs_box = QSpinBox()
@@ -20,7 +20,7 @@ class ClusteringBlobsDataOptions(Options):
                 "Sample sizes per blob:",
                 "Series of integer values separated by a single space.\n"
                 "There should be as many numbers listed as the number of blobs.\n"
-                "If just one value is provided, it will be used for each blob."
+                "If just one value is provided, it will be used for each blob.",
             ),
             self.sample_size_input,
         )
@@ -36,7 +36,7 @@ class ClusteringBlobsDataOptions(Options):
                 "Standard deviation per dimension:",
                 "Series of decimal values separated by a single space.\n"
                 "There should be as many numbers listed as the number of dimensions.\n"
-                "If just one value is provided, it will be used for each dimension."
+                "If just one value is provided, it will be used for each dimension.",
             ),
             self.std_input,
         )
@@ -49,7 +49,7 @@ class ClusteringBlobsDataOptions(Options):
             QLabelWithTooltip(
                 "Seed:",
                 "Used for setting state of the randomizer.\n"
-                "Setting this field to a chosen value will ensure getting the same results every time."
+                "Setting this field to a chosen value will ensure getting the same results every time.",
             ),
             self.seed_box,
         )
@@ -70,7 +70,9 @@ class ClusteringBlobsDataOptions(Options):
         provided_stds_number = len(dims_stds)
 
         if provided_stds_number != 1 and provided_stds_number != dims_number:
-            raise ValueError("Incorrect number of provided values of standard deviation")
+            raise ValueError(
+                "Incorrect number of provided values of standard deviation"
+            )
 
         if provided_stds_number == 1:
             dims_stds *= dims_number

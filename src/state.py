@@ -9,3 +9,5 @@ class State:
         self.imported_data = None
         self.steps_visualization = None
         self.algorithm_results_widgets = {}
+        self.reduced_columns = []
+        self.last_algorithm = None
