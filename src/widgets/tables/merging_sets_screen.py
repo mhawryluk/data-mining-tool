@@ -1,25 +1,28 @@
 from functools import partial
-import pandas as pd
-from PyQt5.QtCore import Qt, QMimeData
-from PyQt5.QtGui import QDrag, QPixmap
-from PyQt5.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QTableView,
-    QLabel,
-    QVBoxLayout,
-    QGroupBox,
-    QFormLayout,
-    QLineEdit,
-    QPushButton,
-    QComboBox,
-    QMessageBox,
-    QFileDialog,
-    QBoxLayout,
-)
-from widgets import QtTable, LoadingWidget
-from data_import import Loader
+
 import numpy as np
+import pandas as pd
+from PyQt5.QtCore import QMimeData, Qt
+from PyQt5.QtGui import QDrag, QKeyEvent, QPixmap
+from PyQt5.QtWidgets import (
+    QBoxLayout,
+    QComboBox,
+    QFileDialog,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QStyle,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+)
+
+from data_import import Loader
+from widgets import LoadingWidget, QtTable
 
 
 class DragButton(QPushButton):
@@ -32,6 +35,35 @@ class DragButton(QPushButton):
             self.render(pixmap)
             drag.setPixmap(pixmap)
             drag.exec_(Qt.MoveAction)
+
+
+class ColumnWidget(QWidget):
+    def __init__(self, column_name, parent_layout):
+        super().__init__()
+        self.column_name = column_name
+        self.parent_layout = parent_layout
+
+        self.layout = QHBoxLayout(self)
+        self.drag_button = DragButton(self.column_name)
+
+        self.layout.addWidget(self.drag_button, stretch=1)
+
+        self.remove_button = QPushButton()
+        pixmapi = getattr(QStyle, "SP_DialogCancelButton")
+        icon = self.style().standardIcon(pixmapi)
+        self.remove_button.setIcon(icon)
+        self.remove_button.setFixedWidth(30)
+        self.remove_button.clicked.connect(self._on_remove)
+        self.layout.addWidget(self.remove_button)
+
+    def _on_remove(self):
+        for i in reversed(range(self.parent_layout.count() - 1)):
+            if (
+                self.parent_layout.itemAt(i).widget().drag_button.text()
+                == self.column_name
+            ):
+                self.parent_layout.itemAt(i).widget().setParent(None)
+                break
 
 
 class MergingSetsScreen(QWidget):
@@ -150,15 +182,18 @@ class MergingSetsScreen(QWidget):
         )
         self.columns_merge_group_layout.addWidget(instruction, 0)
 
-        for column in self._get_imported_columns():
+        imported_columns = self._get_imported_columns()
+        for column in imported_columns:
             self.columns_left_layout.insertWidget(
-                self.columns_left_layout.count() - 1, DragButton(column)
+                self.columns_left_layout.count() - 1,
+                ColumnWidget(column, self.columns_left_layout),
             )
 
         if self.new_data is not None and self.new_data.columns is not None:
             for column in sorted(self.new_data.columns):
                 self.columns_right_layout.insertWidget(
-                    self.columns_right_layout.count() - 1, DragButton(column)
+                    self.columns_right_layout.count() - 1,
+                    ColumnWidget(column, self.columns_right_layout),
                 )
 
         self.left_columns.setLayout(self.columns_left_layout)
@@ -230,15 +265,18 @@ class MergingSetsScreen(QWidget):
         for i in reversed(range(self.columns_right_layout.count() - 1)):
             self.columns_right_layout.itemAt(i).widget().setParent(None)
 
-        for column in self._get_imported_columns():
+        imported_columns = self._get_imported_columns()
+        for column in imported_columns:
             self.columns_left_layout.insertWidget(
-                self.columns_left_layout.count() - 1, DragButton(column)
+                self.columns_left_layout.count() - 1,
+                ColumnWidget(column, self.columns_left_layout),
             )
 
         if self.new_data is not None and self.new_data.columns is not None:
             for column in sorted(self.new_data.columns):
                 self.columns_right_layout.insertWidget(
-                    self.columns_right_layout.count() - 1, DragButton(column)
+                    self.columns_right_layout.count() - 1,
+                    ColumnWidget(column, self.columns_right_layout),
                 )
 
         self.submit_button.setEnabled(self.new_data is not None)
@@ -247,10 +285,12 @@ class MergingSetsScreen(QWidget):
         new_columns_left = []
         new_columns_right = []
         for i in range(self.columns_left_layout.count() - 1):
-            new_columns_left.append(self.columns_left_layout.itemAt(i).widget().text())
+            new_columns_left.append(
+                self.columns_left_layout.itemAt(i).widget().column_name
+            )
         for i in range(self.columns_right_layout.count() - 1):
             new_columns_right.append(
-                self.columns_right_layout.itemAt(i).widget().text()
+                self.columns_right_layout.itemAt(i).widget().column_name
             )
 
         if len(new_columns_left) != len(new_columns_right):
@@ -304,7 +344,7 @@ class MergingSetsScreen(QWidget):
 
     def dropEvent(self, e):
         pos = e.pos()
-        widget = e.source()
+        widget = e.source().parent()
 
         widget_helper = self.columns_left_layout.itemAt(0).widget()
         should_insert = False
