@@ -406,6 +406,7 @@ class ExtraTrees(Algorithm):
         return matplotlib.colors.to_hex(color)
 
     def _update_metric(self):
+        self.metrics_info = {}
         true = false = 0
         for _, row in self.test_data.iterrows():
             target = row[self.tree_parameters["label_name"]]

@@ -5,6 +5,8 @@ import pandas as pd
 
 from algorithms import Algorithm
 
+from .metrics import davies_bouldin_score, dunn_index
+
 init_types = ["random", "kmeans++"]
 
 
@@ -93,9 +95,12 @@ class KMeans(Algorithm):
             return False
         return True
 
-    def update_metrics(self, labels, centroids):
-        dunn_index = self.check_solution(labels, centroids)
-        self.metrics_info["dunn index"] = round(dunn_index, 3)
+    def update_metrics(self, labels):
+        self.metrics_info = {}
+        d_index = dunn_index(self.data, labels)
+        db_index = davies_bouldin_score(self.data, labels)
+        self.metrics_info["Dunn index"] = round(d_index, 3)
+        self.metrics_info["Davies Bouldin index"] = round(db_index, 3)
 
     def check_solution(self, labels, centroids):
         """dunn index"""
@@ -118,7 +123,7 @@ class KMeans(Algorithm):
         )
         if self.repeats == 1:
             solution = runner()
-            self.update_metrics(solution[0], solution[1])
+            self.update_metrics(solution[0])
             return solution[0], pd.DataFrame(solution[1], columns=self.data.columns)
         best_value = np.inf
         solution = None
@@ -131,7 +136,7 @@ class KMeans(Algorithm):
                 steps = [(step[0].copy(), step[1].copy()) for step in self.saved_steps]
                 best_value = value
         self.saved_steps = steps
-        self.update_metrics(solution[0], solution[1])
+        self.update_metrics(solution[0])
         return solution[0], pd.DataFrame(solution[1], columns=self.data.columns)
 
     def run_with_saving_steps(self) -> Tuple[np.ndarray, List[Tuple]]:
