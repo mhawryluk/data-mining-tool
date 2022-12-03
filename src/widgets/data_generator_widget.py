@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Callable, Dict, Tuple, Type
 
+import matplotlib.pyplot as plt
 from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import (
     QComboBox,
@@ -18,7 +19,9 @@ from PyQt5.QtWidgets import (
 
 from data_generators import DataGeneratorFunction, clustering_blobs_generator
 from engines import ImportDataEngine
+from visualization.plots import ScatterPlot
 from widgets import QtTable
+from widgets.components import SamplesColumnsChoice
 from widgets.options_widgets import AlgorithmOptions, ClusteringBlobsDataOptions
 
 
@@ -29,7 +32,7 @@ class DataGeneratorWidget(QWidget):
         self.callback = callback
 
         self.generated_data = None
-        self.setWindowTitle("Data Generator")
+        self.setWindowTitle("Data generator")
         self.setGeometry(QRect(400, 400, 800, 400))
 
         self.setObjectName("data_generator_widget")
@@ -63,6 +66,7 @@ class DataGeneratorWidget(QWidget):
         self.cancel_button.clicked.connect(partial(self.click_listener, "cancel"))
 
         self._render_data()
+        self._render_scatter_plot()
 
         self.left_column = QVBoxLayout()
         self.left_column.addWidget(self.algorithm_group)
@@ -74,10 +78,11 @@ class DataGeneratorWidget(QWidget):
         self.left_column.addWidget(self.cancel_button)
 
         self.right_column = QVBoxLayout()
-        self.right_column.addWidget(self.data_group)
+        self.right_column.addWidget(self.data_group, 2)
+        self.right_column.addWidget(self.scatter_plot_group, 1)
 
-        self.layout.addLayout(self.left_column)
-        self.layout.addLayout(self.right_column)
+        self.layout.addLayout(self.left_column, 0)
+        self.layout.addLayout(self.right_column, 1)
 
         self.hide()
         self.setLayout(self.layout)
@@ -118,9 +123,38 @@ class DataGeneratorWidget(QWidget):
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.data_group_layout.addWidget(self.data_table)
 
+    def _render_scatter_plot(self):
+        self.scatter_plot_group = QGroupBox(self)
+        self.scatter_plot_group.setTitle("Plot")
+        self.scatter_plot_group_layout = QHBoxLayout(self.scatter_plot_group)
+
+        self.parameters_widget = SamplesColumnsChoice()
+        self.parameters_widget.samples_changed.connect(self._plot_data)
+
+        self.plot_layout = QVBoxLayout()
+
+        self.scatter_plot_group_layout.addWidget(self.parameters_widget, 0)
+        self.scatter_plot_group_layout.addLayout(self.plot_layout, 1)
+
+    def _plot_data(self):
+        self._reset_plot()
+        if self.generated_data is not None:
+            parameters = self.parameters_widget.get_parameters()
+            parameters["group_by"] = None
+            self.plot = ScatterPlot(self.generated_data, parameters).plot()
+            self.plot_layout.addWidget(self.plot)
+
+    def _reset_plot(self):
+        if item := self.plot_layout.itemAt(0):
+            item.widget().setParent(None)
+            plt.close(self.plot.fig)
+
     def _reset(self):
         self.generated_data = None
         self.data_table.setModel(None)
+        self.parameters_widget.change_enabled_buttons(False)
+        self.parameters_widget.reset()
+        self._reset_plot()
 
     def click_listener(self, button_type: str):
         match button_type:
@@ -141,6 +175,22 @@ class DataGeneratorWidget(QWidget):
                     self.generated_data = self.selected_generator(options)
                     self.data_table.setModel(QtTable(self.generated_data))
                     self.load_button.setEnabled(self.generated_data is not None)
+                    self.parameters_widget.ox_box.currentTextChanged.disconnect()
+                    self.parameters_widget.oy_box.currentTextChanged.disconnect()
+
+                    if self.generated_data is not None:
+                        self.parameters_widget.change_enabled_buttons(True)
+                        self.parameters_widget.new_columns_name(
+                            list(self.generated_data.columns)
+                        )
+                        self.parameters_widget.new_size(len(self.generated_data))
+
+                        self.parameters_widget.ox_box.currentTextChanged.connect(
+                            self._plot_data
+                        )
+                        self.parameters_widget.oy_box.currentTextChanged.connect(
+                            self._plot_data
+                        )
             case "cancel":
                 self._reset()
                 self.hide()
@@ -149,3 +199,7 @@ class DataGeneratorWidget(QWidget):
                 self._reset()
                 self.callback()
                 self.hide()
+
+    def show(self) -> None:
+        self._reset()
+        super().show()

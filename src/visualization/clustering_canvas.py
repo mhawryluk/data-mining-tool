@@ -7,10 +7,10 @@ from matplotlib.patches import Ellipse
 
 class ClusteringCanvas(FigureCanvasQTAgg):
     def __init__(self, animation):
-        fig, self.axes = plt.subplots()
+        self.fig, self.axes = plt.subplots()
         self.animation = animation
         self.sc = None
-        super().__init__(fig)
+        super().__init__(self.fig)
 
     def data_plot(
         self,
