@@ -3,7 +3,7 @@ from functools import partial
 import numpy as np
 import pandas as pd
 from PyQt5.QtCore import QMimeData, Qt
-from PyQt5.QtGui import QDrag, QKeyEvent, QPixmap
+from PyQt5.QtGui import QDrag, QPixmap
 from PyQt5.QtWidgets import (
     QBoxLayout,
     QComboBox,
