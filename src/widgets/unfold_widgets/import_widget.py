@@ -135,10 +135,10 @@ class ImportWidget(UnfoldWidget):
         self.columns_button.clicked.connect(partial(self.click_listener, "columns"))
 
         self.scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.columns_group_layout.addWidget(self.scroll)
-        self.columns_group_layout.addWidget(
-            self.columns_button, alignment=Qt.AlignCenter
-        )
+        self.columns_group_layout.addRow(self.limit_type_box, self.limit_number_box)
+        self.columns_group_layout.addRow(self.limit_button)
+        self.columns_group_layout.addRow(self.scroll)
+        self.columns_group_layout.addRow(self.columns_button)
         self.columns_group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # data table
