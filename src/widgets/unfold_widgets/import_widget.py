@@ -2,7 +2,6 @@ from functools import partial
 from os.path import basename
 from typing import List
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -78,7 +77,7 @@ class ImportWidget(UnfoldWidget):
         self.load_data_group_layout.addRow(self.generate_button)
 
         self.generate_window = DataGeneratorWidget(
-            self.engine, callback=lambda: self.update_data_view()
+            self.engine, callback=self.update_data_view
         )
 
         self.import_state_label = QLabel(self.load_data_group)

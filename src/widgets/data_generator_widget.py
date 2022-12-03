@@ -152,6 +152,7 @@ class DataGeneratorWidget(QWidget):
     def _reset(self):
         self.generated_data = None
         self.data_table.setModel(None)
+        self.load_button.setEnabled(False)
         self.parameters_widget.change_enabled_buttons(False)
         self.parameters_widget.reset()
         self._reset_plot()
