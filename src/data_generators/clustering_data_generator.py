@@ -16,7 +16,7 @@ def clustering_blobs_generator(options: Dict) -> pd.DataFrame:
 
     noise_percentage = options["noise"]
 
-    centers = np.random.rand(blobs_number, dims_number)
+    centers = np.random.rand(blobs_number, dims_number) * 50
 
     data = pd.DataFrame()
 
@@ -25,10 +25,14 @@ def clustering_blobs_generator(options: Dict) -> pd.DataFrame:
     ):
         noise_count = round(sample_size * noise_percentage)
         blob_data = pd.DataFrame()
-        for dim_i, (center_loc, dim_std) in enumerate(zip(center, dims_stds), start=1):
+        normal_data = np.random.multivariate_normal(
+            center, np.diag(np.array(dims_stds)), sample_size
+        ).T
+
+        for dim_i, normal_data_i in enumerate(normal_data, start=1):
             blob_data[f"Dim #{dim_i}"] = np.concatenate(
                 [
-                    np.random.normal(center_loc, dim_std, size=sample_size),
+                    normal_data_i,
                     np.random.rand(noise_count),
                 ]
             )

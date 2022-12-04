@@ -30,7 +30,7 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
         self.number_of_dims_box.setValue(2)
         self.layout.addRow(QLabel("Number of dimensions:"), self.number_of_dims_box)
 
-        self.std_input = QLineEdit("0.08 0.1, 0.1 0.05")
+        self.std_input = QLineEdit("5 1.2, 2.1 2.1")
         self.layout.addRow(
             QLabelWithTooltip(
                 "Standard deviation:",
