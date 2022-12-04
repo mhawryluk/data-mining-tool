@@ -30,13 +30,14 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
         self.number_of_dims_box.setValue(2)
         self.layout.addRow(QLabel("Number of dimensions:"), self.number_of_dims_box)
 
-        self.std_input = QLineEdit("0.1 0.1")
+        self.std_input = QLineEdit("0.08 0.1, 0.1 0.05")
         self.layout.addRow(
             QLabelWithTooltip(
-                "Standard deviation per dimension:",
-                "Series of decimal values separated by a single space.\n"
-                "There should be as many numbers listed as the number of dimensions.\n"
-                "If just one value is provided, it will be used for each dimension.",
+                "Standard deviation:",
+                "Values for different blobs should be separated via a comma.\n"
+                "Values for different dimensions in a single blob should be separated via a single space.\n"
+                "Format: blob1_dim1 blob1_dim2, blob2_dim1 blob2_dim2\n"
+                "If just one value is provided, instead of a series it will be used for every blob/dimension.",
             ),
             self.std_input,
         )
@@ -80,16 +81,35 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
             sample_sizes *= blobs_number
 
         dims_number = self.number_of_dims_box.value()
-        dims_stds = list(map(float, self.std_input.text().split(" ")))
-        provided_stds_number = len(dims_stds)
-
-        if provided_stds_number != 1 and provided_stds_number != dims_number:
-            raise ValueError(
-                "Incorrect number of provided values of standard deviation"
+        standard_deviations = list(
+            map(
+                lambda std_per_blob: list(map(float, std_per_blob.strip().split(" "))),
+                self.std_input.text().split(","),
             )
+        )
 
-        if provided_stds_number == 1:
-            dims_stds *= dims_number
+        provided_stds_number_blobs = len(standard_deviations)
+        if (
+            provided_stds_number_blobs != 1
+            and provided_stds_number_blobs != blobs_number
+        ):
+            raise ValueError(
+                "Provided configuration of standard deviations doesn't match set number of blobs"
+            )
+        if provided_stds_number_blobs == 1:
+            standard_deviations *= blobs_number
+
+        for blob_stds in standard_deviations:
+            provided_stds_number_dims = len(blob_stds)
+            if (
+                provided_stds_number_dims != 1
+                and provided_stds_number_dims != dims_number
+            ):
+                raise ValueError(
+                    "Provided configuration of standard deviations doesn't match set number of dimensions"
+                )
+            if provided_stds_number_dims == 1:
+                blob_stds *= dims_number
 
         seed = self.seed_box.value()
         if not seed:
@@ -101,7 +121,7 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
             "sample_sizes": sample_sizes,
             "dims_number": dims_number,
             "blobs_number": blobs_number,
-            "dims_stds": dims_stds,
+            "dims_stds": standard_deviations,
             "seed": seed,
             "noise": noise / 100,
         }

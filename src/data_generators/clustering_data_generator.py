@@ -9,7 +9,7 @@ def clustering_blobs_generator(options: Dict) -> pd.DataFrame:
     sample_sizes = options["sample_sizes"]
 
     dims_number = options["dims_number"]
-    dims_stds = options["dims_stds"]
+    blobs_dims_stds = options["dims_stds"]
 
     seed = options.get("seed")
     np.random.seed(seed)
@@ -20,7 +20,9 @@ def clustering_blobs_generator(options: Dict) -> pd.DataFrame:
 
     data = pd.DataFrame()
 
-    for blob_i, (sample_size, center) in enumerate(zip(sample_sizes, centers), start=1):
+    for blob_i, (sample_size, center, dims_stds) in enumerate(
+        zip(sample_sizes, centers, blobs_dims_stds), start=1
+    ):
         noise_count = round(sample_size * noise_percentage)
         blob_data = pd.DataFrame()
         for dim_i, (center_loc, dim_std) in enumerate(zip(center, dims_stds), start=1):
