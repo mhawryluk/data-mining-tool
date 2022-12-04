@@ -41,6 +41,20 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
             self.std_input,
         )
 
+        self.noise_box = QSpinBox()
+        self.noise_box.setValue(0)
+        self.noise_box.setMaximum(100)
+
+        self.layout.addRow(
+            QLabelWithTooltip(
+                "Additional noise percentage:",
+                "How many more points that do not fall into desired pattern\n"
+                "will be added to the generated data set.\n"
+                "Counted as percentage of provided total sample size.",
+            ),
+            self.noise_box,
+        )
+
         self.seed_box = QSpinBox()
         self.seed_box.setRange(0, 10)
         self.seed_box.setSpecialValueText("random")
@@ -81,10 +95,13 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
         if not seed:
             seed = None
 
+        noise = self.noise_box.value()
+
         return {
             "sample_sizes": sample_sizes,
             "dims_number": dims_number,
             "blobs_number": blobs_number,
             "dims_stds": dims_stds,
             "seed": seed,
+            "noise": noise / 100,
         }
