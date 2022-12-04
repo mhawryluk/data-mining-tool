@@ -407,6 +407,8 @@ class ExtraTrees(Algorithm):
 
     def _update_metric(self):
         self.metrics_info = {}
+        if not len(self.test_data):
+            return
         true = false = 0
         for _, row in self.test_data.iterrows():
             target = row[self.tree_parameters["label_name"]]
