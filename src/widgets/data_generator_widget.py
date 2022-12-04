@@ -17,12 +17,20 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from data_generators import DataGeneratorFunction, clustering_blobs_generator
+from data_generators import (
+    DataGeneratorFunction,
+    noncentral_f_blobs_generator,
+    normal_distribution_blobs_generator,
+)
 from engines import ImportDataEngine
 from visualization.plots import ScatterPlot
 from widgets import QtTable
 from widgets.components import SamplesColumnsChoice
-from widgets.options_widgets import AlgorithmOptions, ClusteringBlobsDataOptions
+from widgets.options_widgets import (
+    AlgorithmOptions,
+    NoncentralFClusteringOptions,
+    NormalDistributionClusteringOptions,
+)
 
 
 class DataGeneratorWidget(QWidget):
@@ -43,8 +51,12 @@ class DataGeneratorWidget(QWidget):
             str, Tuple[DataGeneratorFunction, Type[AlgorithmOptions]]
         ] = {
             "(Clustering) Normal distribution blobs": (
-                clustering_blobs_generator,
-                ClusteringBlobsDataOptions,
+                normal_distribution_blobs_generator,
+                NormalDistributionClusteringOptions,
+            ),
+            "(Clustering) Noncental F distribution blobs": (
+                noncentral_f_blobs_generator,
+                NoncentralFClusteringOptions,
             ),
         }
 
@@ -111,6 +123,10 @@ class DataGeneratorWidget(QWidget):
 
     def _set_data_generator(self, dataset_type):
         self.options_widget = self.dataset_types_config[dataset_type][1]()
+
+        if item := self.options_group_layout.itemAt(0):
+            self.options_group_layout.removeWidget(item.widget())
+
         self.options_group_layout.addWidget(self.options_widget)
         self.selected_generator = self.dataset_types_config[dataset_type][0]
 
@@ -155,6 +171,10 @@ class DataGeneratorWidget(QWidget):
         self.load_button.setEnabled(False)
         self.parameters_widget.change_enabled_buttons(False)
         self.parameters_widget.reset()
+
+        self.dataset_type_box.setCurrentIndex(0)
+        self._set_data_generator(self.dataset_type_box.currentText())
+
         self._reset_plot()
 
     def click_listener(self, button_type: str):

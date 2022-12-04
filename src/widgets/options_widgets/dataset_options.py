@@ -30,18 +30,6 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
         self.number_of_dims_box.setValue(2)
         self.layout.addRow(QLabel("Number of dimensions:"), self.number_of_dims_box)
 
-        self.std_input = QLineEdit("5 1.2, 2.1 2.1")
-        self.layout.addRow(
-            QLabelWithTooltip(
-                "Standard deviation:",
-                "Values for different blobs should be separated via a comma.\n"
-                "Values for different dimensions in a single blob should be separated via a single space.\n"
-                "Format: blob1_dim1 blob1_dim2, blob2_dim1 blob2_dim2\n"
-                "If just one value is provided, instead of a series it will be used for every blob/dimension.",
-            ),
-            self.std_input,
-        )
-
         self.noise_box = QSpinBox()
         self.noise_box.setValue(0)
         self.noise_box.setMaximum(100)
@@ -81,6 +69,42 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
             sample_sizes *= blobs_number
 
         dims_number = self.number_of_dims_box.value()
+
+        seed = self.seed_box.value()
+        if not seed:
+            seed = None
+
+        noise = self.noise_box.value()
+
+        return {
+            "sample_sizes": sample_sizes,
+            "dims_number": dims_number,
+            "blobs_number": blobs_number,
+            "seed": seed,
+            "noise": noise / 100,
+        }
+
+
+class NormalDistributionClusteringOptions(ClusteringBlobsDataOptions):
+    def __init__(self):
+        super().__init__()
+        self.std_input = QLineEdit("5 1.2, 2.1 2.1")
+        self.layout.addRow(
+            QLabelWithTooltip(
+                "Standard deviation:",
+                "Values for different blobs should be separated via a comma.\n"
+                "Values for different dimensions in a single blob should be separated via a single space.\n"
+                "Format: blob1_dim1 blob1_dim2, blob2_dim1 blob2_dim2\n"
+                "If just one value is provided, instead of a series it will be used for every blob/dimension.",
+            ),
+            self.std_input,
+        )
+
+    def get_data(self) -> Dict:
+        data = super().get_data()
+        blobs_number = data["blobs_number"]
+        dims_number = data["dims_number"]
+
         standard_deviations = list(
             map(
                 lambda std_per_blob: list(map(float, std_per_blob.strip().split(" "))),
@@ -111,17 +135,51 @@ class ClusteringBlobsDataOptions(AlgorithmOptions):
             if provided_stds_number_dims == 1:
                 blob_stds *= dims_number
 
-        seed = self.seed_box.value()
-        if not seed:
-            seed = None
-
-        noise = self.noise_box.value()
-
-        return {
-            "sample_sizes": sample_sizes,
-            "dims_number": dims_number,
-            "blobs_number": blobs_number,
+        return data | {
             "dims_stds": standard_deviations,
-            "seed": seed,
-            "noise": noise / 100,
+        }
+
+
+class NoncentralFClusteringOptions(ClusteringBlobsDataOptions):
+    def __init__(self):
+        super().__init__()
+        self.df_num_input = QLineEdit("3 5")
+        self.layout.addRow(
+            QLabelWithTooltip(
+                "Numerator degrees of freedom:",
+                "Number of degrees of freedom of the Chi-squared distribution X.\n"
+                "Should be > 0.",
+            ),
+            self.df_num_input,
+        )
+
+        self.df_den_input = QLineEdit("20 15")
+        self.layout.addRow(
+            QLabelWithTooltip(
+                "Denominator degrees of freedom:",
+                "Number of degrees of freedom of the Chi-squared distribution Y.\n"
+                "Should be > 0.",
+            ),
+            self.df_den_input,
+        )
+
+    def get_data(self) -> Dict:
+        data = super().get_data()
+        blobs_number = data["blobs_number"]
+
+        df_nums = list(map(float, self.df_num_input.text().split(" ")))
+        if len(df_nums) != 1 and len(df_nums) != blobs_number:
+            raise ValueError("Incorrect number of provided numerators")
+        if len(df_nums) == 1:
+            df_nums *= blobs_number
+
+        df_dens = list(map(float, self.df_den_input.text().split(" ")))
+        if len(df_dens) != 1 and len(df_dens) != blobs_number:
+            raise ValueError("Incorrect number of provided denominators")
+        if len(df_dens) == 1:
+            df_dens *= blobs_number
+
+        return data | {
+            "df_nums": df_nums,
+            "df_dens": df_dens,
         }
