@@ -11,11 +11,11 @@ class GMMResultsWidget(AlgorithmResultsWidget):
     def __init__(self, df, labels, mean, sigma, options):
         super().__init__(df.select_dtypes(include=["number"]), options)
 
-        self.columns = self.data.columns
         self.labels = labels
         self.max_label = np.amax(self.labels) + 1
-        self.mean = pd.DataFrame(mean, columns=self.columns)
+        self.mean = mean
         self.sigma = sigma
+        self.columns = self.mean.columns
         self.layout = QHBoxLayout(self)
 
         # algorithm parameters
