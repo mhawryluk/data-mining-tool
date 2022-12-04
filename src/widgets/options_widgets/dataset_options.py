@@ -173,11 +173,17 @@ class NoncentralFClusteringOptions(ClusteringBlobsDataOptions):
         if len(df_nums) == 1:
             df_nums *= blobs_number
 
+        if any(df_num <= 0 for df_num in df_nums):
+            raise ValueError("Degrees of freedom need to be positive numbers")
+
         df_dens = list(map(float, self.df_den_input.text().split(" ")))
         if len(df_dens) != 1 and len(df_dens) != blobs_number:
             raise ValueError("Incorrect number of provided denominators")
         if len(df_dens) == 1:
             df_dens *= blobs_number
+
+        if any(df_den <= 0 for df_den in df_dens):
+            raise ValueError("Degrees of freedom need to be positive numbers")
 
         return data | {
             "df_nums": df_nums,
