@@ -39,19 +39,31 @@ class StepWidget(QWidget):
         self.info_group_layout = QVBoxLayout(self.info_group)
         if self.info:
             self.table_info = QTableView()
-            self.table_info.setModel(
-                QtTable(
-                    pd.DataFrame(
-                        self.info, columns=["Column name", "Pivot", "Metric changes"]
-                    )
-                )
+            data = pd.DataFrame(
+                self.info, columns=["Column name", "Pivot", "Metric changes"]
             )
+            data.sort_values(by=["Metric changes"], ascending=False, inplace=True)
+            self.table_info.setModel(QtTable(data))
+            description = (
+                "Algorithm is looking for new pivot for dark blue node. "
+                "It draws n features from columns and for each draws a split point (n is provided in options section). "
+                "In the next step the metric is calculated for each split. "
+                "The splits are listed in table and sorted by metrics (nan in value of metrics means that this pivot is forbidden). "
+                "The best split is chosen."
+            )
+        else:
+            description = (
+                "There are result of division on visualization. "
+                "Under the orange edge algorithm considers samples, which not fulfills condition in parent node. "
+                "Under blue edge samples fulfills this condition. "
+                "The oval nodes are leaves. The rectangular nodes will be divided in next steps."
+            )
+        self.description_label = QLabel(description)
+        self.description_label.setWordWrap(True)
+        self.info_group_layout.addWidget(self.description_label)
+        if self.info:
             self.info_group_layout.addWidget(self.table_info)
         self.info_group_layout.addStretch(1)
-        self.info_group_layout.addWidget(
-            QLabel("Extremely Randomized Trees algorithm - steps visualization.")
-        )
-        self.info_group_layout.addStretch(2)
         self.layout.addWidget(self.info_group)
         self.layout.addWidget(self.graph)
 
@@ -228,7 +240,9 @@ class ExtraTreesStepsVisualization(AlgorithmStepsVisualization):
         self.right_button = QPushButton("NEXT")
         self.right_button.clicked.connect(partial(self.click_listener, "next"))
         self.num_label = QLabel(f"Tree {self.current_graph}")
-        self.description = QLabel("Orange -> FALSE\nBlue -> TRUE")
+        self.description = QLabel(
+            "Visualization of tree from the random forest.\nBlue color of edge means fulfillment condition in node.\nOrange edge leads to the subtree for unfulfilled condition.\nOval nodes are leaves. Each color is related with dominant class."
+        )
         self.random_button = QPushButton("Random graph")
         self.random_button.clicked.connect(partial(self.click_listener, "random"))
         self.steps_button = QPushButton("Creation steps")

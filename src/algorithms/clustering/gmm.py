@@ -1,6 +1,7 @@
 from math import inf
 
 import numpy as np
+import pandas as pd
 from numpy.linalg import LinAlgError
 from PyQt5.QtWidgets import QMessageBox
 from scipy.stats import multivariate_normal
@@ -58,7 +59,11 @@ class GMM(Algorithm):
             return
         labels = self.get_cluster_labels()
         self.update_metrics(labels)
-        return labels, self.mu_arr, self.sigma_arr
+        return (
+            labels,
+            pd.DataFrame(self.mu_arr, columns=self.df.columns),
+            self.sigma_arr,
+        )
 
     def get_cluster_labels(self):
         return np.argmax(self.prob_matrix, axis=1)
