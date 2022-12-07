@@ -5,7 +5,7 @@ import pandas as pd
 
 from algorithms import Algorithm
 
-from .metrics import davies_bouldin_score, dunn_index
+from .metrics import davies_bouldin_score, dunn_score, silhouette_score
 
 init_types = ["random", "kmeans++"]
 
@@ -97,25 +97,18 @@ class KMeans(Algorithm):
 
     def update_metrics(self, labels):
         self.metrics_info = {}
-        d_index = dunn_index(self.data, labels)
+        d_index = dunn_score(self.data, labels)
         db_index = davies_bouldin_score(self.data, labels)
-        self.metrics_info["Dunn index"] = round(d_index, 3)
-        self.metrics_info["Davies Bouldin index"] = round(db_index, 3)
+        s_index = silhouette_score(self.data, labels)
+        self.metrics_info["Dunn index (higher = better)"] = round(d_index, 3)
+        self.metrics_info["Davies Bouldin index (lower = better)"] = round(db_index, 3)
+        self.metrics_info["Silhouette Coefficient (higher = better)"] = round(
+            s_index, 3
+        )
 
-    def check_solution(self, labels, centroids):
+    def check_solution(self, labels):
         """dunn index"""
-        max_distance_intra = 0
-        min_distance_inter = np.inf
-        for i, first in enumerate(centroids):
-            for second in centroids[i + 1 :]:
-                dis = self.distance(first, second)
-                if dis > max_distance_intra:
-                    max_distance_intra = dis
-        for i, row in enumerate(self.data.itertuples(index=False)):
-            dis = self.distance(row, centroids[labels[i]])
-            if dis < min_distance_inter:
-                min_distance_inter = dis
-        return min_distance_inter / max_distance_intra
+        return dunn_score(self.data, labels, self.distance)
 
     def run(self, with_steps) -> Tuple[np.ndarray, pd.DataFrame]:
         runner = (
@@ -125,13 +118,13 @@ class KMeans(Algorithm):
             solution = runner()
             self.update_metrics(solution[0])
             return solution[0], pd.DataFrame(solution[1], columns=self.data.columns)
-        best_value = np.inf
+        best_value = 0
         solution = None
         steps = None
         for _ in range(self.repeats):
             result = runner()
-            value = self.check_solution(*result)
-            if value < best_value:
+            value = self.check_solution(result[0])
+            if value > best_value:
                 solution = (result[0].copy(), result[1].copy())
                 steps = [(step[0].copy(), step[1].copy()) for step in self.saved_steps]
                 best_value = value

@@ -8,7 +8,7 @@ from scipy.stats import multivariate_normal
 
 from algorithms import Algorithm
 
-from .metrics import davies_bouldin_score, dunn_index
+from .metrics import davies_bouldin_score, dunn_score, silhouette_score
 
 
 class GMM(Algorithm):
@@ -133,7 +133,11 @@ class GMM(Algorithm):
 
     def update_metrics(self, labels):
         self.metrics_info = {}
-        d_index = dunn_index(self.df, labels)
+        d_index = dunn_score(self.df, labels)
         db_index = davies_bouldin_score(self.df, labels)
-        self.metrics_info["Dunn index"] = round(d_index, 3)
-        self.metrics_info["Davies Bouldin index"] = round(db_index, 3)
+        s_index = silhouette_score(self.df, labels)
+        self.metrics_info["Dunn index (higher = better)"] = round(d_index, 3)
+        self.metrics_info["Davies Bouldin index (lower = better)"] = round(db_index, 3)
+        self.metrics_info["Silhouette Coefficient (higher = better)"] = round(
+            s_index, 3
+        )
