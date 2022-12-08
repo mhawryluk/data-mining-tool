@@ -58,7 +58,7 @@ def noncentral_f_blobs_generator(options: Dict) -> pd.DataFrame:
 
     noise_percentage = options["noise"]
 
-    centers = np.random.rand(blobs_number, dims_number) * 50
+    centers = np.random.rand(blobs_number, dims_number) * SCALING_FACTOR
 
     data = pd.DataFrame()
 

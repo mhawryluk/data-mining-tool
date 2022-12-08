@@ -38,6 +38,7 @@ class DataGeneratorWidget(QWidget):
         super().__init__()
         self.engine = engine
         self.callback = callback
+        self.plot_connection = None
 
         self.generated_data = None
         self.setWindowTitle("Data generator")
@@ -145,7 +146,6 @@ class DataGeneratorWidget(QWidget):
         self.scatter_plot_group_layout = QHBoxLayout(self.scatter_plot_group)
 
         self.parameters_widget = SamplesColumnsChoice()
-        self.parameters_widget.samples_changed.connect(self._plot_data)
 
         self.plot_layout = QVBoxLayout()
 
@@ -163,7 +163,7 @@ class DataGeneratorWidget(QWidget):
     def _reset_plot(self):
         if item := self.plot_layout.itemAt(0):
             item.widget().setParent(None)
-            plt.close(self.plot.fig)
+            plt.close(self.plot.figure)
 
     def _reset(self):
         self.generated_data = None
@@ -196,22 +196,23 @@ class DataGeneratorWidget(QWidget):
                     self.generated_data = self.selected_generator(options)
                     self.data_table.setModel(QtTable(self.generated_data))
                     self.load_button.setEnabled(self.generated_data is not None)
-                    self.parameters_widget.ox_box.currentTextChanged.disconnect()
-                    self.parameters_widget.oy_box.currentTextChanged.disconnect()
-
+                    if self.plot_connection:
+                        self.parameters_widget.samples_columns_changed.disconnect(
+                            self.plot_connection
+                        )
+                        self.plot_connection = None
                     if self.generated_data is not None:
                         self.parameters_widget.change_enabled_buttons(True)
                         self.parameters_widget.new_columns_name(
                             list(self.generated_data.columns)
                         )
                         self.parameters_widget.new_size(len(self.generated_data))
-
-                        self.parameters_widget.ox_box.currentTextChanged.connect(
-                            self._plot_data
+                        self.plot_connection = (
+                            self.parameters_widget.samples_columns_changed.connect(
+                                self._plot_data
+                            )
                         )
-                        self.parameters_widget.oy_box.currentTextChanged.connect(
-                            self._plot_data
-                        )
+                        self._plot_data()
             case "cancel":
                 self._reset()
                 self.hide()
