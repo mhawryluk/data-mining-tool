@@ -118,11 +118,21 @@ class GMM(Algorithm):
 
     def log_likelihood(self):
         result = 0
+        width = height = len(self.sigma_arr[0][0])
+        covariance_regulator = 1e-4 * np.eye(width) + 1e-6 * np.ones((width, height))
         for i in range(self.rows):
             row_result = 0
             for c in range(self.num_clusters):
+                cov_matrix = self.sigma_arr[c]
+                if not is_invertible(self.sigma_arr[c]):
+                    cov_matrix += covariance_regulator
                 row_result += self.pi_arr[c] * multivariate_normal.pdf(
-                    self.df.iloc[i], mean=self.mu_arr[c], cov=self.sigma_arr[c]
+                    self.df.iloc[i], mean=self.mu_arr[c], cov=cov_matrix
                 )
             result += np.log(row_result)
         return result
+
+
+def is_invertible(matrix):
+    width, height = matrix.shape
+    return width == height and np.linalg.matrix_rank(matrix) == width
