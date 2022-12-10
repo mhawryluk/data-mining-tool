@@ -302,14 +302,16 @@ class MergingSetsScreen(QWidget):
 
         self.new_data = self.new_data[new_columns_right]
 
-        for i in range(len(new_columns_right) - len(new_columns_left)):
-            new_column_name = f"Column {i}"
+        diff = len(new_columns_left) - len(new_columns_right)
+
+        for i in range(-diff):
+            new_column_name = f"{new_columns_right[i+diff]}_right"
             new_columns_left.append(new_column_name)
             self.engine.state.imported_data[new_column_name] = np.nan
             self.engine.state.raw_data[new_column_name] = np.nan
 
-        for i in range(len(new_columns_left) - len(new_columns_right)):
-            new_column_name = f"Column {i}"
+        for i in range(diff):
+            new_column_name = f"{new_columns_left[i+diff]}_left"
             new_columns_right.append(new_column_name)
             self.new_data[new_column_name] = np.nan
 
