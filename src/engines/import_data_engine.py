@@ -2,7 +2,7 @@ from typing import List, Optional
 
 import pandas as pd
 
-from data_import import CSVReader, DatabaseReader, JSONReader
+from data_import import Loader
 from database import DatabaseObjectManager, Writer
 from engines import DB_NAME
 from state import State
@@ -14,31 +14,23 @@ class ImportDataEngine:
         self.reader_data = None
         self.from_file = False
         self.database_manager = DatabaseObjectManager()
+        self.loader = Loader()
 
     def load_data_from_file(self, file_path: str) -> None:
-        if not file_path:
-            raise ValueError("")
-        if "." not in file_path:
-            raise ValueError("Supported file format: .csv, .json.")
-        extension = file_path.split(".")[-1]
-        if extension == "csv":
-            self.reader_data = CSVReader(file_path)
-        elif extension == "json":
-            self.reader_data = JSONReader(file_path)
-        else:
-            raise ValueError("Supported file format: .csv, .json.")
-        if error := self.reader_data.get_error():
+        try:
+            self.reader_data = self.loader.create_file_reader(file_path)
+            self.from_file = True
+        except ValueError as e:
             self.reader_data = None
-            raise ValueError(error)
-        self.from_file = True
+            raise ValueError(e)
 
     def load_data_from_database(self, document_name: str) -> str:
-        self.reader_data = DatabaseReader(DB_NAME, document_name)
-        if error := self.reader_data.get_error():
+        try:
+            self.reader_data = self.loader.create_database_reader(document_name)
+            self.from_file = False
+        except ValueError as e:
             self.reader_data = None
-            return error
-        self.from_file = False
-        return ""
+            raise ValueError(e)
 
     def get_table_names_from_database(self) -> List[str]:
         return self.database_manager.get_collections_list(DB_NAME)
@@ -112,3 +104,11 @@ class ImportDataEngine:
     def set_generated_data(self, data: pd.DataFrame):
         self.state.raw_data = data
         self.state.imported_data = data.copy()
+
+    def merge_sets(self, new_data: pd.DataFrame) -> None:
+        self.state.imported_data = pd.concat(
+            [self.state.imported_data, new_data], ignore_index=True
+        )
+        self.state.raw_data = pd.concat(
+            [self.state.raw_data, new_data], ignore_index=True
+        )
