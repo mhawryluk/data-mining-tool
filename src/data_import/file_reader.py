@@ -8,10 +8,11 @@ class FileReader:
     def __init__(self, filepath: str):
         self.error = ""
         self.filepath = filepath
+        self.need_chunks = False
 
-        # check size of file
-        size = os.stat(self.filepath).st_size
-        self.need_chunks = size > AVAILABLE_RAM_MEMORY
+        # check size of file - big data support is not ready
+        # size = os.stat(self.filepath).st_size
+        # self.need_chunks = size > AVAILABLE_RAM_MEMORY
 
     def get_columns_name(self) -> List[str]:
         return self.columns_name
