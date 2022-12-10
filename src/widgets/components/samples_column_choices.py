@@ -43,7 +43,7 @@ class SamplesColumnsChoice(QWidget):
         self.layout.addRow(self.sample_box, self.sample_button)
 
         # axis
-        self.layout.addRow(QLabel("Set axis:"))
+        self.layout.addRow(QLabel("Set axes:"))
         self.ox_box = QComboBox()
         self.ox_box.addItems(columns)
         self.oy_box = QComboBox()

@@ -211,7 +211,8 @@ class ImportWidget(UnfoldWidget):
             self.data_table.setModel(QtTable(data))
             self.limit_number_box.setMaximum(len(data))
             self.limit_number_box.setValue(len(data) // 2)
-        self.set_columns_grid(self.engine.state.imported_data.columns)
+            self.set_columns_grid(data.columns)
+            self.set_options()
 
     def reset_data_table(self):
         self.data_table.setModel(None)
