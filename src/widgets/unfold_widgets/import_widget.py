@@ -2,7 +2,6 @@ from functools import partial
 from os.path import basename
 from typing import List
 
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -24,6 +23,7 @@ from PyQt5.QtWidgets import (
 )
 
 from widgets import LoadingWidget, QtTable, UnfoldWidget
+from widgets.data_generator_widget import DataGeneratorWidget
 
 
 class ImportWidget(UnfoldWidget):
@@ -66,6 +66,19 @@ class ImportWidget(UnfoldWidget):
         )
 
         self.load_data_group_layout.addRow(self.database_box, self.database_button)
+
+        self.generate_data_label = QLabel(self.load_data_group)
+        self.generate_data_label.setText("Generate data for a specific algorithm:")
+        self.load_data_group_layout.addRow(self.generate_data_label)
+
+        self.generate_button = QPushButton(self.load_data_group)
+        self.generate_button.setText("Generate")
+        self.generate_button.clicked.connect(partial(self.click_listener, "generate"))
+        self.load_data_group_layout.addRow(self.generate_button)
+
+        self.generate_window = DataGeneratorWidget(
+            self.engine, callback=self.update_data_view
+        )
 
         self.import_state_label = QLabel(self.load_data_group)
         self.load_data_group_layout.addRow(self.import_state_label)
@@ -121,7 +134,6 @@ class ImportWidget(UnfoldWidget):
 
         # data table
         self.data_table = QTableView(self.frame)
-
         self.data_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # layouts for sections
@@ -172,9 +184,10 @@ class ImportWidget(UnfoldWidget):
         for i in reversed(range(self.columns_group_form_layout.count())):
             self.columns_group_form_layout.itemAt(i).widget().setParent(None)
 
-    def set_columns_grid(self):
+    def set_columns_grid(self, columns=None):
         """draw columns and checkbox to choose them"""
-        columns = self.engine.get_columns()
+        if columns is None:
+            columns = self.engine.get_columns()
 
         for i in reversed(range(self.columns_group_form_layout.count())):
             self.columns_group_form_layout.itemAt(i).widget().setParent(None)
@@ -185,11 +198,21 @@ class ImportWidget(UnfoldWidget):
             checkbox.setChecked(True)
             self.columns_group_form_layout.addRow(checkbox)
 
+        self.columns_button.setEnabled(True)
+
     def display_data(self):
         if (data := self.engine.state.raw_data) is not None:
             self.data_table.setModel(QtTable(data))
             self.limit_number_box.setMaximum(len(data))
             self.limit_number_box.setValue(len(data) // 2)
+
+    def update_data_view(self):
+        if (data := self.engine.state.imported_data) is not None:
+            self.data_table.setModel(QtTable(data))
+            self.limit_number_box.setMaximum(len(data))
+            self.limit_number_box.setValue(len(data) // 2)
+            self.set_columns_grid(data.columns)
+            self.set_options()
 
     def reset_data_table(self):
         self.data_table.setModel(None)
@@ -233,6 +256,8 @@ class ImportWidget(UnfoldWidget):
                     limit_num=self.limit_number_box.value(),
                 )
                 self.display_data()
+            case "generate":
+                self.generate_window.show()
 
     def load_from_file_handle(self):
         self.import_state_label.setText("Loading ...")
