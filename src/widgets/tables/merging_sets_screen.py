@@ -49,8 +49,8 @@ class ColumnWidget(QWidget):
         self.layout.addWidget(self.drag_button, stretch=1)
 
         self.remove_button = QPushButton()
-        pixmapi = getattr(QStyle, "SP_DialogCancelButton")
-        icon = self.style().standardIcon(pixmapi)
+        pixmap = getattr(QStyle, "SP_DialogCancelButton")
+        icon = self.style().standardIcon(pixmap)
         self.remove_button.setIcon(icon)
         self.remove_button.setFixedWidth(30)
         self.remove_button.clicked.connect(self._on_remove)
@@ -259,19 +259,8 @@ class MergingSetsScreen(QWidget):
             last_preview.deleteLater()
         self._render_table(self.new_data_view, False)
 
-        for i in reversed(range(self.columns_left_layout.count() - 1)):
-            # workaround to delete as low content as possible, removing nested layouts was giving me some segfault
-            self.columns_left_layout.itemAt(i).widget().setParent(None)
-
         for i in reversed(range(self.columns_right_layout.count() - 1)):
             self.columns_right_layout.itemAt(i).widget().setParent(None)
-
-        imported_columns = self._get_imported_columns()
-        for column in imported_columns:
-            self.columns_left_layout.insertWidget(
-                self.columns_left_layout.count() - 1,
-                ColumnWidget(column, self.columns_left_layout),
-            )
 
         if self.new_data is not None and self.new_data.columns is not None:
             for column in sorted(self.new_data.columns, key=lambda x: x.upper()):
@@ -308,11 +297,7 @@ class MergingSetsScreen(QWidget):
 
         overflowed_columns = new_columns_right[len(new_columns_left) :]
 
-        for column in dropped_columns:
-            new_column_name = f"{column}_new"
-            self.new_data.rename(columns={column: new_column_name}, inplace=True)
-
-        for column in overflowed_columns:
+        for column in dropped_columns + overflowed_columns:
             new_column_name = f"{column}_new"
             self.new_data.rename(columns={column: new_column_name}, inplace=True)
 
