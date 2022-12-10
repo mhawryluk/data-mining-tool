@@ -19,8 +19,10 @@ class DatabaseReader:
         try:
             self.database = Reader(db_name, coll_name)
             self.columns_name = self.database.get_columns_names()
-            size = self.database.get_rows_number()
-            self.need_chunks = size > self.get_chunksize()
+
+            # check size - big data support is not ready
+            # size = self.database.get_rows_number()
+            # self.need_chunks = size > self.get_chunksize()
         except Exception as e:
             print(e)
             self.error = "There is some problem with database. Please try again."

@@ -2,7 +2,7 @@ UnfoldWidget > QFrame {
     background-color: white;
 }
 
-UnfoldWidget QGroupBox:title, UnfoldWidget QTabBar::tab{
+QWidget QGroupBox:title, QWidget QTabBar::tab{
     padding: 5px;
     border-radius: 5px;
     margin-bottom: 5px;
@@ -12,7 +12,7 @@ UnfoldWidget QGroupBox:title, UnfoldWidget QTabBar::tab{
 QScrollArea { background: transparent; }
 QScrollArea QWidget { background: transparent; }
 
-#import_widget > QPushButton, #import_widget QGroupBox:title {
+#import_widget > QPushButton, #import_widget QGroupBox:title, #data_generator_widget > QGroupBox:title {
     background-color: #054a91;
     color: white;
     border: none;

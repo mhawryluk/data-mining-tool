@@ -42,11 +42,6 @@ class PreprocessingWidget(UnfoldWidget):
 
         self.plot_picker_group.setTitle("Choose data to plot")
 
-        self.column_picker_label = QLabel(self.plot_picker_group)
-        self.column_picker_label.setText("Select column:")
-        self.column_picker_label.setMinimumHeight(23)
-        self.column_select_box = QComboBox(self.plot_picker_group)
-        self.column_select_box.setMinimumHeight(23)
         self.parameters_widget = SamplesColumnsChoice()
         self.parameters_widget_connection = None
         self.group_picker_label = QLabel("Group by:")
@@ -60,13 +55,23 @@ class PreprocessingWidget(UnfoldWidget):
         self.plot_picker_label.setText("Select plot type:")
         self.plot_picker_label.setMinimumHeight(23)
         self.plot_select_box = QComboBox(self.plot_picker_group)
-        self.plot_select_box.currentTextChanged.connect(self.change_settings)
         self.plot_select_box.setMinimumHeight(23)
         self.plot_select_box.addItems(self.plot_types)
-
         self.plot_picker_group_layout.addRow(
             self.plot_picker_label, self.plot_select_box
         )
+
+        self.column_picker_label = QLabel(self.plot_picker_group)
+        self.column_picker_label.setText("Select column:")
+        self.column_picker_label.setMinimumHeight(23)
+        self.column_select_box = QComboBox(self.plot_picker_group)
+        self.column_select_box.setMinimumHeight(23)
+
+        self.plot_picker_group_layout.addRow(
+            self.column_picker_label, self.column_select_box
+        )
+
+        self.plot_select_box.currentTextChanged.connect(self.change_settings)
 
         self.plot_picker_submit = QPushButton(self.plot_picker_group)
         self.plot_picker_submit.setText("Plot")
@@ -130,7 +135,7 @@ class PreprocessingWidget(UnfoldWidget):
 
         # plot stats window
         self.plot_widget = QGroupBox(self.frame)
-        self.plot_widget.setTitle("Result")
+        self.plot_widget.setTitle("Plot")
 
         self.plot_layout = QVBoxLayout()
         self.plot_widget.setLayout(self.plot_layout)
@@ -184,16 +189,16 @@ class PreprocessingWidget(UnfoldWidget):
         if self.plot_select_box.currentText() == "Scatter plot":
             self.column_select_box.setParent(None)
             self.column_picker_label.setParent(None)
-            self.plot_picker_group_layout.insertRow(0, self.parameters_widget)
+            self.plot_picker_group_layout.insertRow(1, self.parameters_widget)
             self.plot_picker_group_layout.insertRow(
-                1, self.group_picker_label, self.group_select_box
+                2, self.group_picker_label, self.group_select_box
             )
         else:
             self.parameters_widget.setParent(None)
             self.group_picker_label.setParent(None)
             self.group_select_box.setParent(None)
             self.plot_picker_group_layout.insertRow(
-                0, self.column_picker_label, self.column_select_box
+                1, self.column_picker_label, self.column_select_box
             )
 
     def activate_scatter_plot(self):

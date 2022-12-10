@@ -43,11 +43,15 @@ class SamplesColumnsChoice(QWidget):
         self.layout.addRow(self.sample_box, self.sample_button)
 
         # axis
-        self.layout.addRow(QLabel("Set axis:"))
+        self.layout.addRow(QLabel("Set axes:"))
         self.ox_box = QComboBox()
         self.ox_box.addItems(columns)
         self.oy_box = QComboBox()
         self.oy_box.addItems(columns)
+
+        self.ox_box.setMinimumWidth(100)
+        self.oy_box.setMinimumWidth(100)
+
         if len(columns) > 1:
             self.oy_box.setCurrentIndex(1)
         self.ox_box.currentTextChanged.connect(partial(self.click_listener, "set_axis"))
@@ -82,7 +86,7 @@ class SamplesColumnsChoice(QWidget):
 
     def new_size(self, size):
         self.size = size
-        self.num_samples = min(35, self.size // 2)
+        self.num_samples = min(100, self.size // 2)
         self.samples = get_samples(self.size, self.num_samples)
         self.sample_box.setMaximum(min(self.size, 10000))
         self.sample_box.setProperty("value", self.num_samples)
@@ -98,3 +102,8 @@ class SamplesColumnsChoice(QWidget):
         self.oy_box.setEnabled(value)
         self.sample_button.setEnabled(value)
         self.sample_box.setEnabled(value)
+
+    def reset(self):
+        self.ox_box.clear()
+        self.oy_box.clear()
+        self.sample_box.clear()
