@@ -261,7 +261,7 @@ class PreprocessingWidget(UnfoldWidget):
         self._clear_plot()
         scatter_settings = self.parameters_widget.get_parameters()
         group_by = self.group_select_box.currentText()
-        scatter_settings["group_by"] = group_by if group_by else None
+        scatter_settings["group_by"] = group_by or None
         plot_box = self.create_plot(column_name, plot_type, scatter_settings)
         if plot_type == "Scatter plot":
             self.activate_scatter_plot()

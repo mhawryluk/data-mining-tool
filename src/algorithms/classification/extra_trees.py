@@ -409,13 +409,11 @@ class ExtraTrees(Algorithm):
         self.metrics_info = {}
         if not len(self.test_data):
             return
-        true = false = 0
+        count_true = 0
         for _, row in self.test_data.iterrows():
             target = row[self.tree_parameters["label_name"]]
             prediction = self.predict(row.drop(self.tree_parameters["label_name"]))
             predicted = list(prediction.index)[0]
             if target == predicted:
-                true += 1
-            else:
-                false += 1
-        self.metrics_info["accuracy"] = round(true / (true + false), 3)
+                count_true += 1
+        self.metrics_info["accuracy"] = round(count_true / len(self.test_data), 3)

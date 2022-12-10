@@ -23,3 +23,10 @@ class Algorithm:
         Return list of steps for visualization by AlgorithmStepsVisualization
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def update_metrics(self, *args):
+        """
+        Update metrics_info dict
+        """
+        raise NotImplementedError
