@@ -300,26 +300,25 @@ class MergingSetsScreen(QWidget):
                 self.cancel_merge = False
                 return
 
-        num_columns = max(len(new_columns_left), len(new_columns_right))
-        labels_left = new_columns_left[:num_columns]
-        labels_right = new_columns_right[:num_columns]
+        self.new_data = self.new_data[new_columns_right]
+
         for i in range(len(new_columns_right) - len(new_columns_left)):
             new_column_name = f"Column {i}"
-            labels_left.append(new_column_name)
+            new_columns_left.append(new_column_name)
             self.engine.state.imported_data[new_column_name] = np.nan
             self.engine.state.raw_data[new_column_name] = np.nan
 
         for i in range(len(new_columns_left) - len(new_columns_right)):
             new_column_name = f"Column {i}"
-            labels_right.append(new_column_name)
+            new_columns_right.append(new_column_name)
             self.new_data[new_column_name] = np.nan
 
-        labels_mapping = dict(zip(labels_right, labels_left))
+        labels_mapping = dict(zip(new_columns_right, new_columns_left))
 
-        self.engine.reorder_columns(labels_left)
+        self.engine.reorder_columns(new_columns_left)
         self.new_data.rename(columns=labels_mapping, inplace=True)
 
-        self.engine.merge_sets(self.new_data[labels_left])
+        self.engine.merge_sets(self.new_data[new_columns_left])
         self.widget.set_columns_grid()
 
         self.on_hide_callback()
