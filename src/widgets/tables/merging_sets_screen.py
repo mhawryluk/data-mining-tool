@@ -300,27 +300,26 @@ class MergingSetsScreen(QWidget):
                 self.cancel_merge = False
                 return
 
-        self.new_data = self.new_data[new_columns_right]
+        dropped_columns = [
+            column
+            for column in self.new_data.columns
+            if column not in new_columns_right
+        ]
 
-        diff = len(new_columns_left) - len(new_columns_right)
+        overflowed_columns = new_columns_right[len(new_columns_left) :]
 
-        for i in range(-diff):
-            new_column_name = f"{new_columns_right[i+diff]}_right"
-            new_columns_left.append(new_column_name)
-            self.engine.state.imported_data[new_column_name] = np.nan
-            self.engine.state.raw_data[new_column_name] = np.nan
+        for column in dropped_columns:
+            new_column_name = f"{column}_new"
+            self.new_data.rename(columns={column: new_column_name}, inplace=True)
 
-        for i in range(diff):
-            new_column_name = f"{new_columns_left[i+diff]}_left"
-            new_columns_right.append(new_column_name)
-            self.new_data[new_column_name] = np.nan
+        for column in overflowed_columns:
+            new_column_name = f"{column}_new"
+            self.new_data.rename(columns={column: new_column_name}, inplace=True)
 
         labels_mapping = dict(zip(new_columns_right, new_columns_left))
-
-        self.engine.reorder_columns(new_columns_left)
         self.new_data.rename(columns=labels_mapping, inplace=True)
 
-        self.engine.merge_sets(self.new_data[new_columns_left])
+        self.engine.merge_sets(self.new_data)
         self.widget.set_columns_grid()
 
         self.on_hide_callback()
