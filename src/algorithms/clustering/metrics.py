@@ -3,20 +3,19 @@ import pandas as pd
 
 
 def distance(x, y):
-    return np.sqrt(np.sum(x**2 + y**2))
+    return np.linalg.norm(x - y)
 
 
 def davies_bouldin_score(df: pd.DataFrame, labels: np.array):
-    num_cluster = np.amax(labels) + 1
+    clusters = np.unique(labels)
+    num_cluster = len(clusters)
     centroids = []
     avg_distances = []
-    for cluster in range(num_cluster):
+    for cluster in clusters:
         cluster_set = df.loc[labels == cluster].to_numpy()
         centroid = cluster_set.mean(axis=0)
-        avg_distance = np.sqrt(
-            (cluster_set**2 + np.stack([centroid**2] * len(cluster_set))).sum(
-                axis=1
-            )
+        avg_distance = np.linalg.norm(
+            cluster_set - np.tile(centroid, (len(cluster_set), 1)), axis=1
         ).mean()
         centroids.append(centroid)
         avg_distances.append(avg_distance)
@@ -25,16 +24,21 @@ def davies_bouldin_score(df: pd.DataFrame, labels: np.array):
         x = centroids[i]
         for j in range(i + 1, num_cluster):
             y = centroids[j]
-            R_matrix[i, j] = R_matrix[j, i] = (
-                avg_distances[i] + avg_distances[j]
-            ) / distance(x, y)
-    return np.sum(np.amax(R_matrix, axis=0)) / num_cluster
+            avg_distance = avg_distances[i] + avg_distances[j]
+            centroids_dis = distance(x, y)
+            if avg_distance == 0:
+                R_matrix[i, j] = R_matrix[j, i] = 0
+                continue
+            if centroids_dis == 0:
+                return np.inf
+            R_matrix[i, j] = R_matrix[j, i] = avg_distance / centroids_dis
+    return np.amax(R_matrix, axis=0).mean()
 
 
 def dunn_score(df: pd.DataFrame, labels: np.array, distance_function=distance):
-    num_cluster = np.amax(labels) + 1
+    clusters = np.unique(labels)
     centroids = []
-    for cluster in range(num_cluster):
+    for cluster in clusters:
         cluster_set = df.loc[labels == cluster].to_numpy()
         centroid = cluster_set.mean(axis=0)
         centroids.append(centroid)
@@ -44,42 +48,47 @@ def dunn_score(df: pd.DataFrame, labels: np.array, distance_function=distance):
         for second in centroids[i + 1 :]:
             dis = distance_function(first, second)
             min_distance_inter = min(min_distance_inter, dis)
-    for cluster in range(num_cluster):
+    for cluster in clusters:
         cluster_df = df.loc[labels == cluster]
-        for i, pointA in cluster_df.iterrows():
-            for _, pointB in cluster_df.loc[i + 1 :].iterrows():
+        for i, (_, pointA) in enumerate(cluster_df.iterrows()):
+            for _, pointB in cluster_df.iloc[i + 1 :].iterrows():
                 dis = distance_function(pointA.to_numpy(), pointB.to_numpy())
                 max_distance_intra = max(max_distance_intra, dis)
+    if min_distance_inter == 0:
+        return 0
+    if max_distance_intra == 0:
+        return np.inf
     return min_distance_inter / max_distance_intra
 
 
 def silhouette_score(df: pd.DataFrame, labels: np.array):
+    clusters = np.unique(labels)
     dis_same_class = np.zeros_like(labels, dtype=np.float)
     dis_next_class = np.zeros_like(labels, dtype=np.float)
-    num_cluster = np.amax(labels) + 1
     for i, row in df.iterrows():
         cluster = labels[i]
         same_cluster_df = df.loc[labels == cluster].drop(index=i).to_numpy()
-        dis_same_class[i] = np.sqrt(
-            (
-                same_cluster_df**2
-                + np.stack([row.to_numpy() ** 2] * len(same_cluster_df))
-            ).sum(axis=1)
-        ).mean()
+        size = len(same_cluster_df)
+        dis_same_class[i] = (
+            np.linalg.norm(
+                same_cluster_df - np.tile(row.to_numpy(), (size, 1)), axis=1
+            ).mean()
+            if size
+            else 0
+        )
 
         min_dis = np.inf
-        for j in range(num_cluster):
-            if i == j:
+        for j in clusters:
+            if cluster == j:
                 continue
             cluster_df = df.loc[labels == j].to_numpy()
-            dis = np.sqrt(
-                (
-                    cluster_df**2 + np.stack([row.to_numpy() ** 2] * len(cluster_df))
-                ).sum(axis=1)
+            dis = np.linalg.norm(
+                cluster_df - np.tile(row.to_numpy(), (len(cluster_df), 1)), axis=1
             ).mean()
             min_dis = min(min_dis, dis)
         dis_next_class[i] = min_dis
-    silhouette_per_sample = (dis_next_class - dis_same_class) / np.maximum(
-        dis_same_class, dis_next_class
-    )
+    denominator = np.maximum(dis_same_class, dis_next_class)
+    if 0 in denominator:
+        return np.inf
+    silhouette_per_sample = (dis_next_class - dis_same_class) / denominator
     return silhouette_per_sample.mean()
