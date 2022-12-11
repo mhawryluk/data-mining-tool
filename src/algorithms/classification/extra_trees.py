@@ -338,7 +338,8 @@ class DecisionTree:
 
 class ExtraTrees(Algorithm):
     def __init__(self, data: pd.DataFrame, forest_size: int, **tree_parameters):
-        self.data = data
+        self.data = data.sample(frac=0.8)
+        self.test_data = data.drop(self.data.index)
         self.forest_size = forest_size
         self.forest = None
         self.tree_parameters = tree_parameters
@@ -380,6 +381,7 @@ class ExtraTrees(Algorithm):
             / self.forest_size
         )
         self.feature_importance.sort_values(ascending=False, inplace=True)
+        self._update_metric()
         return self.predict, self.get_config(), self.feature_importance
 
     def predict(self, record: pd.Series) -> any:
@@ -388,7 +390,7 @@ class ExtraTrees(Algorithm):
             / self.forest_size
         )
         result = pd.Series(0, index=self.labels)
-        for idx, item in predictions.iteritems():
+        for idx, item in predictions.items():
             result[idx] = item
         result.sort_values(ascending=False, inplace=True)
         return result
@@ -402,3 +404,16 @@ class ExtraTrees(Algorithm):
         index = np.argwhere(self.labels == label)[0]
         color = [min(1, 1.2 * c) for c in colormap(normalize(index))[0]]
         return matplotlib.colors.to_hex(color)
+
+    def _update_metric(self):
+        self.metrics_info = {}
+        if not len(self.test_data):
+            return
+        count_true = 0
+        for _, row in self.test_data.iterrows():
+            target = row[self.tree_parameters["label_name"]]
+            prediction = self.predict(row.drop(self.tree_parameters["label_name"]))
+            predicted = list(prediction.index)[0]
+            if target == predicted:
+                count_true += 1
+        self.metrics_info["accuracy"] = round(count_true / len(self.test_data), 3)

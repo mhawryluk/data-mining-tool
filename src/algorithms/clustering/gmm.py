@@ -8,6 +8,8 @@ from scipy.stats import multivariate_normal
 
 from algorithms import Algorithm
 
+from .metrics import davies_bouldin_score, dunn_score, silhouette_score
+
 
 class GMM(Algorithm):
     def __init__(self, df, num_clusters, eps=1e-6, max_iterations=None):
@@ -55,8 +57,10 @@ class GMM(Algorithm):
             error.setWindowTitle("Error")
             error.exec_()
             return
+        labels = self.get_cluster_labels()
+        self.update_metrics(labels)
         return (
-            self.get_cluster_labels(),
+            labels,
             pd.DataFrame(self.mu_arr, columns=self.df.columns),
             self.sigma_arr,
         )
@@ -131,6 +135,17 @@ class GMM(Algorithm):
                 )
             result += np.log(row_result)
         return result
+
+    def update_metrics(self, labels):
+        self.metrics_info = {}
+        d_index = dunn_score(self.df, labels)
+        db_index = davies_bouldin_score(self.df, labels)
+        s_index = silhouette_score(self.df, labels)
+        self.metrics_info["Dunn index (higher = better)"] = round(d_index, 3)
+        self.metrics_info["Davies Bouldin index (lower = better)"] = round(db_index, 3)
+        self.metrics_info["Silhouette Coefficient (higher = better)"] = round(
+            s_index, 3
+        )
 
 
 def is_invertible(matrix):

@@ -245,7 +245,7 @@ class PreprocessingWidget(UnfoldWidget):
         self.column_select_box.clear()
         self.column_select_box.addItems(self.engine.get_columns())
         self.group_select_box.clear()
-        self.group_select_box.addItems(["null"] + list(self.engine.get_columns()))
+        self.group_select_box.addItems([""] + list(self.engine.get_columns()))
         self._clear_plot()
         self.parameters_widget.new_columns_name(self.engine.get_numeric_columns())
         self.parameters_widget.new_size(self.engine.get_size())
@@ -266,7 +266,7 @@ class PreprocessingWidget(UnfoldWidget):
         self._clear_plot()
         scatter_settings = self.parameters_widget.get_parameters()
         group_by = self.group_select_box.currentText()
-        scatter_settings["group_by"] = None if group_by == "null" else group_by
+        scatter_settings["group_by"] = group_by or None
         plot_box = self.create_plot(column_name, plot_type, scatter_settings)
         if plot_type == "Scatter plot":
             self.activate_scatter_plot()

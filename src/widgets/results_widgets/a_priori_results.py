@@ -17,8 +17,9 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
         association_rules: pd.DataFrame,
         transaction_sets: List[set],
         options,
+        metrics_info,
     ):
-        super().__init__(data, options)
+        super().__init__(data, options, metrics_info)
 
         self.transaction_sets = transaction_sets
         self.frequent_sets = frequent_sets.reset_index()
@@ -38,6 +39,10 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
 
         # algorithm parameters
         self.params_group = ParametersGroupBox(self.options)
+
+        # algorithm metrics
+        if self.metrics_info:
+            self.metrics_group = ParametersGroupBox(self.metrics_info, "Metrics")
 
         # sets plots and charts
         self.gauge_chart = APrioriGauge()
@@ -78,6 +83,8 @@ class APrioriResultsWidget(AlgorithmResultsWidget):
         self.right_column.addWidget(self.transactions_canvas, 1)
 
         self.left_column.addWidget(self.params_group, 0)
+        if self.metrics_info:
+            self.left_column.addWidget(self.metrics_group, 0)
         self.left_column.addWidget(self.frequent_sets_result_group, 1)
         self.left_column.addWidget(self.association_rules_group, 1)
 

@@ -7,6 +7,8 @@ class Algorithm:
     Abstract class of algorithm
     """
 
+    metrics_info = {}
+
     @abstractmethod
     def run(self, with_steps: bool):
         """
@@ -19,5 +21,12 @@ class Algorithm:
     def get_steps(self) -> List:
         """
         Return list of steps for visualization by AlgorithmStepsVisualization
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_metrics(self, *args):
+        """
+        Update metrics_info dict
         """
         raise NotImplementedError

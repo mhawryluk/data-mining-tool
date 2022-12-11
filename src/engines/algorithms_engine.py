@@ -25,6 +25,7 @@ class AlgorithmsEngine:
         alg = chosen_alg.algorithm(self.state.imported_data, **kwargs)
 
         result = alg.run(will_be_visualized)
+        metrics_info = alg.metrics_info
 
         if result is None:
             return False
@@ -44,7 +45,9 @@ class AlgorithmsEngine:
         if not self.state.algorithm_results_widgets[technique].get(algorithm):
             self.state.algorithm_results_widgets[technique][algorithm] = []
         self.state.algorithm_results_widgets[technique][algorithm].append(
-            chosen_alg.result_widget(self.state.raw_data, *result, options=kwargs)
+            chosen_alg.result_widget(
+                self.state.raw_data, *result, options=kwargs, metrics_info=metrics_info
+            )
         )
         return True
 
