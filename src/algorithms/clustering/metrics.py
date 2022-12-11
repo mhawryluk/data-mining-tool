@@ -50,10 +50,16 @@ def dunn_score(df: pd.DataFrame, labels: np.array, distance_function=distance):
             min_distance_inter = min(min_distance_inter, dis)
     for cluster in clusters:
         cluster_df = df.loc[labels == cluster]
+        size = len(cluster_df)
         for i, (_, pointA) in enumerate(cluster_df.iterrows()):
-            for _, pointB in cluster_df.iloc[i + 1 :].iterrows():
-                dis = distance_function(pointA.to_numpy(), pointB.to_numpy())
-                max_distance_intra = max(max_distance_intra, dis)
+            if i + 1 == size:
+                continue
+            dis = np.linalg.norm(
+                cluster_df.iloc[i + 1 :].to_numpy()
+                - np.tile(pointA.to_numpy(), (size - i - 1, 1)),
+                axis=1,
+            ).max()
+            max_distance_intra = max(max_distance_intra, dis)
     if min_distance_inter == 0:
         return 0
     if max_distance_intra == 0:
