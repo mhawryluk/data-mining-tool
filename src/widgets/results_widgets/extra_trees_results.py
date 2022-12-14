@@ -103,7 +103,10 @@ class ExtraTreesResultsWidget(AlgorithmResultsWidget):
                 result = self.predict(input_data.iloc[0])
                 result_label = QLabel(
                     "\n".join(
-                        [f"{label}: {100 * value}%" for label, value in result.items()]
+                        [
+                            f"{label}: {100 * value:.2f}%"
+                            for label, value in result.items()
+                        ]
                     )
                 )
                 result_label.setAlignment(Qt.AlignRight)

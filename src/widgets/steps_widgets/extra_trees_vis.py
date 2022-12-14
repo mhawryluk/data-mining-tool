@@ -144,8 +144,6 @@ class TreeStepsVisualization(QWidget):
             self.step_label = QLabel("STEP: {}".format(self.current_step))
             self.layout.addWidget(self.step_label, 0, alignment=Qt.AlignCenter)
 
-        self.showMaximized()
-
     def create_step_graph(self, step_num: int):
         if step_num % 2 == 0:
             info = self.node_info[step_num]
